@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>fastapi_sso.sso.base API documentation</title>
+<meta name="description" content="SSO login base dependency" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>fastapi_sso.sso.base</code></h1>
+</header>
+<section id="section-intro">
+<p>SSO login base dependency</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;SSO login base dependency
+&#34;&#34;&#34;
+# pylint: disable=too-few-public-methods
+
+import json
+
+from typing import Dict, List, Optional
+from uuid import uuid4
+import aiohttp
+from oauthlib.oauth2 import WebApplicationClient
+from starlette.exceptions import HTTPException
+from starlette.requests import Request
+from starlette.responses import RedirectResponse
+import pydantic
+
+
+class SSOLoginError(HTTPException):
+    &#34;&#34;&#34;Raised when any login-related error ocurrs
+    (such as when user is not verified or if there was an attempt for fake login)
+    &#34;&#34;&#34;
+
+
+class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
+    &#34;&#34;&#34;Class (schema) to represent information got from sso provider in a common form.&#34;&#34;&#34;
+
+    id: Optional[str]
+    email: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
+    display_name: Optional[str]
+    picture: Optional[str]
+    provider: Optional[str]
+
+
+class SSOBase:
+    &#34;&#34;&#34;Base class (mixin) for all SSO providers&#34;&#34;&#34;
+
+    provider = NotImplemented
+    client_id: str = NotImplemented
+    client_secret: str = NotImplemented
+    redirect_uri: str = NotImplemented
+    scope: List[str] = NotImplemented
+    _oauth_client: Optional[WebApplicationClient] = None
+    state: Optional[str] = None
+
+    def __init__(self, client_id: str, client_secret: str, redirect_uri: str):
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.redirect_uri = redirect_uri
+
+    @property
+    def oauth_client(self) -&gt; WebApplicationClient:
+        &#34;&#34;&#34;OAuth Client to help us generate requests and parse responses&#34;&#34;&#34;
+        if self.client_id == NotImplemented:
+            raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
+        if self._oauth_client is None:
+            self._oauth_client = WebApplicationClient(self.client_id)
+        return self._oauth_client
+
+    @classmethod
+    async def openid_from_response(cls, response: dict) -&gt; OpenID:
+        &#34;&#34;&#34;Return {OpenID} object from provider&#39;s user info endpoint response&#34;&#34;&#34;
+        raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)
+
+    @classmethod
+    async def get_discovery_document(cls) -&gt; Dict[str, str]:
+        &#34;&#34;&#34;Get discovery document containing handy urls&#34;&#34;&#34;
+        raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)
+
+    @property
+    async def authorization_endpoint(self) -&gt; Optional[str]:
+        &#34;&#34;&#34;Return `authorization_endpoint` from discovery document&#34;&#34;&#34;
+        discovery = await self.get_discovery_document()
+        return discovery.get(&#34;authorization_endpoint&#34;)
+
+    @property
+    async def token_endpoint(self) -&gt; Optional[str]:
+        &#34;&#34;&#34;Return `token_endpoint` from discovery document&#34;&#34;&#34;
+        discovery = await self.get_discovery_document()
+        return discovery.get(&#34;token_endpoint&#34;)
+
+    @property
+    async def userinfo_endpoint(self) -&gt; Optional[str]:
+        &#34;&#34;&#34;Return `userinfo_endpoint` from discovery document&#34;&#34;&#34;
+        discovery = await self.get_discovery_document()
+        return discovery.get(&#34;userinfo_endpoint&#34;)
+
+    async def get_login_url(self) -&gt; str:
+        &#34;&#34;&#34;Return prepared login url. This is low-level, see {get_login_redirect} instead.&#34;&#34;&#34;
+        self.state = str(uuid4())
+        request_uri = self.oauth_client.prepare_request_uri(
+            await self.authorization_endpoint, redirect_uri=self.redirect_uri, state=self.state, scope=self.scope
+        )
+        return request_uri
+
+    async def get_login_redirect(self) -&gt; RedirectResponse:
+        &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
+
+        Returns:
+            RedirectResponse -- Starlette response (may directly be returned from FastAPI)
+        &#34;&#34;&#34;
+        login_uri = await self.get_login_url()
+        response = RedirectResponse(login_uri, 303)
+        if self.state is not None:
+            response.set_cookie(&#34;ssostate&#34;, self.state)
+        return response
+
+    async def verify_and_process(self, request: Request) -&gt; Optional[OpenID]:
+        &#34;&#34;&#34;Get FastAPI (Starlette) Request object and process login.
+        This handler should be used for your /callback path.
+
+        Arguments:
+            request {Request} -- FastAPI request object (or Starlette)
+
+        Returns:
+            Optional[OpenID] -- OpenID if the login was successfull
+        &#34;&#34;&#34;
+        code = request.path_params.get(&#34;code&#34;)
+        if code is None:
+            raise SSOLoginError(400, &#34;&#39;code&#39; parameter was not found in callback request&#34;)
+        if self.state is not None:
+            ssostate = request.cookies.get(&#34;ssostate&#34;)
+            if ssostate is None or ssostate != self.state:
+                raise SSOLoginError(
+                    401,
+                    &#34;&#39;state&#39; parameter in callback request does not match our internal &#39;state&#39;, &#34;
+                    &#34;someone may be trying to do something bad.&#34;,
+                )
+        return await self.process_login(code, request)
+
+    async def process_login(self, code: str, request: Request) -&gt; Optional[OpenID]:
+        &#34;&#34;&#34;This method should be called from callback endpoint to verify the user and request user info endpoint.
+        This is low level, you should use {verify_and_process} instead.
+        &#34;&#34;&#34;
+        url = request.url
+        current_url = str(url).replace(&#34;http://&#34;, &#34;https://&#34;)
+        current_path = f&#34;https://{url.netloc}{url.path}&#34;
+
+        token_url, headers, body = self.oauth_client.prepare_token_request(
+            await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code
+        )  # type: ignore
+
+        if token_url is None:
+            return None
+
+        auth = aiohttp.BasicAuth(self.client_id, self.client_secret)
+        async with aiohttp.ClientSession() as session:
+            async with session.post(token_url, headers=headers, data=body, auth=auth) as response:
+                content = await response.json()
+            self.oauth_client.parse_request_body_response(json.dumps(content))
+
+            uri, headers, body = self.oauth_client.add_token(await self.userinfo_endpoint)
+            async with session.get(uri, headers=headers, data=body) as response:
+                content = await response.json()
+
+        return await self.openid_from_response(content)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="fastapi_sso.sso.base.OpenID"><code class="flex name class">
+<span>class <span class="ident">OpenID</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Class (schema) to represent information got from sso provider in a common form.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
+    &#34;&#34;&#34;Class (schema) to represent information got from sso provider in a common form.&#34;&#34;&#34;
+
+    id: Optional[str]
+    email: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
+    display_name: Optional[str]
+    picture: Optional[str]
+    provider: Optional[str]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="fastapi_sso.sso.base.OpenID.display_name"><code class="name">var <span class="ident">display_name</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.OpenID.email"><code class="name">var <span class="ident">email</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.OpenID.first_name"><code class="name">var <span class="ident">first_name</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.OpenID.id"><code class="name">var <span class="ident">id</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.OpenID.last_name"><code class="name">var <span class="ident">last_name</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.OpenID.picture"><code class="name">var <span class="ident">picture</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.OpenID.provider"><code class="name">var <span class="ident">provider</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="fastapi_sso.sso.base.SSOBase"><code class="flex name class">
+<span>class <span class="ident">SSOBase</span></span>
+<span>(</span><span>client_id: str, client_secret: str, redirect_uri: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class (mixin) for all SSO providers</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SSOBase:
+    &#34;&#34;&#34;Base class (mixin) for all SSO providers&#34;&#34;&#34;
+
+    provider = NotImplemented
+    client_id: str = NotImplemented
+    client_secret: str = NotImplemented
+    redirect_uri: str = NotImplemented
+    scope: List[str] = NotImplemented
+    _oauth_client: Optional[WebApplicationClient] = None
+    state: Optional[str] = None
+
+    def __init__(self, client_id: str, client_secret: str, redirect_uri: str):
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.redirect_uri = redirect_uri
+
+    @property
+    def oauth_client(self) -&gt; WebApplicationClient:
+        &#34;&#34;&#34;OAuth Client to help us generate requests and parse responses&#34;&#34;&#34;
+        if self.client_id == NotImplemented:
+            raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
+        if self._oauth_client is None:
+            self._oauth_client = WebApplicationClient(self.client_id)
+        return self._oauth_client
+
+    @classmethod
+    async def openid_from_response(cls, response: dict) -&gt; OpenID:
+        &#34;&#34;&#34;Return {OpenID} object from provider&#39;s user info endpoint response&#34;&#34;&#34;
+        raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)
+
+    @classmethod
+    async def get_discovery_document(cls) -&gt; Dict[str, str]:
+        &#34;&#34;&#34;Get discovery document containing handy urls&#34;&#34;&#34;
+        raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)
+
+    @property
+    async def authorization_endpoint(self) -&gt; Optional[str]:
+        &#34;&#34;&#34;Return `authorization_endpoint` from discovery document&#34;&#34;&#34;
+        discovery = await self.get_discovery_document()
+        return discovery.get(&#34;authorization_endpoint&#34;)
+
+    @property
+    async def token_endpoint(self) -&gt; Optional[str]:
+        &#34;&#34;&#34;Return `token_endpoint` from discovery document&#34;&#34;&#34;
+        discovery = await self.get_discovery_document()
+        return discovery.get(&#34;token_endpoint&#34;)
+
+    @property
+    async def userinfo_endpoint(self) -&gt; Optional[str]:
+        &#34;&#34;&#34;Return `userinfo_endpoint` from discovery document&#34;&#34;&#34;
+        discovery = await self.get_discovery_document()
+        return discovery.get(&#34;userinfo_endpoint&#34;)
+
+    async def get_login_url(self) -&gt; str:
+        &#34;&#34;&#34;Return prepared login url. This is low-level, see {get_login_redirect} instead.&#34;&#34;&#34;
+        self.state = str(uuid4())
+        request_uri = self.oauth_client.prepare_request_uri(
+            await self.authorization_endpoint, redirect_uri=self.redirect_uri, state=self.state, scope=self.scope
+        )
+        return request_uri
+
+    async def get_login_redirect(self) -&gt; RedirectResponse:
+        &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
+
+        Returns:
+            RedirectResponse -- Starlette response (may directly be returned from FastAPI)
+        &#34;&#34;&#34;
+        login_uri = await self.get_login_url()
+        response = RedirectResponse(login_uri, 303)
+        if self.state is not None:
+            response.set_cookie(&#34;ssostate&#34;, self.state)
+        return response
+
+    async def verify_and_process(self, request: Request) -&gt; Optional[OpenID]:
+        &#34;&#34;&#34;Get FastAPI (Starlette) Request object and process login.
+        This handler should be used for your /callback path.
+
+        Arguments:
+            request {Request} -- FastAPI request object (or Starlette)
+
+        Returns:
+            Optional[OpenID] -- OpenID if the login was successfull
+        &#34;&#34;&#34;
+        code = request.path_params.get(&#34;code&#34;)
+        if code is None:
+            raise SSOLoginError(400, &#34;&#39;code&#39; parameter was not found in callback request&#34;)
+        if self.state is not None:
+            ssostate = request.cookies.get(&#34;ssostate&#34;)
+            if ssostate is None or ssostate != self.state:
+                raise SSOLoginError(
+                    401,
+                    &#34;&#39;state&#39; parameter in callback request does not match our internal &#39;state&#39;, &#34;
+                    &#34;someone may be trying to do something bad.&#34;,
+                )
+        return await self.process_login(code, request)
+
+    async def process_login(self, code: str, request: Request) -&gt; Optional[OpenID]:
+        &#34;&#34;&#34;This method should be called from callback endpoint to verify the user and request user info endpoint.
+        This is low level, you should use {verify_and_process} instead.
+        &#34;&#34;&#34;
+        url = request.url
+        current_url = str(url).replace(&#34;http://&#34;, &#34;https://&#34;)
+        current_path = f&#34;https://{url.netloc}{url.path}&#34;
+
+        token_url, headers, body = self.oauth_client.prepare_token_request(
+            await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code
+        )  # type: ignore
+
+        if token_url is None:
+            return None
+
+        auth = aiohttp.BasicAuth(self.client_id, self.client_secret)
+        async with aiohttp.ClientSession() as session:
+            async with session.post(token_url, headers=headers, data=body, auth=auth) as response:
+                content = await response.json()
+            self.oauth_client.parse_request_body_response(json.dumps(content))
+
+            uri, headers, body = self.oauth_client.add_token(await self.userinfo_endpoint)
+            async with session.get(uri, headers=headers, data=body) as response:
+                content = await response.json()
+
+        return await self.openid_from_response(content)</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="fastapi_sso.sso.facebook.FacebookSSO" href="facebook.html#fastapi_sso.sso.facebook.FacebookSSO">FacebookSSO</a></li>
+<li><a title="fastapi_sso.sso.google.GoogleSSO" href="google.html#fastapi_sso.sso.google.GoogleSSO">GoogleSSO</a></li>
+<li><a title="fastapi_sso.sso.microsoft.MicrosoftSSO" href="microsoft.html#fastapi_sso.sso.microsoft.MicrosoftSSO">MicrosoftSSO</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="fastapi_sso.sso.base.SSOBase.client_id"><code class="name">var <span class="ident">client_id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.SSOBase.client_secret"><code class="name">var <span class="ident">client_secret</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.SSOBase.provider"><code class="name">var <span class="ident">provider</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.SSOBase.redirect_uri"><code class="name">var <span class="ident">redirect_uri</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.SSOBase.scope"><code class="name">var <span class="ident">scope</span> : List[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.SSOBase.state"><code class="name">var <span class="ident">state</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="fastapi_sso.sso.base.SSOBase.get_discovery_document"><code class="name flex">
+<span>async def <span class="ident">get_discovery_document</span></span>(<span>) ‑> Dict[str, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get discovery document containing handy urls</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+async def get_discovery_document(cls) -&gt; Dict[str, str]:
+    &#34;&#34;&#34;Get discovery document containing handy urls&#34;&#34;&#34;
+    raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)</code></pre>
+</details>
+</dd>
+<dt id="fastapi_sso.sso.base.SSOBase.openid_from_response"><code class="name flex">
+<span>async def <span class="ident">openid_from_response</span></span>(<span>response: dict) ‑> <a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return {OpenID} object from provider's user info endpoint response</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+async def openid_from_response(cls, response: dict) -&gt; OpenID:
+    &#34;&#34;&#34;Return {OpenID} object from provider&#39;s user info endpoint response&#34;&#34;&#34;
+    raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="fastapi_sso.sso.base.SSOBase.authorization_endpoint"><code class="name">var <span class="ident">authorization_endpoint</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"><p>Return <code>authorization_endpoint</code> from discovery document</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+async def authorization_endpoint(self) -&gt; Optional[str]:
+    &#34;&#34;&#34;Return `authorization_endpoint` from discovery document&#34;&#34;&#34;
+    discovery = await self.get_discovery_document()
+    return discovery.get(&#34;authorization_endpoint&#34;)</code></pre>
+</details>
+</dd>
+<dt id="fastapi_sso.sso.base.SSOBase.oauth_client"><code class="name">var <span class="ident">oauth_client</span> : oauthlib.oauth2.rfc6749.clients.web_application.WebApplicationClient</code></dt>
+<dd>
+<div class="desc"><p>OAuth Client to help us generate requests and parse responses</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def oauth_client(self) -&gt; WebApplicationClient:
+    &#34;&#34;&#34;OAuth Client to help us generate requests and parse responses&#34;&#34;&#34;
+    if self.client_id == NotImplemented:
+        raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
+    if self._oauth_client is None:
+        self._oauth_client = WebApplicationClient(self.client_id)
+    return self._oauth_client</code></pre>
+</details>
+</dd>
+<dt id="fastapi_sso.sso.base.SSOBase.token_endpoint"><code class="name">var <span class="ident">token_endpoint</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"><p>Return <code>token_endpoint</code> from discovery document</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+async def token_endpoint(self) -&gt; Optional[str]:
+    &#34;&#34;&#34;Return `token_endpoint` from discovery document&#34;&#34;&#34;
+    discovery = await self.get_discovery_document()
+    return discovery.get(&#34;token_endpoint&#34;)</code></pre>
+</details>
+</dd>
+<dt id="fastapi_sso.sso.base.SSOBase.userinfo_endpoint"><code class="name">var <span class="ident">userinfo_endpoint</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"><p>Return <code>userinfo_endpoint</code> from discovery document</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+async def userinfo_endpoint(self) -&gt; Optional[str]:
+    &#34;&#34;&#34;Return `userinfo_endpoint` from discovery document&#34;&#34;&#34;
+    discovery = await self.get_discovery_document()
+    return discovery.get(&#34;userinfo_endpoint&#34;)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="fastapi_sso.sso.base.SSOBase.get_login_redirect"><code class="name flex">
+<span>async def <span class="ident">get_login_redirect</span></span>(<span>self) ‑> starlette.responses.RedirectResponse</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return redirect response by Stalette to login page of Oauth SSO provider</p>
+<h2 id="returns">Returns</h2>
+<p>RedirectResponse &ndash; Starlette response (may directly be returned from FastAPI)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get_login_redirect(self) -&gt; RedirectResponse:
+    &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
+
+    Returns:
+        RedirectResponse -- Starlette response (may directly be returned from FastAPI)
+    &#34;&#34;&#34;
+    login_uri = await self.get_login_url()
+    response = RedirectResponse(login_uri, 303)
+    if self.state is not None:
+        response.set_cookie(&#34;ssostate&#34;, self.state)
+    return response</code></pre>
+</details>
+</dd>
+<dt id="fastapi_sso.sso.base.SSOBase.get_login_url"><code class="name flex">
+<span>async def <span class="ident">get_login_url</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return prepared login url. This is low-level, see {get_login_redirect} instead.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get_login_url(self) -&gt; str:
+    &#34;&#34;&#34;Return prepared login url. This is low-level, see {get_login_redirect} instead.&#34;&#34;&#34;
+    self.state = str(uuid4())
+    request_uri = self.oauth_client.prepare_request_uri(
+        await self.authorization_endpoint, redirect_uri=self.redirect_uri, state=self.state, scope=self.scope
+    )
+    return request_uri</code></pre>
+</details>
+</dd>
+<dt id="fastapi_sso.sso.base.SSOBase.process_login"><code class="name flex">
+<span>async def <span class="ident">process_login</span></span>(<span>self, code: str, request: starlette.requests.Request) ‑> Optional[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This method should be called from callback endpoint to verify the user and request user info endpoint.
+This is low level, you should use {verify_and_process} instead.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def process_login(self, code: str, request: Request) -&gt; Optional[OpenID]:
+    &#34;&#34;&#34;This method should be called from callback endpoint to verify the user and request user info endpoint.
+    This is low level, you should use {verify_and_process} instead.
+    &#34;&#34;&#34;
+    url = request.url
+    current_url = str(url).replace(&#34;http://&#34;, &#34;https://&#34;)
+    current_path = f&#34;https://{url.netloc}{url.path}&#34;
+
+    token_url, headers, body = self.oauth_client.prepare_token_request(
+        await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code
+    )  # type: ignore
+
+    if token_url is None:
+        return None
+
+    auth = aiohttp.BasicAuth(self.client_id, self.client_secret)
+    async with aiohttp.ClientSession() as session:
+        async with session.post(token_url, headers=headers, data=body, auth=auth) as response:
+            content = await response.json()
+        self.oauth_client.parse_request_body_response(json.dumps(content))
+
+        uri, headers, body = self.oauth_client.add_token(await self.userinfo_endpoint)
+        async with session.get(uri, headers=headers, data=body) as response:
+            content = await response.json()
+
+    return await self.openid_from_response(content)</code></pre>
+</details>
+</dd>
+<dt id="fastapi_sso.sso.base.SSOBase.verify_and_process"><code class="name flex">
+<span>async def <span class="ident">verify_and_process</span></span>(<span>self, request: starlette.requests.Request) ‑> Optional[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get FastAPI (Starlette) Request object and process login.
+This handler should be used for your /callback path.</p>
+<h2 id="arguments">Arguments</h2>
+<p>request {Request} &ndash; FastAPI request object (or Starlette)</p>
+<h2 id="returns">Returns</h2>
+<p>Optional[OpenID] &ndash; OpenID if the login was successfull</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def verify_and_process(self, request: Request) -&gt; Optional[OpenID]:
+    &#34;&#34;&#34;Get FastAPI (Starlette) Request object and process login.
+    This handler should be used for your /callback path.
+
+    Arguments:
+        request {Request} -- FastAPI request object (or Starlette)
+
+    Returns:
+        Optional[OpenID] -- OpenID if the login was successfull
+    &#34;&#34;&#34;
+    code = request.path_params.get(&#34;code&#34;)
+    if code is None:
+        raise SSOLoginError(400, &#34;&#39;code&#39; parameter was not found in callback request&#34;)
+    if self.state is not None:
+        ssostate = request.cookies.get(&#34;ssostate&#34;)
+        if ssostate is None or ssostate != self.state:
+            raise SSOLoginError(
+                401,
+                &#34;&#39;state&#39; parameter in callback request does not match our internal &#39;state&#39;, &#34;
+                &#34;someone may be trying to do something bad.&#34;,
+            )
+    return await self.process_login(code, request)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="fastapi_sso.sso.base.SSOLoginError"><code class="flex name class">
+<span>class <span class="ident">SSOLoginError</span></span>
+<span>(</span><span>status_code: int, detail: str = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Raised when any login-related error ocurrs
+(such as when user is not verified or if there was an attempt for fake login)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SSOLoginError(HTTPException):
+    &#34;&#34;&#34;Raised when any login-related error ocurrs
+    (such as when user is not verified or if there was an attempt for fake login)
+    &#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>starlette.exceptions.HTTPException</li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="fastapi_sso.sso" href="index.html">fastapi_sso.sso</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a></code></h4>
+<ul class="two-column">
+<li><code><a title="fastapi_sso.sso.base.OpenID.display_name" href="#fastapi_sso.sso.base.OpenID.display_name">display_name</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.OpenID.email" href="#fastapi_sso.sso.base.OpenID.email">email</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.OpenID.first_name" href="#fastapi_sso.sso.base.OpenID.first_name">first_name</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.OpenID.id" href="#fastapi_sso.sso.base.OpenID.id">id</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.OpenID.last_name" href="#fastapi_sso.sso.base.OpenID.last_name">last_name</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.OpenID.picture" href="#fastapi_sso.sso.base.OpenID.picture">picture</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.OpenID.provider" href="#fastapi_sso.sso.base.OpenID.provider">provider</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="fastapi_sso.sso.base.SSOBase" href="#fastapi_sso.sso.base.SSOBase">SSOBase</a></code></h4>
+<ul class="">
+<li><code><a title="fastapi_sso.sso.base.SSOBase.authorization_endpoint" href="#fastapi_sso.sso.base.SSOBase.authorization_endpoint">authorization_endpoint</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.client_id" href="#fastapi_sso.sso.base.SSOBase.client_id">client_id</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.client_secret" href="#fastapi_sso.sso.base.SSOBase.client_secret">client_secret</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.get_discovery_document" href="#fastapi_sso.sso.base.SSOBase.get_discovery_document">get_discovery_document</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.get_login_redirect" href="#fastapi_sso.sso.base.SSOBase.get_login_redirect">get_login_redirect</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.get_login_url" href="#fastapi_sso.sso.base.SSOBase.get_login_url">get_login_url</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.oauth_client" href="#fastapi_sso.sso.base.SSOBase.oauth_client">oauth_client</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.openid_from_response" href="#fastapi_sso.sso.base.SSOBase.openid_from_response">openid_from_response</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.process_login" href="#fastapi_sso.sso.base.SSOBase.process_login">process_login</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.provider" href="#fastapi_sso.sso.base.SSOBase.provider">provider</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.redirect_uri" href="#fastapi_sso.sso.base.SSOBase.redirect_uri">redirect_uri</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.scope" href="#fastapi_sso.sso.base.SSOBase.scope">scope</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.state" href="#fastapi_sso.sso.base.SSOBase.state">state</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.token_endpoint" href="#fastapi_sso.sso.base.SSOBase.token_endpoint">token_endpoint</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.userinfo_endpoint" href="#fastapi_sso.sso.base.SSOBase.userinfo_endpoint">userinfo_endpoint</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.verify_and_process" href="#fastapi_sso.sso.base.SSOBase.verify_and_process">verify_and_process</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="fastapi_sso.sso.base.SSOLoginError" href="#fastapi_sso.sso.base.SSOLoginError">SSOLoginError</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>
