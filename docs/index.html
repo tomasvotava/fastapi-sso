@@ -36,7 +36,7 @@ from fastapi_sso.sso.google import GoogleSSO
 
 app = FastAPI()
 
-google_sso = GoogleSSO(&quot;my-client-id&quot;, &quot;my-client-server&quot;, &quot;https://my.awesome-web.com/google/callback&quot;)
+google_sso = GoogleSSO(&quot;my-client-id&quot;, &quot;my-client-secret&quot;, &quot;https://my.awesome-web.com/google/callback&quot;)
 
 
 @app.get(&quot;/google/login&quot;)
@@ -78,7 +78,7 @@ from fastapi_sso.sso.google import GoogleSSO
 
 app = FastAPI()
 
-google_sso = GoogleSSO(&#34;my-client-id&#34;, &#34;my-client-server&#34;, &#34;https://my.awesome-web.com/google/callback&#34;)
+google_sso = GoogleSSO(&#34;my-client-id&#34;, &#34;my-client-secret&#34;, &#34;https://my.awesome-web.com/google/callback&#34;)
 
 
 @app.get(&#34;/google/login&#34;)
