@@ -4,6 +4,20 @@ FastAPI plugin to enable SSO to most common providers (such as Facebook login, G
 
 This allows you to implement the famous `Login with Google/Facebook/Microsoft` buttons functionality on your backend very easily.
 
+## Installation
+
+### Install using `pip`
+
+```console
+pip install fastapi-sso
+```
+
+### Install using `poetry`
+
+```console
+poetry add fastapi-sso
+```
+
 ## Example
 
 ### `example.py`
