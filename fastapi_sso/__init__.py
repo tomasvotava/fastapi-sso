@@ -15,7 +15,7 @@ from fastapi_sso.sso.google import GoogleSSO
 
 app = FastAPI()
 
-google_sso = GoogleSSO("my-client-id", "my-client-server", "https://my.awesome-web.com/google/callback")
+google_sso = GoogleSSO("my-client-id", "my-client-secret", "https://my.awesome-web.com/google/callback")
 
 
 @app.get("/google/login")
