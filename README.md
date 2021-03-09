@@ -54,4 +54,4 @@ async def google_callback(request: Request):
     }
 ```
 
-Run using `uvicorn app:main`.
+Run using `uvicorn example:app`.
