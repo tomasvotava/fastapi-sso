@@ -115,7 +115,7 @@ class SSOBase:
         Returns:
             Optional[OpenID] -- OpenID if the login was successfull
         """
-        code = request.path_params.get("code")
+        code = request.query_params.get("code")
         if code is None:
             raise SSOLoginError(400, "'code' parameter was not found in callback request")
         if self.state is not None:
