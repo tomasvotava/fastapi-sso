@@ -102,7 +102,7 @@ class SSOBase:
         login_uri = await self.get_login_url()
         response = RedirectResponse(login_uri, 303)
         if self.state is not None:
-            response.set_cookie("ssostate", self.state)
+            response.set_cookie("ssostate", self.state, expires=600)
         return response
 
     async def verify_and_process(self, request: Request) -> Optional[OpenID]:
