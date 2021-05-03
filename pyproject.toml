@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "fastapi-sso"
-version = "0.2.5"
+version = "0.2.6"
 description = "FastAPI plugin to enable SSO to most common providers (such as Facebook login, Google login and login via Microsoft Office 365 Account)"
 authors = ["Tomas Votava <info@tomasvotava.eu>"]
 readme = "README.md"
 repository = "https://github.com/tomasvotava/fastapi-sso"
 homepage = "https://tomasvotava.github.io/fastapi-sso/"
 documentation = "https://tomasvotava.github.io/fastapi-sso/"
-keywords = ["fastapi", "sso", "oauth", "google", "facebook"]
+keywords = ["fastapi", "sso", "oauth", "google", "facebook", "spotify"]
 
 [tool.black]
 line_length = 119
