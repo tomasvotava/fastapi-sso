@@ -57,6 +57,11 @@ class SSOBase:
             self._oauth_client = WebApplicationClient(self.client_id)
         return self._oauth_client
 
+    @property
+    def access_token(self) -> Optional[str]:
+        """Access token from token endpoint"""
+        return self._oauth_client.access_token
+
     @classmethod
     async def openid_from_response(cls, response: dict) -> OpenID:
         """Return {OpenID} object from provider's user info endpoint response"""
