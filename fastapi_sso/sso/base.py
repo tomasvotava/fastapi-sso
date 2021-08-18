@@ -140,12 +140,12 @@ class SSOBase:
         """
         url = request.url
         scheme = url.scheme
-        if not self.allow_insecure_http and scheme != "https://":
+        if not self.allow_insecure_http and scheme != "https":
             current_url = str(url).replace("http://", "https://")
-            scheme = "https://"
+            scheme = "https"
         else:
             current_url = str(url)
-        current_path = f"{scheme}{url.netloc}{url.path}"
+        current_path = f"{scheme}://{url.netloc}{url.path}"
 
         token_url, headers, body = self.oauth_client.prepare_token_request(
             await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code
