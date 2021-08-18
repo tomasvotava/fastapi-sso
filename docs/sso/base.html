@@ -72,10 +72,11 @@ class SSOBase:
     _oauth_client: Optional[WebApplicationClient] = None
     state: Optional[str] = None
 
-    def __init__(self, client_id: str, client_secret: str, redirect_uri: str):
+    def __init__(self, client_id: str, client_secret: str, redirect_uri: str, allow_insecure_http: bool = False):
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
+        self.allow_insecure_http = allow_insecure_http
 
     @property
     def oauth_client(self) -&gt; WebApplicationClient:
@@ -167,8 +168,13 @@ class SSOBase:
         This is low level, you should use {verify_and_process} instead.
         &#34;&#34;&#34;
         url = request.url
-        current_url = str(url).replace(&#34;http://&#34;, &#34;https://&#34;)
-        current_path = f&#34;https://{url.netloc}{url.path}&#34;
+        scheme = url.scheme
+        if not self.allow_insecure_http and scheme != &#34;https://&#34;:
+            current_url = str(url).replace(&#34;http://&#34;, &#34;https://&#34;)
+            scheme = &#34;https://&#34;
+        else:
+            current_url = str(url)
+        current_path = f&#34;{scheme}{url.netloc}{url.path}&#34;
 
         token_url, headers, body = self.oauth_client.prepare_token_request(
             await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code
@@ -261,7 +267,7 @@ class SSOBase:
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase"><code class="flex name class">
 <span>class <span class="ident">SSOBase</span></span>
-<span>(</span><span>client_id: str, client_secret: str, redirect_uri: str)</span>
+<span>(</span><span>client_id: str, client_secret: str, redirect_uri: str, allow_insecure_http: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Base class (mixin) for all SSO providers</p></div>
@@ -280,10 +286,11 @@ class SSOBase:
     _oauth_client: Optional[WebApplicationClient] = None
     state: Optional[str] = None
 
-    def __init__(self, client_id: str, client_secret: str, redirect_uri: str):
+    def __init__(self, client_id: str, client_secret: str, redirect_uri: str, allow_insecure_http: bool = False):
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
+        self.allow_insecure_http = allow_insecure_http
 
     @property
     def oauth_client(self) -&gt; WebApplicationClient:
@@ -375,8 +382,13 @@ class SSOBase:
         This is low level, you should use {verify_and_process} instead.
         &#34;&#34;&#34;
         url = request.url
-        current_url = str(url).replace(&#34;http://&#34;, &#34;https://&#34;)
-        current_path = f&#34;https://{url.netloc}{url.path}&#34;
+        scheme = url.scheme
+        if not self.allow_insecure_http and scheme != &#34;https://&#34;:
+            current_url = str(url).replace(&#34;http://&#34;, &#34;https://&#34;)
+            scheme = &#34;https://&#34;
+        else:
+            current_url = str(url)
+        current_path = f&#34;{scheme}{url.netloc}{url.path}&#34;
 
         token_url, headers, body = self.oauth_client.prepare_token_request(
             await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code
@@ -598,8 +610,13 @@ This is low level, you should use {verify_and_process} instead.</p></div>
     This is low level, you should use {verify_and_process} instead.
     &#34;&#34;&#34;
     url = request.url
-    current_url = str(url).replace(&#34;http://&#34;, &#34;https://&#34;)
-    current_path = f&#34;https://{url.netloc}{url.path}&#34;
+    scheme = url.scheme
+    if not self.allow_insecure_http and scheme != &#34;https://&#34;:
+        current_url = str(url).replace(&#34;http://&#34;, &#34;https://&#34;)
+        scheme = &#34;https://&#34;
+    else:
+        current_url = str(url)
+    current_path = f&#34;{scheme}{url.netloc}{url.path}&#34;
 
     token_url, headers, body = self.oauth_client.prepare_token_request(
         await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code

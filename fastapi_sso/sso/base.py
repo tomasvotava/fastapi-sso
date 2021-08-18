@@ -43,10 +43,11 @@ class SSOBase:
     _oauth_client: Optional[WebApplicationClient] = None
     state: Optional[str] = None
 
-    def __init__(self, client_id: str, client_secret: str, redirect_uri: str):
+    def __init__(self, client_id: str, client_secret: str, redirect_uri: str, allow_insecure_http: bool = False):
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
+        self.allow_insecure_http = allow_insecure_http
 
     @property
     def oauth_client(self) -> WebApplicationClient:
@@ -138,8 +139,13 @@ class SSOBase:
         This is low level, you should use {verify_and_process} instead.
         """
         url = request.url
-        current_url = str(url).replace("http://", "https://")
-        current_path = f"https://{url.netloc}{url.path}"
+        scheme = url.scheme
+        if not self.allow_insecure_http and scheme != "https://":
+            current_url = str(url).replace("http://", "https://")
+            scheme = "https://"
+        else:
+            current_url = str(url)
+        current_path = f"{scheme}{url.netloc}{url.path}"
 
         token_url, headers, body = self.oauth_client.prepare_token_request(
             await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code
