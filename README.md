@@ -55,3 +55,15 @@ async def google_callback(request: Request):
 ```
 
 Run using `uvicorn example:app`.
+
+## HTTP and development
+
+**You should always use `https` in production**. But in case you need to test on `localhost` and do not want to
+use self-signed certificate, make sure you set up redirect uri within your SSO provider to `http://localhost:{port}`
+and then add this to your environment:
+
+```bash
+OAUTHLIB_INSECURE_TRANSPORT=1
+```
+
+See [this issue](https://github.com/tomasvotava/fastapi-sso/issues/2) for more information.
