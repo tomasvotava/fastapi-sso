@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastapi-sso"
-version = "0.2.9"
+version = "0.2.10"
 description = "FastAPI plugin to enable SSO to most common providers (such as Facebook login, Google login and login via Microsoft Office 365 Account)"
 authors = ["Tomas Votava <info@tomasvotava.eu>"]
 readme = "README.md"

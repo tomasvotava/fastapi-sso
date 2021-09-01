@@ -66,4 +66,23 @@ and then add this to your environment:
 OAUTHLIB_INSECURE_TRANSPORT=1
 ```
 
+And make sure you pass `allow_insecure_http = True` to SSO class' constructor, such as:
+
+```python
+google_sso = GoogleSSO("client-id", "client-secret", "callback-url", allow_insecure_http=True)
+```
+
 See [this issue](https://github.com/tomasvotava/fastapi-sso/issues/2) for more information.
+
+## State
+
+State is used in OAuth to make sure server is responding to the request we send. It may cause you trouble
+as `fastsapi-sso` actually saves the state content as a cookie and attempts reading upon callback and this may
+fail (e.g. when loging in from different domain then the callback is landing on). If this is your case,
+you may want to disable state checking by passing `use_state = False` in SSO class's constructor, such as:
+
+```python
+google_sso = GoogleSSO("client-id", "client-secret", "callback-url", use_state=False)
+```
+
+See more on state [here](https://auth0.com/docs/configure/attack-protection/state-parameters).

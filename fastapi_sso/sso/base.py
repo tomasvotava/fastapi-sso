@@ -43,11 +43,19 @@ class SSOBase:
     _oauth_client: Optional[WebApplicationClient] = None
     state: Optional[str] = None
 
-    def __init__(self, client_id: str, client_secret: str, redirect_uri: str, allow_insecure_http: bool = False):
+    def __init__(
+        self,
+        client_id: str,
+        client_secret: str,
+        redirect_uri: str,
+        allow_insecure_http: bool = False,
+        use_state: bool = True,
+    ):
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
+        self.use_state = use_state
 
     @property
     def oauth_client(self) -> WebApplicationClient:
@@ -93,7 +101,8 @@ class SSOBase:
 
     async def get_login_url(self) -> str:
         """Return prepared login url. This is low-level, see {get_login_redirect} instead."""
-        self.state = str(uuid4())
+        if self.use_state:
+            self.state = str(uuid4())
         request_uri = self.oauth_client.prepare_request_uri(
             await self.authorization_endpoint, redirect_uri=self.redirect_uri, state=self.state, scope=self.scope
         )
@@ -107,7 +116,7 @@ class SSOBase:
         """
         login_uri = await self.get_login_url()
         response = RedirectResponse(login_uri, 303)
-        if self.state is not None:
+        if self.state is not None and self.use_state:
             response.set_cookie("ssostate", self.state, expires=600)
         return response
 
@@ -124,7 +133,7 @@ class SSOBase:
         code = request.query_params.get("code")
         if code is None:
             raise SSOLoginError(400, "'code' parameter was not found in callback request")
-        if self.state is not None:
+        if self.state is not None and self.use_state:
             ssostate = request.cookies.get("ssostate")
             if ssostate is None or ssostate != self.state:
                 raise SSOLoginError(
