@@ -6,11 +6,11 @@ import json
 
 from typing import Dict, List, Optional
 from uuid import uuid4
-import aiohttp
 from oauthlib.oauth2 import WebApplicationClient
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
+import httpx
 import pydantic
 
 
@@ -163,14 +163,14 @@ class SSOBase:
         if token_url is None:
             return None
 
-        auth = aiohttp.BasicAuth(self.client_id, self.client_secret)
-        async with aiohttp.ClientSession() as session:
-            async with session.post(token_url, headers=headers, data=body, auth=auth) as response:
-                content = await response.json()
+        auth = httpx.BasicAuth(self.client_id, self.client_secret)
+        async with httpx.AsyncClient() as session:
+            response = await session.post(token_url, headers=headers, content=body, auth=auth)
+            content = response.json()
             self.oauth_client.parse_request_body_response(json.dumps(content))
 
             uri, headers, body = self.oauth_client.add_token(await self.userinfo_endpoint)
-            async with session.get(uri, headers=headers, data=body) as response:
-                content = await response.json()
+            response = await session.get(uri, headers=headers, content=body)
+            content = response.json()
 
         return await self.openid_from_response(content)
