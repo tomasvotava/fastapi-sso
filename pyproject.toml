@@ -15,7 +15,6 @@ line_length = 119
 [tool.poetry.dependencies]
 python = ">=3.7,<4.0"
 fastapi = "<1"
-aiohttp = ">=3.7.4"
 oauthlib = ">=3.1.0"
 starlette = ">=0.13.6"
 pydantic = ">=1.8.1"
