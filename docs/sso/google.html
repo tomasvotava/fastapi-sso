@@ -31,7 +31,7 @@
 &#34;&#34;&#34;
 
 from typing import Dict
-import aiohttp
+import httpx
 
 from fastapi_sso.sso.base import OpenID, SSOBase, SSOLoginError
 
@@ -61,10 +61,10 @@ class GoogleSSO(SSOBase):
     @classmethod
     async def get_discovery_document(cls) -&gt; Dict[str, str]:
         &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
-        async with aiohttp.ClientSession() as session:
-            async with session.get(cls.discovery_url) as response:
-                content = await response.json()
-                return content</code></pre>
+        async with httpx.AsyncClient() as session:
+            response = await session.get(cls.discovery_url)
+            content = response.json()
+            return content</code></pre>
 </details>
 </section>
 <section>
@@ -111,10 +111,10 @@ class GoogleSSO(SSOBase):
     @classmethod
     async def get_discovery_document(cls) -&gt; Dict[str, str]:
         &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
-        async with aiohttp.ClientSession() as session:
-            async with session.get(cls.discovery_url) as response:
-                content = await response.json()
-                return content</code></pre>
+        async with httpx.AsyncClient() as session:
+            response = await session.get(cls.discovery_url)
+            content = response.json()
+            return content</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -146,7 +146,7 @@ class GoogleSSO(SSOBase):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.google.GoogleSSO.state"><code class="name">var <span class="ident">state</span> : Optional[str]</code></dt>
+<dt id="fastapi_sso.sso.google.GoogleSSO.state"><code class="name">var <span class="ident">state</span> : Union[str, NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -165,10 +165,10 @@ class GoogleSSO(SSOBase):
 <pre><code class="python">@classmethod
 async def get_discovery_document(cls) -&gt; Dict[str, str]:
     &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
-    async with aiohttp.ClientSession() as session:
-        async with session.get(cls.discovery_url) as response:
-            content = await response.json()
-            return content</code></pre>
+    async with httpx.AsyncClient() as session:
+        response = await session.get(cls.discovery_url)
+        content = response.json()
+        return content</code></pre>
 </details>
 </dd>
 <dt id="fastapi_sso.sso.google.GoogleSSO.openid_from_response"><code class="name flex">
