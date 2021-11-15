@@ -2,7 +2,7 @@
 """
 
 from typing import Dict
-import aiohttp
+import httpx
 
 from fastapi_sso.sso.base import OpenID, SSOBase, SSOLoginError
 
@@ -32,7 +32,7 @@ class GoogleSSO(SSOBase):
     @classmethod
     async def get_discovery_document(cls) -> Dict[str, str]:
         """Get document containing handy urls"""
-        async with aiohttp.ClientSession() as session:
-            async with session.get(cls.discovery_url) as response:
-                content = await response.json()
-                return content
+        async with httpx.AsyncClient() as session:
+            response = await session.get(cls.discovery_url)
+            content = response.json()
+            return content
