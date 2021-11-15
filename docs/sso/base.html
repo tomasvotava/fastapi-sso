@@ -244,31 +244,31 @@ class SSOBase:
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="fastapi_sso.sso.base.OpenID.display_name"><code class="name">var <span class="ident">display_name</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.OpenID.display_name"><code class="name">var <span class="ident">display_name</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.OpenID.email"><code class="name">var <span class="ident">email</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.OpenID.email"><code class="name">var <span class="ident">email</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.OpenID.first_name"><code class="name">var <span class="ident">first_name</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.OpenID.first_name"><code class="name">var <span class="ident">first_name</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.OpenID.id"><code class="name">var <span class="ident">id</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.OpenID.id"><code class="name">var <span class="ident">id</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.OpenID.last_name"><code class="name">var <span class="ident">last_name</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.OpenID.last_name"><code class="name">var <span class="ident">last_name</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.OpenID.picture"><code class="name">var <span class="ident">picture</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.OpenID.picture"><code class="name">var <span class="ident">picture</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.OpenID.provider"><code class="name">var <span class="ident">provider</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.OpenID.provider"><code class="name">var <span class="ident">provider</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -456,7 +456,7 @@ class SSOBase:
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.SSOBase.state"><code class="name">var <span class="ident">state</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.SSOBase.state"><code class="name">var <span class="ident">state</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -496,7 +496,7 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
 </dl>
 <h3>Instance variables</h3>
 <dl>
-<dt id="fastapi_sso.sso.base.SSOBase.access_token"><code class="name">var <span class="ident">access_token</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.SSOBase.access_token"><code class="name">var <span class="ident">access_token</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"><p>Access token from token endpoint</p></div>
 <details class="source">
@@ -509,7 +509,7 @@ def access_token(self) -&gt; Optional[str]:
     return self._oauth_client.access_token</code></pre>
 </details>
 </dd>
-<dt id="fastapi_sso.sso.base.SSOBase.authorization_endpoint"><code class="name">var <span class="ident">authorization_endpoint</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.SSOBase.authorization_endpoint"><code class="name">var <span class="ident">authorization_endpoint</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"><p>Return <code>authorization_endpoint</code> from discovery document</p></div>
 <details class="source">
@@ -540,7 +540,7 @@ def oauth_client(self) -&gt; WebApplicationClient:
     return self._oauth_client</code></pre>
 </details>
 </dd>
-<dt id="fastapi_sso.sso.base.SSOBase.token_endpoint"><code class="name">var <span class="ident">token_endpoint</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.SSOBase.token_endpoint"><code class="name">var <span class="ident">token_endpoint</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"><p>Return <code>token_endpoint</code> from discovery document</p></div>
 <details class="source">
@@ -554,7 +554,7 @@ async def token_endpoint(self) -&gt; Optional[str]:
     return discovery.get(&#34;token_endpoint&#34;)</code></pre>
 </details>
 </dd>
-<dt id="fastapi_sso.sso.base.SSOBase.userinfo_endpoint"><code class="name">var <span class="ident">userinfo_endpoint</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.SSOBase.userinfo_endpoint"><code class="name">var <span class="ident">userinfo_endpoint</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"><p>Return <code>userinfo_endpoint</code> from discovery document</p></div>
 <details class="source">
@@ -615,7 +615,7 @@ async def userinfo_endpoint(self) -&gt; Optional[str]:
 </details>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase.process_login"><code class="name flex">
-<span>async def <span class="ident">process_login</span></span>(<span>self, code: str, request: starlette.requests.Request) ‑> Union[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>, NoneType]</span>
+<span>async def <span class="ident">process_login</span></span>(<span>self, code: str, request: starlette.requests.Request) ‑> Optional[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>This method should be called from callback endpoint to verify the user and request user info endpoint.
@@ -658,7 +658,7 @@ This is low level, you should use {verify_and_process} instead.</p></div>
 </details>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase.verify_and_process"><code class="name flex">
-<span>async def <span class="ident">verify_and_process</span></span>(<span>self, request: starlette.requests.Request) ‑> Union[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>, NoneType]</span>
+<span>async def <span class="ident">verify_and_process</span></span>(<span>self, request: starlette.requests.Request) ‑> Optional[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get FastAPI (Starlette) Request object and process login.
