@@ -76,7 +76,7 @@ class FacebookSSO(SSOBase):
 <dl>
 <dt id="fastapi_sso.sso.facebook.FacebookSSO"><code class="flex name class">
 <span>class <span class="ident">FacebookSSO</span></span>
-<span>(</span><span>client_id: str, client_secret: str, redirect_uri: str, allow_insecure_http: bool = False, use_state: bool = True)</span>
+<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Union[str, NoneType] = None, allow_insecure_http: bool = False, use_state: bool = True)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Class providing login via Facebook OAuth</p></div>
@@ -135,7 +135,7 @@ class FacebookSSO(SSOBase):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.facebook.FacebookSSO.redirect_uri"><code class="name">var <span class="ident">redirect_uri</span> : str</code></dt>
+<dt id="fastapi_sso.sso.facebook.FacebookSSO.redirect_uri"><code class="name">var <span class="ident">redirect_uri</span> : Union[str, NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -143,7 +143,7 @@ class FacebookSSO(SSOBase):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.facebook.FacebookSSO.state"><code class="name">var <span class="ident">state</span> : Optional[str]</code></dt>
+<dt id="fastapi_sso.sso.facebook.FacebookSSO.state"><code class="name">var <span class="ident">state</span> : Union[str, NoneType]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>

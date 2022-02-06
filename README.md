@@ -32,13 +32,12 @@ from fastapi_sso.sso.google import GoogleSSO
 
 app = FastAPI()
 
-google_sso = GoogleSSO("my-client-id", "my-client-secret", "https://my.awesome-web.com/google/callback")
-
+google_sso = GoogleSSO("my-client-id", "my-client-secret")
 
 @app.get("/google/login")
-async def google_login():
+async def google_login(request: Request):
     """Generate login url and redirect"""
-    return await google_sso.get_login_redirect()
+    return await google_sso.get_login_redirect(redirect_uri=request.url_for("google_callback"))
 
 
 @app.get("/google/callback")
@@ -69,7 +68,7 @@ OAUTHLIB_INSECURE_TRANSPORT=1
 And make sure you pass `allow_insecure_http = True` to SSO class' constructor, such as:
 
 ```python
-google_sso = GoogleSSO("client-id", "client-secret", "callback-url", allow_insecure_http=True)
+google_sso = GoogleSSO("client-id", "client-secret", allow_insecure_http=True)
 ```
 
 See [this issue](https://github.com/tomasvotava/fastapi-sso/issues/2) for more information.
@@ -82,7 +81,7 @@ fail (e.g. when loging in from different domain then the callback is landing on)
 you may want to disable state checking by passing `use_state = False` in SSO class's constructor, such as:
 
 ```python
-google_sso = GoogleSSO("client-id", "client-secret", "callback-url", use_state=False)
+google_sso = GoogleSSO("client-id", "client-secret", use_state=False)
 ```
 
 See more on state [here](https://auth0.com/docs/configure/attack-protection/state-parameters).
