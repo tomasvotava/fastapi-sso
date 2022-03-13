@@ -9,27 +9,23 @@ class MicrosoftSSO(SSOBase):
     """Class providing login via Microsoft Graph OAuth"""
 
     provider = "microsoft"
-    scope = ["email", "openid", "profile"]
+    scope = ["openid", "User.read"]
     version = "v1.0"
 
-    @classmethod
-    async def get_discovery_document(cls) -> Dict[str, str]:
+    async def get_discovery_document(self) -> Dict[str, str]:
         """Get document containing handy urls"""
         return {
-            "authorization_endpoint": "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
-            "token_endpoint": "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-            "userinfo_endpoint": f"https://graph.microsoft.com/{cls.version}/me",
+            "authorization_endpoint": f"https://login.microsoftonline.com/{self.client_tenant}/oauth2/v2.0/authorize",
+            "token_endpoint": f"https://login.microsoftonline.com/{self.client_tenant}/oauth2/v2.0/token",
+            "userinfo_endpoint": f"https://graph.microsoft.com/{self.version}/me",
         }
 
     @classmethod
     async def openid_from_response(cls, response: dict) -> OpenID:
         """Return OpenID from user information provided by Microsoft Office 365"""
         return OpenID(
-            first_name=response.get("givenName"),
-            last_name=response.get("surname"),
-            email=response.get("userPrincipalName", ""),
-            provider=cls.provider,
-            id=response.get("id"),
-            display_name=response.get("displayName"),
-            picture=None,
+            displayName=response.get("displayName"),
+            givenName=response.get("givenName"),
+            jobTitle=response.get("jobTitle"),
+            mail=response.get("mail"),
         )

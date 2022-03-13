@@ -3,15 +3,15 @@
 # pylint: disable=too-few-public-methods
 
 import json
-
 from typing import Dict, List, Optional
 from uuid import uuid4
+
+import httpx
+import pydantic
 from oauthlib.oauth2 import WebApplicationClient
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
-import httpx
-import pydantic
 
 
 class SSOLoginError(HTTPException):
@@ -31,6 +31,12 @@ class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
     picture: Optional[str]
     provider: Optional[str]
 
+    # Microsoft
+    displayName: Optional[str]
+    givenName: Optional[str]
+    jobTitle: Optional[str]
+    mail: Optional[str]
+
 
 class SSOBase:
     """Base class (mixin) for all SSO providers"""
@@ -38,6 +44,7 @@ class SSOBase:
     provider = NotImplemented
     client_id: str = NotImplemented
     client_secret: str = NotImplemented
+    client_tenant: str = NotImplemented  # Microsoft
     redirect_uri: str = NotImplemented
     scope: List[str] = NotImplemented
     _oauth_client: Optional[WebApplicationClient] = None
@@ -47,12 +54,14 @@ class SSOBase:
         self,
         client_id: str,
         client_secret: str,
+        client_tenant: str,
         redirect_uri: str,
         allow_insecure_http: bool = False,
         use_state: bool = True,
     ):
         self.client_id = client_id
         self.client_secret = client_secret
+        self.client_tenant = client_tenant
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
         self.use_state = use_state
