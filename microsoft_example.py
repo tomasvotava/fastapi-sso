@@ -10,6 +10,8 @@ from starlette.requests import Request
 
 from fastapi_sso.sso.microsoft import MicrosoftSSO
 
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
 load_dotenv(verbose=True)
 app = FastAPI()
 

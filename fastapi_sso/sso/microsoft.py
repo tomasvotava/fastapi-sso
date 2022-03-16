@@ -5,15 +5,28 @@ from typing import Dict
 from fastapi_sso.sso.base import OpenID, SSOBase
 
 
-class MicrosoftSSO(SSOBase):
-    """Class providing login via Microsoft Graph OAuth"""
+class MicrosoftSSOBase(SSOBase):
+    client_tenant: str = NotImplemented  # Microsoft
 
+    def __init__(
+        self,
+        client_id: str,
+        client_secret: str,
+        client_tenant: str,
+        redirect_uri: str,
+        allow_insecure_http: bool = False,
+        use_state: bool = True,
+    ):
+        super().__init__(client_id, client_secret, redirect_uri, allow_insecure_http, use_state)
+        self.client_tenant = client_tenant
+
+
+class MicrosoftSSO(MicrosoftSSOBase):
     provider = "microsoft"
-    scope = ["openid", "User.read"]
+    scope = ["openid"]
     version = "v1.0"
 
     async def get_discovery_document(self) -> Dict[str, str]:
-        """Get document containing handy urls"""
         return {
             "authorization_endpoint": f"https://login.microsoftonline.com/{self.client_tenant}/oauth2/v2.0/authorize",
             "token_endpoint": f"https://login.microsoftonline.com/{self.client_tenant}/oauth2/v2.0/token",
@@ -22,10 +35,4 @@ class MicrosoftSSO(SSOBase):
 
     @classmethod
     async def openid_from_response(cls, response: dict) -> OpenID:
-        """Return OpenID from user information provided by Microsoft Office 365"""
-        return OpenID(
-            displayName=response.get("displayName"),
-            givenName=response.get("givenName"),
-            jobTitle=response.get("jobTitle"),
-            mail=response.get("mail"),
-        )
+        return response

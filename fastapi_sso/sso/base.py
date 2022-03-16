@@ -31,12 +31,6 @@ class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
     picture: Optional[str]
     provider: Optional[str]
 
-    # Microsoft
-    displayName: Optional[str]
-    givenName: Optional[str]
-    jobTitle: Optional[str]
-    mail: Optional[str]
-
 
 class SSOBase:
     """Base class (mixin) for all SSO providers"""
@@ -44,7 +38,6 @@ class SSOBase:
     provider = NotImplemented
     client_id: str = NotImplemented
     client_secret: str = NotImplemented
-    client_tenant: str = NotImplemented  # Microsoft
     redirect_uri: str = NotImplemented
     scope: List[str] = NotImplemented
     _oauth_client: Optional[WebApplicationClient] = None
@@ -54,14 +47,12 @@ class SSOBase:
         self,
         client_id: str,
         client_secret: str,
-        client_tenant: str,
         redirect_uri: str,
         allow_insecure_http: bool = False,
         use_state: bool = True,
     ):
         self.client_id = client_id
         self.client_secret = client_secret
-        self.client_tenant = client_tenant
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
         self.use_state = use_state
@@ -112,9 +103,7 @@ class SSOBase:
         """Return prepared login url. This is low-level, see {get_login_redirect} instead."""
         if self.use_state:
             self.state = str(uuid4())
-        request_uri = self.oauth_client.prepare_request_uri(
-            await self.authorization_endpoint, redirect_uri=self.redirect_uri, state=self.state, scope=self.scope
-        )
+        request_uri = self.oauth_client.prepare_request_uri(await self.authorization_endpoint, redirect_uri=self.redirect_uri, state=self.state, scope=self.scope)
         return request_uri
 
     async def get_login_redirect(self) -> RedirectResponse:
@@ -147,8 +136,7 @@ class SSOBase:
             if ssostate is None or ssostate != self.state:
                 raise SSOLoginError(
                     401,
-                    "'state' parameter in callback request does not match our internal 'state', "
-                    "someone may be trying to do something bad.",
+                    "'state' parameter in callback request does not match our internal 'state', " "someone may be trying to do something bad.",
                 )
         return await self.process_login(code, request)
 
@@ -165,9 +153,7 @@ class SSOBase:
             current_url = str(url)
         current_path = f"{scheme}://{url.netloc}{url.path}"
 
-        token_url, headers, body = self.oauth_client.prepare_token_request(
-            await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code
-        )  # type: ignore
+        token_url, headers, body = self.oauth_client.prepare_token_request(await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code)  # type: ignore
 
         if token_url is None:
             return None
