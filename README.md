@@ -1,60 +1,71 @@
-# FastAPI SSO
-
-FastAPI plugin to enable SSO to most common providers (such as Facebook login, Google login and login via Microsoft Office 365 account).
-
-This allows you to implement the famous `Login with Google/Facebook/Microsoft` buttons functionality on your backend very easily.
-
+# FastAPI Microsoft SSO
+<a href="https://www.docker.com/"><img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white"/></a>
+<a href="https://fastapi.tiangolo.com/ko/"><img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=FastAPI&logoColor=white"/></a>
 ## Installation
 
 ### Install using `pip`
 
 ```console
 pip install fastapi-sso
+
+pip install -r requirements.txt
+
+echo "MY_CLIENT_ID=[<b>MY_CLIENT_ID</b>]" >> .env
+echo "MY_CLIENT_SECRET=[<b>MY_CLIENT_SECRET</b>]" >> .env
+echo "MY_CLIENT_TENANT=[<b>MY_CLIENT_TENANT</b>]" >> .env
+echo "REDIRECT_URL=[<b>REDIRECT_URL</b>]" >> .env
 ```
 
-### Install using `poetry`
+## Microsoft Example
 
-```console
-poetry add fastapi-sso
-```
-
-## Example
-
-### `example.py`
+### `microsoft_example.py`
 
 ```python
-"""This is an example usage of fastapi-sso.
-"""
+#This is an example usage of fastapi-microsoft-sso.
 
+import os
+
+import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from starlette.requests import Request
-from fastapi_sso.sso.google import GoogleSSO
 
+from fastapi_sso.sso.microsoft import MicrosoftSSO
+
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
+load_dotenv(verbose=True)
 app = FastAPI()
 
-google_sso = GoogleSSO("my-client-id", "my-client-secret", "https://my.awesome-web.com/google/callback")
+microsoft_sso = MicrosoftSSO(
+    client_id=os.getenv("MY_CLIENT_ID"),
+    client_secret=os.getenv("MY_CLIENT_SECRET"),
+    client_tenant=os.getenv("MY_CLIENT_TENANT"),
+    redirect_uri=os.getenv("REDIRECT_URL"),
+    allow_insecure_http=True,
+    use_state=False,
+)
 
 
-@app.get("/google/login")
-async def google_login():
+@app.get("/microsoft/login")
+async def microsoft_login():
     """Generate login url and redirect"""
-    return await google_sso.get_login_redirect()
+    return await microsoft_sso.get_login_redirect()
 
 
-@app.get("/google/callback")
-async def google_callback(request: Request):
-    """Process login response from Google and return user info"""
-    user = await google_sso.verify_and_process(request)
-    return {
-        "id": user.id,
-        "picture": user.picture,
-        "display_name": user.display_name,
-        "email": user.email,
-        "provider": user.provider,
-    }
+@app.get("/microsoft/callback")
+async def microsoft_callback(request: Request):
+    """Process login response from Microsoft and return user info"""
+    user = await microsoft_sso.verify_and_process(request)
+    return user
+
+
+if __name__ == "__main__":
+    uvicorn.run(app="microsoft_example:app", host="0.0.0.0", port=8000, reload=True)
+
 ```
 
-Run using `uvicorn example:app`.
+Run using `uvicorn microsoft_example:app`.
 
 ## HTTP and development
 
