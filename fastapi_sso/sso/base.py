@@ -3,15 +3,15 @@
 # pylint: disable=too-few-public-methods
 
 import json
-
 from typing import Dict, List, Optional
 from uuid import uuid4
+
+import httpx
+import pydantic
 from oauthlib.oauth2 import WebApplicationClient
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
-import httpx
-import pydantic
 
 
 class SSOLoginError(HTTPException):
@@ -103,9 +103,7 @@ class SSOBase:
         """Return prepared login url. This is low-level, see {get_login_redirect} instead."""
         if self.use_state:
             self.state = str(uuid4())
-        request_uri = self.oauth_client.prepare_request_uri(
-            await self.authorization_endpoint, redirect_uri=self.redirect_uri, state=self.state, scope=self.scope
-        )
+        request_uri = self.oauth_client.prepare_request_uri(await self.authorization_endpoint, redirect_uri=self.redirect_uri, state=self.state, scope=self.scope)
         return request_uri
 
     async def get_login_redirect(self) -> RedirectResponse:
@@ -138,8 +136,7 @@ class SSOBase:
             if ssostate is None or ssostate != self.state:
                 raise SSOLoginError(
                     401,
-                    "'state' parameter in callback request does not match our internal 'state', "
-                    "someone may be trying to do something bad.",
+                    "'state' parameter in callback request does not match our internal 'state', " "someone may be trying to do something bad.",
                 )
         return await self.process_login(code, request)
 
@@ -156,9 +153,7 @@ class SSOBase:
             current_url = str(url)
         current_path = f"{scheme}://{url.netloc}{url.path}"
 
-        token_url, headers, body = self.oauth_client.prepare_token_request(
-            await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code
-        )  # type: ignore
+        token_url, headers, body = self.oauth_client.prepare_token_request(await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code)  # type: ignore
 
         if token_url is None:
             return None
