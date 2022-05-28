@@ -34,7 +34,6 @@ app = FastAPI()
 
 google_sso = GoogleSSO("my-client-id", "my-client-secret", "https://my.awesome-web.com/google/callback")
 
-
 @app.get("/google/login")
 async def google_login():
     """Generate login url and redirect"""
@@ -56,6 +55,26 @@ async def google_callback(request: Request):
 
 Run using `uvicorn example:app`.
 
+### Specify `request_uri` on request time
+
+In scenarios you cannot provide the `request_uri` upon the SSO class initialization, you may simply omit
+the parameter and provide it when calling `get_login_redirect` method.
+
+```python
+...
+
+google_sso = GoogleSSO("my-client-id", "my-client-secret")
+
+@app.get("/google/login")
+async def google_login(request: Request):
+    """Generate login url and redirect"""
+    return await google_sso.get_login_redirect(redirect_uri=request.url_for("google_callback"))
+
+@app.get("/google/callback")
+async def google_callback(request: Request):
+    ...
+```
+
 ## HTTP and development
 
 **You should always use `https` in production**. But in case you need to test on `localhost` and do not want to
@@ -69,7 +88,7 @@ OAUTHLIB_INSECURE_TRANSPORT=1
 And make sure you pass `allow_insecure_http = True` to SSO class' constructor, such as:
 
 ```python
-google_sso = GoogleSSO("client-id", "client-secret", "callback-url", allow_insecure_http=True)
+google_sso = GoogleSSO("client-id", "client-secret", allow_insecure_http=True)
 ```
 
 See [this issue](https://github.com/tomasvotava/fastapi-sso/issues/2) for more information.
@@ -82,7 +101,7 @@ fail (e.g. when loging in from different domain then the callback is landing on)
 you may want to disable state checking by passing `use_state = False` in SSO class's constructor, such as:
 
 ```python
-google_sso = GoogleSSO("client-id", "client-secret", "callback-url", use_state=False)
+google_sso = GoogleSSO("client-id", "client-secret", use_state=False)
 ```
 
 See more on state [here](https://auth0.com/docs/configure/attack-protection/state-parameters).
