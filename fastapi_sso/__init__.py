@@ -9,7 +9,7 @@
 \"""This is an example usage of fastapi-sso.
 \"""
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from starlette.requests import Request
 from fastapi_sso.sso.google import GoogleSSO
 
@@ -28,6 +28,8 @@ async def google_login():
 async def google_callback(request: Request):
     \"""Process login response from Google and return user info\"""
     user = await google_sso.verify_and_process(request)
+    if user is None:
+        raise HTTPException(401, "Failed to fetch user information")
     return {
         "id": user.id,
         "picture": user.picture,
@@ -35,5 +37,6 @@ async def google_callback(request: Request):
         "email": user.email,
         "provider": user.provider,
     }
+
 ```
 """

@@ -38,7 +38,7 @@ class SSOBase:
     provider = NotImplemented
     client_id: str = NotImplemented
     client_secret: str = NotImplemented
-    redirect_uri: str = NotImplemented
+    redirect_uri: Optional[str] = NotImplemented
     scope: List[str] = NotImplemented
     _oauth_client: Optional[WebApplicationClient] = None
     state: Optional[str] = None
@@ -47,10 +47,11 @@ class SSOBase:
         self,
         client_id: str,
         client_secret: str,
-        redirect_uri: str,
+        redirect_uri: Optional[str] = None,
         allow_insecure_http: bool = False,
         use_state: bool = True,
     ):
+        # pylint: disable=too-many-arguments
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
@@ -69,7 +70,7 @@ class SSOBase:
     @property
     def access_token(self) -> Optional[str]:
         """Access token from token endpoint"""
-        return self._oauth_client.access_token
+        return self.oauth_client.access_token
 
     @classmethod
     async def openid_from_response(cls, response: dict) -> OpenID:
@@ -99,22 +100,28 @@ class SSOBase:
         discovery = await self.get_discovery_document()
         return discovery.get("userinfo_endpoint")
 
-    async def get_login_url(self) -> str:
+    async def get_login_url(self, *, redirect_uri: Optional[str] = None) -> str:
         """Return prepared login url. This is low-level, see {get_login_redirect} instead."""
+        redirect_uri = redirect_uri or self.redirect_uri
+        if redirect_uri is None:
+            raise ValueError("redirect_uri must be provided, either at construction or request time")
         if self.use_state:
             self.state = str(uuid4())
         request_uri = self.oauth_client.prepare_request_uri(
-            await self.authorization_endpoint, redirect_uri=self.redirect_uri, state=self.state, scope=self.scope
+            await self.authorization_endpoint, redirect_uri=redirect_uri, state=self.state, scope=self.scope
         )
         return request_uri
 
-    async def get_login_redirect(self) -> RedirectResponse:
+    async def get_login_redirect(self, *, redirect_uri: Optional[str] = None) -> RedirectResponse:
         """Return redirect response by Stalette to login page of Oauth SSO provider
+
+        Arguments:
+            redirect_uri {Optional[str]} -- Override redirect_uri specified on this instance (default: None)
 
         Returns:
             RedirectResponse -- Starlette response (may directly be returned from FastAPI)
         """
-        login_uri = await self.get_login_url()
+        login_uri = await self.get_login_url(redirect_uri=redirect_uri)
         response = RedirectResponse(login_uri, 303)
         if self.state is not None and self.use_state:
             response.set_cookie("ssostate", self.state, expires=600)
@@ -147,6 +154,7 @@ class SSOBase:
         """This method should be called from callback endpoint to verify the user and request user info endpoint.
         This is low level, you should use {verify_and_process} instead.
         """
+        # pylint: disable=too-many-locals
         url = request.url
         scheme = url.scheme
         if not self.allow_insecure_http and scheme != "https":
