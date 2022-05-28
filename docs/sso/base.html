@@ -99,7 +99,7 @@ class SSOBase:
     @property
     def access_token(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Access token from token endpoint&#34;&#34;&#34;
-        return self._oauth_client.access_token
+        return self.oauth_client.access_token
 
     @classmethod
     async def openid_from_response(cls, response: dict) -&gt; OpenID:
@@ -129,13 +129,11 @@ class SSOBase:
         discovery = await self.get_discovery_document()
         return discovery.get(&#34;userinfo_endpoint&#34;)
 
-    async def get_login_url(self, redirect_uri: Optional[str] = None) -&gt; str:
+    async def get_login_url(self, *, redirect_uri: Optional[str] = None) -&gt; str:
         &#34;&#34;&#34;Return prepared login url. This is low-level, see {get_login_redirect} instead.&#34;&#34;&#34;
+        redirect_uri = redirect_uri or self.redirect_uri
         if redirect_uri is None:
-            if self.redirect_uri is None:
-                raise ValueError(&#34;redirect_uri must be provided, either at construction or request time&#34;)
-            redirect_uri = self.redirect_uri
-
+            raise ValueError(&#34;redirect_uri must be provided, either at construction or request time&#34;)
         if self.use_state:
             self.state = str(uuid4())
         request_uri = self.oauth_client.prepare_request_uri(
@@ -143,8 +141,11 @@ class SSOBase:
         )
         return request_uri
 
-    async def get_login_redirect(self, redirect_uri: Optional[str] = None) -&gt; RedirectResponse:
+    async def get_login_redirect(self, *, redirect_uri: Optional[str] = None) -&gt; RedirectResponse:
         &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
+
+        Arguments:
+            redirect_uri {Optional[str]} -- Override redirect_uri for this instance (default: None)
 
         Returns:
             RedirectResponse -- Starlette response (may directly be returned from FastAPI)
@@ -251,31 +252,31 @@ class SSOBase:
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="fastapi_sso.sso.base.OpenID.display_name"><code class="name">var <span class="ident">display_name</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.OpenID.display_name"><code class="name">var <span class="ident">display_name</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.OpenID.email"><code class="name">var <span class="ident">email</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.OpenID.email"><code class="name">var <span class="ident">email</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.OpenID.first_name"><code class="name">var <span class="ident">first_name</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.OpenID.first_name"><code class="name">var <span class="ident">first_name</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.OpenID.id"><code class="name">var <span class="ident">id</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.OpenID.id"><code class="name">var <span class="ident">id</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.OpenID.last_name"><code class="name">var <span class="ident">last_name</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.OpenID.last_name"><code class="name">var <span class="ident">last_name</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.OpenID.picture"><code class="name">var <span class="ident">picture</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.OpenID.picture"><code class="name">var <span class="ident">picture</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.OpenID.provider"><code class="name">var <span class="ident">provider</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.OpenID.provider"><code class="name">var <span class="ident">provider</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -283,7 +284,7 @@ class SSOBase:
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase"><code class="flex name class">
 <span>class <span class="ident">SSOBase</span></span>
-<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Union[str, NoneType] = None, allow_insecure_http: bool = False, use_state: bool = True)</span>
+<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = True)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Base class (mixin) for all SSO providers</p></div>
@@ -329,7 +330,7 @@ class SSOBase:
     @property
     def access_token(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Access token from token endpoint&#34;&#34;&#34;
-        return self._oauth_client.access_token
+        return self.oauth_client.access_token
 
     @classmethod
     async def openid_from_response(cls, response: dict) -&gt; OpenID:
@@ -359,13 +360,11 @@ class SSOBase:
         discovery = await self.get_discovery_document()
         return discovery.get(&#34;userinfo_endpoint&#34;)
 
-    async def get_login_url(self, redirect_uri: Optional[str] = None) -&gt; str:
+    async def get_login_url(self, *, redirect_uri: Optional[str] = None) -&gt; str:
         &#34;&#34;&#34;Return prepared login url. This is low-level, see {get_login_redirect} instead.&#34;&#34;&#34;
+        redirect_uri = redirect_uri or self.redirect_uri
         if redirect_uri is None:
-            if self.redirect_uri is None:
-                raise ValueError(&#34;redirect_uri must be provided, either at construction or request time&#34;)
-            redirect_uri = self.redirect_uri
-
+            raise ValueError(&#34;redirect_uri must be provided, either at construction or request time&#34;)
         if self.use_state:
             self.state = str(uuid4())
         request_uri = self.oauth_client.prepare_request_uri(
@@ -373,8 +372,11 @@ class SSOBase:
         )
         return request_uri
 
-    async def get_login_redirect(self, redirect_uri: Optional[str] = None) -&gt; RedirectResponse:
+    async def get_login_redirect(self, *, redirect_uri: Optional[str] = None) -&gt; RedirectResponse:
         &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
+
+        Arguments:
+            redirect_uri {Optional[str]} -- Override redirect_uri for this instance (default: None)
 
         Returns:
             RedirectResponse -- Starlette response (may directly be returned from FastAPI)
@@ -462,7 +464,7 @@ class SSOBase:
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.SSOBase.redirect_uri"><code class="name">var <span class="ident">redirect_uri</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.SSOBase.redirect_uri"><code class="name">var <span class="ident">redirect_uri</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -470,7 +472,7 @@ class SSOBase:
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.SSOBase.state"><code class="name">var <span class="ident">state</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.SSOBase.state"><code class="name">var <span class="ident">state</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -510,7 +512,7 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
 </dl>
 <h3>Instance variables</h3>
 <dl>
-<dt id="fastapi_sso.sso.base.SSOBase.access_token"><code class="name">var <span class="ident">access_token</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.SSOBase.access_token"><code class="name">var <span class="ident">access_token</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"><p>Access token from token endpoint</p></div>
 <details class="source">
@@ -520,10 +522,10 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
 <pre><code class="python">@property
 def access_token(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Access token from token endpoint&#34;&#34;&#34;
-    return self._oauth_client.access_token</code></pre>
+    return self.oauth_client.access_token</code></pre>
 </details>
 </dd>
-<dt id="fastapi_sso.sso.base.SSOBase.authorization_endpoint"><code class="name">var <span class="ident">authorization_endpoint</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.SSOBase.authorization_endpoint"><code class="name">var <span class="ident">authorization_endpoint</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"><p>Return <code>authorization_endpoint</code> from discovery document</p></div>
 <details class="source">
@@ -554,7 +556,7 @@ def oauth_client(self) -&gt; WebApplicationClient:
     return self._oauth_client</code></pre>
 </details>
 </dd>
-<dt id="fastapi_sso.sso.base.SSOBase.token_endpoint"><code class="name">var <span class="ident">token_endpoint</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.SSOBase.token_endpoint"><code class="name">var <span class="ident">token_endpoint</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"><p>Return <code>token_endpoint</code> from discovery document</p></div>
 <details class="source">
@@ -568,7 +570,7 @@ async def token_endpoint(self) -&gt; Optional[str]:
     return discovery.get(&#34;token_endpoint&#34;)</code></pre>
 </details>
 </dd>
-<dt id="fastapi_sso.sso.base.SSOBase.userinfo_endpoint"><code class="name">var <span class="ident">userinfo_endpoint</span> : Union[str, NoneType]</code></dt>
+<dt id="fastapi_sso.sso.base.SSOBase.userinfo_endpoint"><code class="name">var <span class="ident">userinfo_endpoint</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"><p>Return <code>userinfo_endpoint</code> from discovery document</p></div>
 <details class="source">
@@ -586,18 +588,23 @@ async def userinfo_endpoint(self) -&gt; Optional[str]:
 <h3>Methods</h3>
 <dl>
 <dt id="fastapi_sso.sso.base.SSOBase.get_login_redirect"><code class="name flex">
-<span>async def <span class="ident">get_login_redirect</span></span>(<span>self, redirect_uri: Union[str, NoneType] = None) ‑> starlette.responses.RedirectResponse</span>
+<span>async def <span class="ident">get_login_redirect</span></span>(<span>self, *, redirect_uri: Optional[str] = None) ‑> starlette.responses.RedirectResponse</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return redirect response by Stalette to login page of Oauth SSO provider</p>
+<h2 id="arguments">Arguments</h2>
+<p>redirect_uri {Optional[str]} &ndash; Override redirect_uri for this instance (default: None)</p>
 <h2 id="returns">Returns</h2>
 <p>RedirectResponse &ndash; Starlette response (may directly be returned from FastAPI)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def get_login_redirect(self, redirect_uri: Optional[str] = None) -&gt; RedirectResponse:
+<pre><code class="python">async def get_login_redirect(self, *, redirect_uri: Optional[str] = None) -&gt; RedirectResponse:
     &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
+
+    Arguments:
+        redirect_uri {Optional[str]} -- Override redirect_uri for this instance (default: None)
 
     Returns:
         RedirectResponse -- Starlette response (may directly be returned from FastAPI)
@@ -610,7 +617,7 @@ async def userinfo_endpoint(self) -&gt; Optional[str]:
 </details>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase.get_login_url"><code class="name flex">
-<span>async def <span class="ident">get_login_url</span></span>(<span>self, redirect_uri: Union[str, NoneType] = None) ‑> str</span>
+<span>async def <span class="ident">get_login_url</span></span>(<span>self, *, redirect_uri: Optional[str] = None) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return prepared login url. This is low-level, see {get_login_redirect} instead.</p></div>
@@ -618,13 +625,11 @@ async def userinfo_endpoint(self) -&gt; Optional[str]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def get_login_url(self, redirect_uri: Optional[str] = None) -&gt; str:
+<pre><code class="python">async def get_login_url(self, *, redirect_uri: Optional[str] = None) -&gt; str:
     &#34;&#34;&#34;Return prepared login url. This is low-level, see {get_login_redirect} instead.&#34;&#34;&#34;
+    redirect_uri = redirect_uri or self.redirect_uri
     if redirect_uri is None:
-        if self.redirect_uri is None:
-            raise ValueError(&#34;redirect_uri must be provided, either at construction or request time&#34;)
-        redirect_uri = self.redirect_uri
-
+        raise ValueError(&#34;redirect_uri must be provided, either at construction or request time&#34;)
     if self.use_state:
         self.state = str(uuid4())
     request_uri = self.oauth_client.prepare_request_uri(
@@ -634,7 +639,7 @@ async def userinfo_endpoint(self) -&gt; Optional[str]:
 </details>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase.process_login"><code class="name flex">
-<span>async def <span class="ident">process_login</span></span>(<span>self, code: str, request: starlette.requests.Request) ‑> Union[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>, NoneType]</span>
+<span>async def <span class="ident">process_login</span></span>(<span>self, code: str, request: starlette.requests.Request) ‑> Optional[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>This method should be called from callback endpoint to verify the user and request user info endpoint.
@@ -678,7 +683,7 @@ This is low level, you should use {verify_and_process} instead.</p></div>
 </details>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase.verify_and_process"><code class="name flex">
-<span>async def <span class="ident">verify_and_process</span></span>(<span>self, request: starlette.requests.Request) ‑> Union[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>, NoneType]</span>
+<span>async def <span class="ident">verify_and_process</span></span>(<span>self, request: starlette.requests.Request) ‑> Optional[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get FastAPI (Starlette) Request object and process login.
