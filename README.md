@@ -32,12 +32,12 @@ from fastapi_sso.sso.google import GoogleSSO
 
 app = FastAPI()
 
-google_sso = GoogleSSO("my-client-id", "my-client-secret")
+google_sso = GoogleSSO("my-client-id", "my-client-secret", "https://my.awesome-web.com/google/callback")
 
 @app.get("/google/login")
-async def google_login(request: Request):
+async def google_login():
     """Generate login url and redirect"""
-    return await google_sso.get_login_redirect(redirect_uri=request.url_for("google_callback"))
+    return await google_sso.get_login_redirect()
 
 
 @app.get("/google/callback")
@@ -54,6 +54,26 @@ async def google_callback(request: Request):
 ```
 
 Run using `uvicorn example:app`.
+
+### Specify `request_uri` on request time
+
+In scenarios you cannot provide the `request_uri` upon the SSO class initialization, you may simply omit
+the parameter and provide it when calling `get_login_redirect` method.
+
+```python
+...
+
+google_sso = GoogleSSO("my-client-id", "my-client-secret")
+
+@app.get("/google/login")
+async def google_login(request: Request):
+    """Generate login url and redirect"""
+    return await google_sso.get_login_redirect(redirect_uri=request.url_for("google_callback"))
+
+@app.get("/google/callback")
+async def google_callback(request: Request):
+    ...
+```
 
 ## HTTP and development
 
