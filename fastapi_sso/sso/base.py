@@ -70,7 +70,7 @@ class SSOBase:
     @property
     def access_token(self) -> Optional[str]:
         """Access token from token endpoint"""
-        return self._oauth_client.access_token
+        return self.oauth_client.access_token
 
     @classmethod
     async def openid_from_response(cls, response: dict) -> OpenID:
@@ -100,13 +100,11 @@ class SSOBase:
         discovery = await self.get_discovery_document()
         return discovery.get("userinfo_endpoint")
 
-    async def get_login_url(self, redirect_uri: Optional[str] = None) -> str:
+    async def get_login_url(self, *, redirect_uri: Optional[str] = None) -> str:
         """Return prepared login url. This is low-level, see {get_login_redirect} instead."""
+        redirect_uri = redirect_uri or self.redirect_uri
         if redirect_uri is None:
-            if self.redirect_uri is None:
-                raise ValueError("redirect_uri must be provided, either at construction or request time")
-            redirect_uri = self.redirect_uri
-
+            raise ValueError("redirect_uri must be provided, either at construction or request time")
         if self.use_state:
             self.state = str(uuid4())
         request_uri = self.oauth_client.prepare_request_uri(
@@ -114,8 +112,11 @@ class SSOBase:
         )
         return request_uri
 
-    async def get_login_redirect(self, redirect_uri: Optional[str] = None) -> RedirectResponse:
+    async def get_login_redirect(self, *, redirect_uri: Optional[str] = None) -> RedirectResponse:
         """Return redirect response by Stalette to login page of Oauth SSO provider
+
+        Arguments:
+            redirect_uri {Optional[str]} -- Override redirect_uri specified on this instance (default: None)
 
         Returns:
             RedirectResponse -- Starlette response (may directly be returned from FastAPI)
