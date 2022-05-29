@@ -29,39 +29,49 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Microsoft SSO Oauth Helper class&#34;&#34;&#34;
 
-from typing import Dict
+from typing import Dict, List, Optional
 
 from fastapi_sso.sso.base import OpenID, SSOBase
 
 
 class MicrosoftSSO(SSOBase):
-    &#34;&#34;&#34;Class providing login via Microsoft Graph OAuth&#34;&#34;&#34;
+    &#34;&#34;&#34;Class providing login using Microsoft OAuth&#34;&#34;&#34;
 
     provider = &#34;microsoft&#34;
-    scope = [&#34;email&#34;, &#34;openid&#34;, &#34;profile&#34;]
+    scope = [&#34;openid&#34;]
     version = &#34;v1.0&#34;
+    tenant: str = &#34;common&#34;
 
-    @classmethod
-    async def get_discovery_document(cls) -&gt; Dict[str, str]:
-        &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
+    def __init__(
+        self,
+        client_id: str,
+        client_secret: str,
+        redirect_uri: Optional[str] = None,
+        allow_insecure_http: bool = False,
+        use_state: bool = True,
+        scope: Optional[List[str]] = None,
+        tenant: Optional[str] = None,
+    ):
+        super().__init__(
+            client_id=client_id,
+            client_secret=client_secret,
+            redirect_uri=redirect_uri,
+            allow_insecure_http=allow_insecure_http,
+            use_state=use_state,
+            scope=scope,
+        )
+        self.tenant = tenant or self.tenant
+
+    async def get_discovery_document(self) -&gt; Dict[str, str]:
         return {
-            &#34;authorization_endpoint&#34;: &#34;https://login.microsoftonline.com/common/oauth2/v2.0/authorize&#34;,
-            &#34;token_endpoint&#34;: &#34;https://login.microsoftonline.com/common/oauth2/v2.0/token&#34;,
-            &#34;userinfo_endpoint&#34;: f&#34;https://graph.microsoft.com/{cls.version}/me&#34;,
+            &#34;authorization_endpoint&#34;: f&#34;https://login.microsoftonline.com/{self.tenant}/oauth2/v2.0/authorize&#34;,
+            &#34;token_endpoint&#34;: f&#34;https://login.microsoftonline.com/{self.tenant}/oauth2/v2.0/token&#34;,
+            &#34;userinfo_endpoint&#34;: f&#34;https://graph.microsoft.com/{self.version}/me&#34;,
         }
 
     @classmethod
     async def openid_from_response(cls, response: dict) -&gt; OpenID:
-        &#34;&#34;&#34;Return OpenID from user information provided by Microsoft Office 365&#34;&#34;&#34;
-        return OpenID(
-            first_name=response.get(&#34;givenName&#34;),
-            last_name=response.get(&#34;surname&#34;),
-            email=response.get(&#34;userPrincipalName&#34;, &#34;&#34;),
-            provider=cls.provider,
-            id=response.get(&#34;id&#34;),
-            display_name=response.get(&#34;displayName&#34;),
-            picture=None,
-        )</code></pre>
+        return OpenID(email=response[&#34;mail&#34;], display_name=response[&#34;displayName&#34;], provider=cls.provider)</code></pre>
 </details>
 </section>
 <section>
@@ -75,42 +85,52 @@ class MicrosoftSSO(SSOBase):
 <dl>
 <dt id="fastapi_sso.sso.microsoft.MicrosoftSSO"><code class="flex name class">
 <span>class <span class="ident">MicrosoftSSO</span></span>
-<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = True)</span>
+<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = True, scope: Optional[List[str]] = None, tenant: Optional[str] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Class providing login via Microsoft Graph OAuth</p></div>
+<div class="desc"><p>Class providing login using Microsoft OAuth</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class MicrosoftSSO(SSOBase):
-    &#34;&#34;&#34;Class providing login via Microsoft Graph OAuth&#34;&#34;&#34;
+    &#34;&#34;&#34;Class providing login using Microsoft OAuth&#34;&#34;&#34;
 
     provider = &#34;microsoft&#34;
-    scope = [&#34;email&#34;, &#34;openid&#34;, &#34;profile&#34;]
+    scope = [&#34;openid&#34;]
     version = &#34;v1.0&#34;
+    tenant: str = &#34;common&#34;
 
-    @classmethod
-    async def get_discovery_document(cls) -&gt; Dict[str, str]:
-        &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
+    def __init__(
+        self,
+        client_id: str,
+        client_secret: str,
+        redirect_uri: Optional[str] = None,
+        allow_insecure_http: bool = False,
+        use_state: bool = True,
+        scope: Optional[List[str]] = None,
+        tenant: Optional[str] = None,
+    ):
+        super().__init__(
+            client_id=client_id,
+            client_secret=client_secret,
+            redirect_uri=redirect_uri,
+            allow_insecure_http=allow_insecure_http,
+            use_state=use_state,
+            scope=scope,
+        )
+        self.tenant = tenant or self.tenant
+
+    async def get_discovery_document(self) -&gt; Dict[str, str]:
         return {
-            &#34;authorization_endpoint&#34;: &#34;https://login.microsoftonline.com/common/oauth2/v2.0/authorize&#34;,
-            &#34;token_endpoint&#34;: &#34;https://login.microsoftonline.com/common/oauth2/v2.0/token&#34;,
-            &#34;userinfo_endpoint&#34;: f&#34;https://graph.microsoft.com/{cls.version}/me&#34;,
+            &#34;authorization_endpoint&#34;: f&#34;https://login.microsoftonline.com/{self.tenant}/oauth2/v2.0/authorize&#34;,
+            &#34;token_endpoint&#34;: f&#34;https://login.microsoftonline.com/{self.tenant}/oauth2/v2.0/token&#34;,
+            &#34;userinfo_endpoint&#34;: f&#34;https://graph.microsoft.com/{self.version}/me&#34;,
         }
 
     @classmethod
     async def openid_from_response(cls, response: dict) -&gt; OpenID:
-        &#34;&#34;&#34;Return OpenID from user information provided by Microsoft Office 365&#34;&#34;&#34;
-        return OpenID(
-            first_name=response.get(&#34;givenName&#34;),
-            last_name=response.get(&#34;surname&#34;),
-            email=response.get(&#34;userPrincipalName&#34;, &#34;&#34;),
-            provider=cls.provider,
-            id=response.get(&#34;id&#34;),
-            display_name=response.get(&#34;displayName&#34;),
-            picture=None,
-        )</code></pre>
+        return OpenID(email=response[&#34;mail&#34;], display_name=response[&#34;displayName&#34;], provider=cls.provider)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -126,54 +146,13 @@ class MicrosoftSSO(SSOBase):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.microsoft.MicrosoftSSO.version"><code class="name">var <span class="ident">version</span></code></dt>
+<dt id="fastapi_sso.sso.microsoft.MicrosoftSSO.tenant"><code class="name">var <span class="ident">tenant</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-</dl>
-<h3>Static methods</h3>
-<dl>
-<dt id="fastapi_sso.sso.microsoft.MicrosoftSSO.get_discovery_document"><code class="name flex">
-<span>async def <span class="ident">get_discovery_document</span></span>(<span>) ‑> Dict[str, str]</span>
-</code></dt>
+<dt id="fastapi_sso.sso.microsoft.MicrosoftSSO.version"><code class="name">var <span class="ident">version</span></code></dt>
 <dd>
-<div class="desc"><p>Get document containing handy urls</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-async def get_discovery_document(cls) -&gt; Dict[str, str]:
-    &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
-    return {
-        &#34;authorization_endpoint&#34;: &#34;https://login.microsoftonline.com/common/oauth2/v2.0/authorize&#34;,
-        &#34;token_endpoint&#34;: &#34;https://login.microsoftonline.com/common/oauth2/v2.0/token&#34;,
-        &#34;userinfo_endpoint&#34;: f&#34;https://graph.microsoft.com/{cls.version}/me&#34;,
-    }</code></pre>
-</details>
-</dd>
-<dt id="fastapi_sso.sso.microsoft.MicrosoftSSO.openid_from_response"><code class="name flex">
-<span>async def <span class="ident">openid_from_response</span></span>(<span>response: dict) ‑> <a title="fastapi_sso.sso.base.OpenID" href="base.html#fastapi_sso.sso.base.OpenID">OpenID</a></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Return OpenID from user information provided by Microsoft Office 365</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-async def openid_from_response(cls, response: dict) -&gt; OpenID:
-    &#34;&#34;&#34;Return OpenID from user information provided by Microsoft Office 365&#34;&#34;&#34;
-    return OpenID(
-        first_name=response.get(&#34;givenName&#34;),
-        last_name=response.get(&#34;surname&#34;),
-        email=response.get(&#34;userPrincipalName&#34;, &#34;&#34;),
-        provider=cls.provider,
-        id=response.get(&#34;id&#34;),
-        display_name=response.get(&#34;displayName&#34;),
-        picture=None,
-    )</code></pre>
-</details>
+<div class="desc"></div>
 </dd>
 </dl>
 <h3>Inherited members</h3>
@@ -182,9 +161,11 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
 <ul class="hlist">
 <li><code><a title="fastapi_sso.sso.base.SSOBase.access_token" href="base.html#fastapi_sso.sso.base.SSOBase.access_token">access_token</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.authorization_endpoint" href="base.html#fastapi_sso.sso.base.SSOBase.authorization_endpoint">authorization_endpoint</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.get_discovery_document" href="base.html#fastapi_sso.sso.base.SSOBase.get_discovery_document">get_discovery_document</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.get_login_redirect" href="base.html#fastapi_sso.sso.base.SSOBase.get_login_redirect">get_login_redirect</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.get_login_url" href="base.html#fastapi_sso.sso.base.SSOBase.get_login_url">get_login_url</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.oauth_client" href="base.html#fastapi_sso.sso.base.SSOBase.oauth_client">oauth_client</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.openid_from_response" href="base.html#fastapi_sso.sso.base.SSOBase.openid_from_response">openid_from_response</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.process_login" href="base.html#fastapi_sso.sso.base.SSOBase.process_login">process_login</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.token_endpoint" href="base.html#fastapi_sso.sso.base.SSOBase.token_endpoint">token_endpoint</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.userinfo_endpoint" href="base.html#fastapi_sso.sso.base.SSOBase.userinfo_endpoint">userinfo_endpoint</a></code></li>
@@ -212,10 +193,9 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
 <li>
 <h4><code><a title="fastapi_sso.sso.microsoft.MicrosoftSSO" href="#fastapi_sso.sso.microsoft.MicrosoftSSO">MicrosoftSSO</a></code></h4>
 <ul class="">
-<li><code><a title="fastapi_sso.sso.microsoft.MicrosoftSSO.get_discovery_document" href="#fastapi_sso.sso.microsoft.MicrosoftSSO.get_discovery_document">get_discovery_document</a></code></li>
-<li><code><a title="fastapi_sso.sso.microsoft.MicrosoftSSO.openid_from_response" href="#fastapi_sso.sso.microsoft.MicrosoftSSO.openid_from_response">openid_from_response</a></code></li>
 <li><code><a title="fastapi_sso.sso.microsoft.MicrosoftSSO.provider" href="#fastapi_sso.sso.microsoft.MicrosoftSSO.provider">provider</a></code></li>
 <li><code><a title="fastapi_sso.sso.microsoft.MicrosoftSSO.scope" href="#fastapi_sso.sso.microsoft.MicrosoftSSO.scope">scope</a></code></li>
+<li><code><a title="fastapi_sso.sso.microsoft.MicrosoftSSO.tenant" href="#fastapi_sso.sso.microsoft.MicrosoftSSO.tenant">tenant</a></code></li>
 <li><code><a title="fastapi_sso.sso.microsoft.MicrosoftSSO.version" href="#fastapi_sso.sso.microsoft.MicrosoftSSO.version">version</a></code></li>
 </ul>
 </li>

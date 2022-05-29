@@ -42,13 +42,12 @@ class FacebookSSO(SSOBase):
     base_url = &#34;https://graph.facebook.com/v9.0&#34;
     scope = [&#34;email&#34;]
 
-    @classmethod
-    async def get_discovery_document(cls) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; Dict[str, str]:
         &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
         return {
             &#34;authorization_endpoint&#34;: &#34;https://www.facebook.com/v9.0/dialog/oauth&#34;,
-            &#34;token_endpoint&#34;: f&#34;{cls.base_url}/oauth/access_token&#34;,
-            &#34;userinfo_endpoint&#34;: f&#34;{cls.base_url}/me?fields=id,name,email,first_name,last_name,picture&#34;,
+            &#34;token_endpoint&#34;: f&#34;{self.base_url}/oauth/access_token&#34;,
+            &#34;userinfo_endpoint&#34;: f&#34;{self.base_url}/me?fields=id,name,email,first_name,last_name,picture&#34;,
         }
 
     @classmethod
@@ -76,7 +75,7 @@ class FacebookSSO(SSOBase):
 <dl>
 <dt id="fastapi_sso.sso.facebook.FacebookSSO"><code class="flex name class">
 <span>class <span class="ident">FacebookSSO</span></span>
-<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = True)</span>
+<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = True, scope: Optional[List[str]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Class providing login via Facebook OAuth</p></div>
@@ -91,13 +90,12 @@ class FacebookSSO(SSOBase):
     base_url = &#34;https://graph.facebook.com/v9.0&#34;
     scope = [&#34;email&#34;]
 
-    @classmethod
-    async def get_discovery_document(cls) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; Dict[str, str]:
         &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
         return {
             &#34;authorization_endpoint&#34;: &#34;https://www.facebook.com/v9.0/dialog/oauth&#34;,
-            &#34;token_endpoint&#34;: f&#34;{cls.base_url}/oauth/access_token&#34;,
-            &#34;userinfo_endpoint&#34;: f&#34;{cls.base_url}/me?fields=id,name,email,first_name,last_name,picture&#34;,
+            &#34;token_endpoint&#34;: f&#34;{self.base_url}/oauth/access_token&#34;,
+            &#34;userinfo_endpoint&#34;: f&#34;{self.base_url}/me?fields=id,name,email,first_name,last_name,picture&#34;,
         }
 
     @classmethod
@@ -134,25 +132,6 @@ class FacebookSSO(SSOBase):
 </dl>
 <h3>Static methods</h3>
 <dl>
-<dt id="fastapi_sso.sso.facebook.FacebookSSO.get_discovery_document"><code class="name flex">
-<span>async def <span class="ident">get_discovery_document</span></span>(<span>) ‑> Dict[str, str]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get document containing handy urls</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-async def get_discovery_document(cls) -&gt; Dict[str, str]:
-    &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
-    return {
-        &#34;authorization_endpoint&#34;: &#34;https://www.facebook.com/v9.0/dialog/oauth&#34;,
-        &#34;token_endpoint&#34;: f&#34;{cls.base_url}/oauth/access_token&#34;,
-        &#34;userinfo_endpoint&#34;: f&#34;{cls.base_url}/me?fields=id,name,email,first_name,last_name,picture&#34;,
-    }</code></pre>
-</details>
-</dd>
 <dt id="fastapi_sso.sso.facebook.FacebookSSO.openid_from_response"><code class="name flex">
 <span>async def <span class="ident">openid_from_response</span></span>(<span>response: dict) ‑> <a title="fastapi_sso.sso.base.OpenID" href="base.html#fastapi_sso.sso.base.OpenID">OpenID</a></span>
 </code></dt>
@@ -174,6 +153,27 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
         id=response.get(&#34;id&#34;),
         picture=response.get(&#34;picture&#34;, {}).get(&#34;data&#34;, {}).get(&#34;url&#34;, None),
     )</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="fastapi_sso.sso.facebook.FacebookSSO.get_discovery_document"><code class="name flex">
+<span>async def <span class="ident">get_discovery_document</span></span>(<span>self) ‑> Dict[str, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get document containing handy urls</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get_discovery_document(self) -&gt; Dict[str, str]:
+    &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
+    return {
+        &#34;authorization_endpoint&#34;: &#34;https://www.facebook.com/v9.0/dialog/oauth&#34;,
+        &#34;token_endpoint&#34;: f&#34;{self.base_url}/oauth/access_token&#34;,
+        &#34;userinfo_endpoint&#34;: f&#34;{self.base_url}/me?fields=id,name,email,first_name,last_name,picture&#34;,
+    }</code></pre>
 </details>
 </dd>
 </dl>

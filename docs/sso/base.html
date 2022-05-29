@@ -32,15 +32,15 @@
 # pylint: disable=too-few-public-methods
 
 import json
-
 from typing import Dict, List, Optional
 from uuid import uuid4
+
+import httpx
+import pydantic
 from oauthlib.oauth2 import WebApplicationClient
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
-import httpx
-import pydantic
 
 
 class SSOLoginError(HTTPException):
@@ -61,6 +61,7 @@ class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
     provider: Optional[str]
 
 
+# pylint: disable=too-many-instance-attributes
 class SSOBase:
     &#34;&#34;&#34;Base class (mixin) for all SSO providers&#34;&#34;&#34;
 
@@ -79,6 +80,7 @@ class SSOBase:
         redirect_uri: Optional[str] = None,
         allow_insecure_http: bool = False,
         use_state: bool = True,
+        scope: Optional[List[str]] = None,
     ):
         # pylint: disable=too-many-arguments
         self.client_id = client_id
@@ -86,6 +88,7 @@ class SSOBase:
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
         self.use_state = use_state
+        self.scope = scope or self.scope
 
     @property
     def oauth_client(self) -&gt; WebApplicationClient:
@@ -106,10 +109,9 @@ class SSOBase:
         &#34;&#34;&#34;Return {OpenID} object from provider&#39;s user info endpoint response&#34;&#34;&#34;
         raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)
 
-    @classmethod
-    async def get_discovery_document(cls) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; Dict[str, str]:
         &#34;&#34;&#34;Get discovery document containing handy urls&#34;&#34;&#34;
-        raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)
+        raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
 
     @property
     async def authorization_endpoint(self) -&gt; Optional[str]:
@@ -145,7 +147,7 @@ class SSOBase:
         &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
 
         Arguments:
-            redirect_uri {Optional[str]} -- Override redirect_uri for this instance (default: None)
+            redirect_uri {Optional[str]} -- Override redirect_uri specified on this instance (default: None)
 
         Returns:
             RedirectResponse -- Starlette response (may directly be returned from FastAPI)
@@ -284,7 +286,7 @@ class SSOBase:
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase"><code class="flex name class">
 <span>class <span class="ident">SSOBase</span></span>
-<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = True)</span>
+<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = True, scope: Optional[List[str]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Base class (mixin) for all SSO providers</p></div>
@@ -310,6 +312,7 @@ class SSOBase:
         redirect_uri: Optional[str] = None,
         allow_insecure_http: bool = False,
         use_state: bool = True,
+        scope: Optional[List[str]] = None,
     ):
         # pylint: disable=too-many-arguments
         self.client_id = client_id
@@ -317,6 +320,7 @@ class SSOBase:
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
         self.use_state = use_state
+        self.scope = scope or self.scope
 
     @property
     def oauth_client(self) -&gt; WebApplicationClient:
@@ -337,10 +341,9 @@ class SSOBase:
         &#34;&#34;&#34;Return {OpenID} object from provider&#39;s user info endpoint response&#34;&#34;&#34;
         raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)
 
-    @classmethod
-    async def get_discovery_document(cls) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; Dict[str, str]:
         &#34;&#34;&#34;Get discovery document containing handy urls&#34;&#34;&#34;
-        raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)
+        raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
 
     @property
     async def authorization_endpoint(self) -&gt; Optional[str]:
@@ -376,7 +379,7 @@ class SSOBase:
         &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
 
         Arguments:
-            redirect_uri {Optional[str]} -- Override redirect_uri for this instance (default: None)
+            redirect_uri {Optional[str]} -- Override redirect_uri specified on this instance (default: None)
 
         Returns:
             RedirectResponse -- Starlette response (may directly be returned from FastAPI)
@@ -479,21 +482,6 @@ class SSOBase:
 </dl>
 <h3>Static methods</h3>
 <dl>
-<dt id="fastapi_sso.sso.base.SSOBase.get_discovery_document"><code class="name flex">
-<span>async def <span class="ident">get_discovery_document</span></span>(<span>) ‑> Dict[str, str]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get discovery document containing handy urls</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-async def get_discovery_document(cls) -&gt; Dict[str, str]:
-    &#34;&#34;&#34;Get discovery document containing handy urls&#34;&#34;&#34;
-    raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)</code></pre>
-</details>
-</dd>
 <dt id="fastapi_sso.sso.base.SSOBase.openid_from_response"><code class="name flex">
 <span>async def <span class="ident">openid_from_response</span></span>(<span>response: dict) ‑> <a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a></span>
 </code></dt>
@@ -587,13 +575,27 @@ async def userinfo_endpoint(self) -&gt; Optional[str]:
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="fastapi_sso.sso.base.SSOBase.get_discovery_document"><code class="name flex">
+<span>async def <span class="ident">get_discovery_document</span></span>(<span>self) ‑> Dict[str, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get discovery document containing handy urls</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get_discovery_document(self) -&gt; Dict[str, str]:
+    &#34;&#34;&#34;Get discovery document containing handy urls&#34;&#34;&#34;
+    raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)</code></pre>
+</details>
+</dd>
 <dt id="fastapi_sso.sso.base.SSOBase.get_login_redirect"><code class="name flex">
 <span>async def <span class="ident">get_login_redirect</span></span>(<span>self, *, redirect_uri: Optional[str] = None) ‑> starlette.responses.RedirectResponse</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return redirect response by Stalette to login page of Oauth SSO provider</p>
 <h2 id="arguments">Arguments</h2>
-<p>redirect_uri {Optional[str]} &ndash; Override redirect_uri for this instance (default: None)</p>
+<p>redirect_uri {Optional[str]} &ndash; Override redirect_uri specified on this instance (default: None)</p>
 <h2 id="returns">Returns</h2>
 <p>RedirectResponse &ndash; Starlette response (may directly be returned from FastAPI)</p></div>
 <details class="source">
@@ -604,7 +606,7 @@ async def userinfo_endpoint(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
 
     Arguments:
-        redirect_uri {Optional[str]} -- Override redirect_uri for this instance (default: None)
+        redirect_uri {Optional[str]} -- Override redirect_uri specified on this instance (default: None)
 
     Returns:
         RedirectResponse -- Starlette response (may directly be returned from FastAPI)
