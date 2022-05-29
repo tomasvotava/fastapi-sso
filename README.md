@@ -55,9 +55,9 @@ async def google_callback(request: Request):
 
 Run using `uvicorn example:app`.
 
-### Specify `request_uri` on request time
+### Specify `redirect_uri` on request time
 
-In scenarios you cannot provide the `request_uri` upon the SSO class initialization, you may simply omit
+In scenarios you cannot provide the `redirect_uri` upon the SSO class initialization, you may simply omit
 the parameter and provide it when calling `get_login_redirect` method.
 
 ```python
@@ -73,6 +73,16 @@ async def google_login(request: Request):
 @app.get("/google/callback")
 async def google_callback(request: Request):
     ...
+```
+
+### Specify scope
+
+Since `0.3.1` you may specify `scope` when initializing the SSO class.
+
+```python
+from fastapi_sso.sso.microsoft import MicrosoftSSO
+
+sso = MicrosoftSSO(client_id="client-id", client_secret="client-secret", scope=["openid", "email"])
 ```
 
 ## HTTP and development
