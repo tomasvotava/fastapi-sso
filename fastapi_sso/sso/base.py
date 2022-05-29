@@ -32,6 +32,7 @@ class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
     provider: Optional[str]
 
 
+# pylint: disable=too-many-instance-attributes
 class SSOBase:
     """Base class (mixin) for all SSO providers"""
 
@@ -50,6 +51,7 @@ class SSOBase:
         redirect_uri: Optional[str] = None,
         allow_insecure_http: bool = False,
         use_state: bool = True,
+        scope: Optional[List[str]] = None,
     ):
         # pylint: disable=too-many-arguments
         self.client_id = client_id
@@ -57,6 +59,7 @@ class SSOBase:
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
         self.use_state = use_state
+        self.scope = scope or self.scope
 
     @property
     def oauth_client(self) -> WebApplicationClient:
@@ -77,10 +80,9 @@ class SSOBase:
         """Return {OpenID} object from provider's user info endpoint response"""
         raise NotImplementedError(f"Provider {cls.provider} not supported")
 
-    @classmethod
-    async def get_discovery_document(cls) -> Dict[str, str]:
+    async def get_discovery_document(self) -> Dict[str, str]:
         """Get discovery document containing handy urls"""
-        raise NotImplementedError(f"Provider {cls.provider} not supported")
+        raise NotImplementedError(f"Provider {self.provider} not supported")
 
     @property
     async def authorization_endpoint(self) -> Optional[str]:
@@ -164,7 +166,9 @@ class SSOBase:
             current_url = str(url)
         current_path = f"{scheme}://{url.netloc}{url.path}"
 
-        token_url, headers, body = self.oauth_client.prepare_token_request(await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code)  # type: ignore
+        token_url, headers, body = self.oauth_client.prepare_token_request(
+            await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code
+        )  # type: ignore
 
         if token_url is None:
             return None

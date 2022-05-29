@@ -77,7 +77,7 @@ async def google_callback(request: Request):
 
 ### Specify scope
 
-Since `0.3.1` you may specify `scope` when initializing the SSO class.
+Since `0.4.0` you may specify `scope` when initializing the SSO class.
 
 ```python
 from fastapi_sso.sso.microsoft import MicrosoftSSO

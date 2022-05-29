@@ -8,7 +8,7 @@ from fastapi_sso.sso.base import OpenID, SSOBase, SSOLoginError
 
 
 class GoogleSSO(SSOBase):
-    """Class providing login via Facebook OAuth"""
+    """Class providing login via Google OAuth"""
 
     discovery_url = "https://accounts.google.com/.well-known/openid-configuration"
     provider = "google"
@@ -29,10 +29,9 @@ class GoogleSSO(SSOBase):
             )
         raise SSOLoginError(401, f"User {response.get('email')} is not verified with Google")
 
-    @classmethod
-    async def get_discovery_document(cls) -> Dict[str, str]:
+    async def get_discovery_document(self) -> Dict[str, str]:
         """Get document containing handy urls"""
         async with httpx.AsyncClient() as session:
-            response = await session.get(cls.discovery_url)
+            response = await session.get(self.discovery_url)
             content = response.json()
             return content
