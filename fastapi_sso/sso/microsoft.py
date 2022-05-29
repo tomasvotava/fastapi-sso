@@ -1,35 +1,45 @@
 """Microsoft SSO Oauth Helper class"""
 
-from typing import Dict
+from typing import Dict, List, Optional
 
 from fastapi_sso.sso.base import OpenID, SSOBase
 
 
 class MicrosoftSSO(SSOBase):
-    """Class providing login via Microsoft Graph OAuth"""
+    """Class providing login using Microsoft OAuth"""
 
     provider = "microsoft"
-    scope = ["email", "openid", "profile"]
+    scope = ["openid"]
     version = "v1.0"
+    tenant: str = "common"
 
-    @classmethod
-    async def get_discovery_document(cls) -> Dict[str, str]:
-        """Get document containing handy urls"""
+    def __init__(
+        self,
+        client_id: str,
+        client_secret: str,
+        redirect_uri: Optional[str] = None,
+        allow_insecure_http: bool = False,
+        use_state: bool = True,
+        scope: Optional[List[str]] = None,
+        tenant: Optional[str] = None,
+    ):
+        super().__init__(
+            client_id=client_id,
+            client_secret=client_secret,
+            redirect_uri=redirect_uri,
+            allow_insecure_http=allow_insecure_http,
+            use_state=use_state,
+            scope=scope,
+        )
+        self.tenant = tenant or self.tenant
+
+    async def get_discovery_document(self) -> Dict[str, str]:
         return {
-            "authorization_endpoint": "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
-            "token_endpoint": "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-            "userinfo_endpoint": f"https://graph.microsoft.com/{cls.version}/me",
+            "authorization_endpoint": f"https://login.microsoftonline.com/{self.tenant}/oauth2/v2.0/authorize",
+            "token_endpoint": f"https://login.microsoftonline.com/{self.tenant}/oauth2/v2.0/token",
+            "userinfo_endpoint": f"https://graph.microsoft.com/{self.version}/me",
         }
 
     @classmethod
     async def openid_from_response(cls, response: dict) -> OpenID:
-        """Return OpenID from user information provided by Microsoft Office 365"""
-        return OpenID(
-            first_name=response.get("givenName"),
-            last_name=response.get("surname"),
-            email=response.get("userPrincipalName", ""),
-            provider=cls.provider,
-            id=response.get("id"),
-            display_name=response.get("displayName"),
-            picture=None,
-        )
+        return OpenID(email=response["mail"], display_name=response["displayName"], provider=cls.provider)

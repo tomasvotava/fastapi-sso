@@ -12,8 +12,8 @@ class SpotifySSO(SSOBase):
     provider = "spotify"
     scope = ["user-read-private", "user-read-email"]
 
-    @classmethod
-    async def get_discovery_document(cls) -> Dict[str, str]:
+    # pylint: disable=no-self-use
+    async def get_discovery_document(self) -> Dict[str, str]:
         """Get document containing handy urls"""
         return {
             "authorization_endpoint": "https://accounts.spotify.com/authorize",
