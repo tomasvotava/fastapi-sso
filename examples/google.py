@@ -24,14 +24,18 @@ sso = GoogleSSO(
 @app.get("/auth/login")
 async def auth_init():
     """Initialize auth and redirect"""
-    return await sso.get_login_redirect()
+    return await sso.get_login_redirect(params={"prompt": "consent", "access_type": "offline"})
 
 
 @app.get("/auth/callback")
 async def auth_callback(request: Request):
     """Verify login"""
-    return await sso.verify_and_process(request)
+    user = await sso.verify_and_process(request)
+    return user
 
 
 if __name__ == "__main__":
-    uvicorn.run(app="examples.google:app", host="127.0.0.1", port=5000)
+    try:
+        uvicorn.run(app="examples.google:app", host="127.0.0.1", port=5000)
+    except KeyboardInterrupt:
+        pass

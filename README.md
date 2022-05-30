@@ -20,6 +20,8 @@ poetry add fastapi-sso
 
 ## Example
 
+For more examples, see [`examples`](/examples/) directory.
+
 ### `example.py`
 
 ```python
@@ -85,6 +87,23 @@ from fastapi_sso.sso.microsoft import MicrosoftSSO
 sso = MicrosoftSSO(client_id="client-id", client_secret="client-secret", scope=["openid", "email"])
 ```
 
+### Additional query parameters
+
+Since `0.4.0` you may provide additional query parameters to be
+sent to the login screen.
+
+E.g. sometimes you want to specify `access_type=offline` or `prompt=consent` in order for
+Google to return `refresh_token`.
+
+```python
+async def google_login():
+    return await google_sso.get_login_redirect(
+        redirect_uri=request.url_for("google_callback"),
+        params={"prompt": "consent", "access_type": "offline"}
+        )
+
+```
+
 ## HTTP and development
 
 **You should always use `https` in production**. But in case you need to test on `localhost` and do not want to
@@ -115,3 +134,12 @@ google_sso = GoogleSSO("client-id", "client-secret", use_state=False)
 ```
 
 See more on state [here](https://auth0.com/docs/configure/attack-protection/state-parameters).
+
+## Supported login providers
+
+### Official
+
+- Google
+- Microsoft
+- Facebook
+- Spotify
