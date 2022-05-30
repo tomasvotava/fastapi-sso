@@ -143,3 +143,7 @@ See more on state [here](https://auth0.com/docs/configure/attack-protection/stat
 - Microsoft
 - Facebook
 - Spotify
+
+## Contributing
+
+If you'd like to contribute and add your specific login provider, please see [CONTRIBUTING.md](CONTRIBUTING.md) file.

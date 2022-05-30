@@ -36,7 +36,7 @@ class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
 class SSOBase:
     """Base class (mixin) for all SSO providers"""
 
-    provider = NotImplemented
+    provider: str = NotImplemented
     client_id: str = NotImplemented
     client_secret: str = NotImplemented
     redirect_uri: Optional[str] = NotImplemented
