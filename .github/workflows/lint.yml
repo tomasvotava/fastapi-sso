@@ -23,7 +23,7 @@ jobs:
           curl -sSL https://install.python-poetry.org | python -
       - name: Install dependencies
         run: |
-          POETRY_VIRTUALENVS_CREATE=false /root/.local/bin/poetry install
+          POETRY_VIRTUALENVS_CREATE=false ~/.local/bin/poetry install
       - name: Analysing the code with pylint
         run: |
           python -m pylint fastapi_sso
