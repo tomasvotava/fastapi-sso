@@ -1,0 +1,35 @@
+name: Pylint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python -
+      - name: Install dependencies
+        run: |
+          POETRY_VIRTUALENVS_CREATE=false /root/.local/bin/poetry install
+      - name: Analysing the code with pylint
+        run: |
+          python -m pylint fastapi_sso
+      - name: Static type-checking using mypy
+        run: |
+          python -m mypy fastapi_sso
+      - name: Format checking using black
+        run: |
+          python -m black --check fastapi_sso
