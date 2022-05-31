@@ -32,15 +32,15 @@
 # pylint: disable=too-few-public-methods
 
 import json
-
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
+
+import httpx
+import pydantic
 from oauthlib.oauth2 import WebApplicationClient
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
-import httpx
-import pydantic
 
 
 class SSOLoginError(HTTPException):
@@ -61,13 +61,14 @@ class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
     provider: Optional[str]
 
 
+# pylint: disable=too-many-instance-attributes
 class SSOBase:
     &#34;&#34;&#34;Base class (mixin) for all SSO providers&#34;&#34;&#34;
 
     provider = NotImplemented
     client_id: str = NotImplemented
     client_secret: str = NotImplemented
-    redirect_uri: str = NotImplemented
+    redirect_uri: Optional[str] = NotImplemented
     scope: List[str] = NotImplemented
     _oauth_client: Optional[WebApplicationClient] = None
     state: Optional[str] = None
@@ -76,15 +77,19 @@ class SSOBase:
         self,
         client_id: str,
         client_secret: str,
-        redirect_uri: str,
+        redirect_uri: Optional[str] = None,
         allow_insecure_http: bool = False,
         use_state: bool = True,
+        scope: Optional[List[str]] = None,
     ):
+        # pylint: disable=too-many-arguments
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
         self.use_state = use_state
+        self.scope = scope or self.scope
+        self._refresh_token: Optional[str] = None
 
     @property
     def oauth_client(self) -&gt; WebApplicationClient:
@@ -98,17 +103,21 @@ class SSOBase:
     @property
     def access_token(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Access token from token endpoint&#34;&#34;&#34;
-        return self._oauth_client.access_token
+        return self.oauth_client.access_token
+
+    @property
+    def refresh_token(self) -&gt; Optional[str]:
+        &#34;&#34;&#34;Get refresh token (if returned from provider)&#34;&#34;&#34;
+        return self._refresh_token or self.oauth_client.refresh_token
 
     @classmethod
     async def openid_from_response(cls, response: dict) -&gt; OpenID:
         &#34;&#34;&#34;Return {OpenID} object from provider&#39;s user info endpoint response&#34;&#34;&#34;
         raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)
 
-    @classmethod
-    async def get_discovery_document(cls) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; Dict[str, str]:
         &#34;&#34;&#34;Get discovery document containing handy urls&#34;&#34;&#34;
-        raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)
+        raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
 
     @property
     async def authorization_endpoint(self) -&gt; Optional[str]:
@@ -128,33 +137,48 @@ class SSOBase:
         discovery = await self.get_discovery_document()
         return discovery.get(&#34;userinfo_endpoint&#34;)
 
-    async def get_login_url(self) -&gt; str:
+    async def get_login_url(
+        self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None
+    ) -&gt; str:
         &#34;&#34;&#34;Return prepared login url. This is low-level, see {get_login_redirect} instead.&#34;&#34;&#34;
+        params = params or {}
+        redirect_uri = redirect_uri or self.redirect_uri
+        if redirect_uri is None:
+            raise ValueError(&#34;redirect_uri must be provided, either at construction or request time&#34;)
         if self.use_state:
             self.state = str(uuid4())
         request_uri = self.oauth_client.prepare_request_uri(
-            await self.authorization_endpoint, redirect_uri=self.redirect_uri, state=self.state, scope=self.scope
+            await self.authorization_endpoint, redirect_uri=redirect_uri, state=self.state, scope=self.scope, **params
         )
         return request_uri
 
-    async def get_login_redirect(self) -&gt; RedirectResponse:
+    async def get_login_redirect(
+        self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None
+    ) -&gt; RedirectResponse:
         &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
+
+        Arguments:
+            redirect_uri {Optional[str]} -- Override redirect_uri specified on this instance (default: None)
+            params {Optional[Dict[str, Any]]} -- Add additional query parameters to the login request.
 
         Returns:
             RedirectResponse -- Starlette response (may directly be returned from FastAPI)
         &#34;&#34;&#34;
-        login_uri = await self.get_login_url()
+        login_uri = await self.get_login_url(redirect_uri=redirect_uri, params=params)
         response = RedirectResponse(login_uri, 303)
         if self.state is not None and self.use_state:
             response.set_cookie(&#34;ssostate&#34;, self.state, expires=600)
         return response
 
-    async def verify_and_process(self, request: Request) -&gt; Optional[OpenID]:
+    async def verify_and_process(
+        self, request: Request, *, params: Optional[Dict[str, Any]] = None
+    ) -&gt; Optional[OpenID]:
         &#34;&#34;&#34;Get FastAPI (Starlette) Request object and process login.
         This handler should be used for your /callback path.
 
         Arguments:
             request {Request} -- FastAPI request object (or Starlette)
+            params {Optional[Dict[str, Any]]} -- Optional additional query parameters to pass to the provider
 
         Returns:
             Optional[OpenID] -- OpenID if the login was successfull
@@ -170,12 +194,19 @@ class SSOBase:
                     &#34;&#39;state&#39; parameter in callback request does not match our internal &#39;state&#39;, &#34;
                     &#34;someone may be trying to do something bad.&#34;,
                 )
-        return await self.process_login(code, request)
+        return await self.process_login(code, request, params=params)
 
-    async def process_login(self, code: str, request: Request) -&gt; Optional[OpenID]:
+    async def process_login(
+        self, code: str, request: Request, *, params: Optional[Dict[str, Any]] = None
+    ) -&gt; Optional[OpenID]:
         &#34;&#34;&#34;This method should be called from callback endpoint to verify the user and request user info endpoint.
         This is low level, you should use {verify_and_process} instead.
+
+        Arguments:
+            params {Optional[Dict[str, Any]]} -- Optional additional query parameters to pass to the provider
         &#34;&#34;&#34;
+        # pylint: disable=too-many-locals
+        params = params or {}
         url = request.url
         scheme = url.scheme
         if not self.allow_insecure_http and scheme != &#34;https&#34;:
@@ -186,7 +217,11 @@ class SSOBase:
         current_path = f&#34;{scheme}://{url.netloc}{url.path}&#34;
 
         token_url, headers, body = self.oauth_client.prepare_token_request(
-            await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code
+            await self.token_endpoint,
+            authorization_response=current_url,
+            redirect_url=current_path,
+            code=code,
+            **params,
         )  # type: ignore
 
         if token_url is None:
@@ -196,10 +231,11 @@ class SSOBase:
         async with httpx.AsyncClient() as session:
             response = await session.post(token_url, headers=headers, content=body, auth=auth)
             content = response.json()
+            self._refresh_token = content.get(&#34;refresh_token&#34;)
             self.oauth_client.parse_request_body_response(json.dumps(content))
 
-            uri, headers, body = self.oauth_client.add_token(await self.userinfo_endpoint)
-            response = await session.get(uri, headers=headers, content=body)
+            uri, headers, _ = self.oauth_client.add_token(await self.userinfo_endpoint)
+            response = await session.get(uri, headers=headers)
             content = response.json()
 
         return await self.openid_from_response(content)</code></pre>
@@ -276,7 +312,7 @@ class SSOBase:
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase"><code class="flex name class">
 <span>class <span class="ident">SSOBase</span></span>
-<span>(</span><span>client_id: str, client_secret: str, redirect_uri: str, allow_insecure_http: bool = False, use_state: bool = True)</span>
+<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = True, scope: Optional[List[str]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Base class (mixin) for all SSO providers</p></div>
@@ -290,7 +326,7 @@ class SSOBase:
     provider = NotImplemented
     client_id: str = NotImplemented
     client_secret: str = NotImplemented
-    redirect_uri: str = NotImplemented
+    redirect_uri: Optional[str] = NotImplemented
     scope: List[str] = NotImplemented
     _oauth_client: Optional[WebApplicationClient] = None
     state: Optional[str] = None
@@ -299,15 +335,19 @@ class SSOBase:
         self,
         client_id: str,
         client_secret: str,
-        redirect_uri: str,
+        redirect_uri: Optional[str] = None,
         allow_insecure_http: bool = False,
         use_state: bool = True,
+        scope: Optional[List[str]] = None,
     ):
+        # pylint: disable=too-many-arguments
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
         self.use_state = use_state
+        self.scope = scope or self.scope
+        self._refresh_token: Optional[str] = None
 
     @property
     def oauth_client(self) -&gt; WebApplicationClient:
@@ -321,17 +361,21 @@ class SSOBase:
     @property
     def access_token(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Access token from token endpoint&#34;&#34;&#34;
-        return self._oauth_client.access_token
+        return self.oauth_client.access_token
+
+    @property
+    def refresh_token(self) -&gt; Optional[str]:
+        &#34;&#34;&#34;Get refresh token (if returned from provider)&#34;&#34;&#34;
+        return self._refresh_token or self.oauth_client.refresh_token
 
     @classmethod
     async def openid_from_response(cls, response: dict) -&gt; OpenID:
         &#34;&#34;&#34;Return {OpenID} object from provider&#39;s user info endpoint response&#34;&#34;&#34;
         raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)
 
-    @classmethod
-    async def get_discovery_document(cls) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; Dict[str, str]:
         &#34;&#34;&#34;Get discovery document containing handy urls&#34;&#34;&#34;
-        raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)
+        raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
 
     @property
     async def authorization_endpoint(self) -&gt; Optional[str]:
@@ -351,33 +395,48 @@ class SSOBase:
         discovery = await self.get_discovery_document()
         return discovery.get(&#34;userinfo_endpoint&#34;)
 
-    async def get_login_url(self) -&gt; str:
+    async def get_login_url(
+        self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None
+    ) -&gt; str:
         &#34;&#34;&#34;Return prepared login url. This is low-level, see {get_login_redirect} instead.&#34;&#34;&#34;
+        params = params or {}
+        redirect_uri = redirect_uri or self.redirect_uri
+        if redirect_uri is None:
+            raise ValueError(&#34;redirect_uri must be provided, either at construction or request time&#34;)
         if self.use_state:
             self.state = str(uuid4())
         request_uri = self.oauth_client.prepare_request_uri(
-            await self.authorization_endpoint, redirect_uri=self.redirect_uri, state=self.state, scope=self.scope
+            await self.authorization_endpoint, redirect_uri=redirect_uri, state=self.state, scope=self.scope, **params
         )
         return request_uri
 
-    async def get_login_redirect(self) -&gt; RedirectResponse:
+    async def get_login_redirect(
+        self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None
+    ) -&gt; RedirectResponse:
         &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
+
+        Arguments:
+            redirect_uri {Optional[str]} -- Override redirect_uri specified on this instance (default: None)
+            params {Optional[Dict[str, Any]]} -- Add additional query parameters to the login request.
 
         Returns:
             RedirectResponse -- Starlette response (may directly be returned from FastAPI)
         &#34;&#34;&#34;
-        login_uri = await self.get_login_url()
+        login_uri = await self.get_login_url(redirect_uri=redirect_uri, params=params)
         response = RedirectResponse(login_uri, 303)
         if self.state is not None and self.use_state:
             response.set_cookie(&#34;ssostate&#34;, self.state, expires=600)
         return response
 
-    async def verify_and_process(self, request: Request) -&gt; Optional[OpenID]:
+    async def verify_and_process(
+        self, request: Request, *, params: Optional[Dict[str, Any]] = None
+    ) -&gt; Optional[OpenID]:
         &#34;&#34;&#34;Get FastAPI (Starlette) Request object and process login.
         This handler should be used for your /callback path.
 
         Arguments:
             request {Request} -- FastAPI request object (or Starlette)
+            params {Optional[Dict[str, Any]]} -- Optional additional query parameters to pass to the provider
 
         Returns:
             Optional[OpenID] -- OpenID if the login was successfull
@@ -393,12 +452,19 @@ class SSOBase:
                     &#34;&#39;state&#39; parameter in callback request does not match our internal &#39;state&#39;, &#34;
                     &#34;someone may be trying to do something bad.&#34;,
                 )
-        return await self.process_login(code, request)
+        return await self.process_login(code, request, params=params)
 
-    async def process_login(self, code: str, request: Request) -&gt; Optional[OpenID]:
+    async def process_login(
+        self, code: str, request: Request, *, params: Optional[Dict[str, Any]] = None
+    ) -&gt; Optional[OpenID]:
         &#34;&#34;&#34;This method should be called from callback endpoint to verify the user and request user info endpoint.
         This is low level, you should use {verify_and_process} instead.
+
+        Arguments:
+            params {Optional[Dict[str, Any]]} -- Optional additional query parameters to pass to the provider
         &#34;&#34;&#34;
+        # pylint: disable=too-many-locals
+        params = params or {}
         url = request.url
         scheme = url.scheme
         if not self.allow_insecure_http and scheme != &#34;https&#34;:
@@ -409,7 +475,11 @@ class SSOBase:
         current_path = f&#34;{scheme}://{url.netloc}{url.path}&#34;
 
         token_url, headers, body = self.oauth_client.prepare_token_request(
-            await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code
+            await self.token_endpoint,
+            authorization_response=current_url,
+            redirect_url=current_path,
+            code=code,
+            **params,
         )  # type: ignore
 
         if token_url is None:
@@ -419,10 +489,11 @@ class SSOBase:
         async with httpx.AsyncClient() as session:
             response = await session.post(token_url, headers=headers, content=body, auth=auth)
             content = response.json()
+            self._refresh_token = content.get(&#34;refresh_token&#34;)
             self.oauth_client.parse_request_body_response(json.dumps(content))
 
-            uri, headers, body = self.oauth_client.add_token(await self.userinfo_endpoint)
-            response = await session.get(uri, headers=headers, content=body)
+            uri, headers, _ = self.oauth_client.add_token(await self.userinfo_endpoint)
+            response = await session.get(uri, headers=headers)
             content = response.json()
 
         return await self.openid_from_response(content)</code></pre>
@@ -448,7 +519,7 @@ class SSOBase:
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.SSOBase.redirect_uri"><code class="name">var <span class="ident">redirect_uri</span> : str</code></dt>
+<dt id="fastapi_sso.sso.base.SSOBase.redirect_uri"><code class="name">var <span class="ident">redirect_uri</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -463,21 +534,6 @@ class SSOBase:
 </dl>
 <h3>Static methods</h3>
 <dl>
-<dt id="fastapi_sso.sso.base.SSOBase.get_discovery_document"><code class="name flex">
-<span>async def <span class="ident">get_discovery_document</span></span>(<span>) ‑> Dict[str, str]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get discovery document containing handy urls</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-async def get_discovery_document(cls) -&gt; Dict[str, str]:
-    &#34;&#34;&#34;Get discovery document containing handy urls&#34;&#34;&#34;
-    raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)</code></pre>
-</details>
-</dd>
 <dt id="fastapi_sso.sso.base.SSOBase.openid_from_response"><code class="name flex">
 <span>async def <span class="ident">openid_from_response</span></span>(<span>response: dict) ‑> <a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a></span>
 </code></dt>
@@ -506,7 +562,7 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
 <pre><code class="python">@property
 def access_token(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Access token from token endpoint&#34;&#34;&#34;
-    return self._oauth_client.access_token</code></pre>
+    return self.oauth_client.access_token</code></pre>
 </details>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase.authorization_endpoint"><code class="name">var <span class="ident">authorization_endpoint</span> : Optional[str]</code></dt>
@@ -540,6 +596,19 @@ def oauth_client(self) -&gt; WebApplicationClient:
     return self._oauth_client</code></pre>
 </details>
 </dd>
+<dt id="fastapi_sso.sso.base.SSOBase.refresh_token"><code class="name">var <span class="ident">refresh_token</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"><p>Get refresh token (if returned from provider)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def refresh_token(self) -&gt; Optional[str]:
+    &#34;&#34;&#34;Get refresh token (if returned from provider)&#34;&#34;&#34;
+    return self._refresh_token or self.oauth_client.refresh_token</code></pre>
+</details>
+</dd>
 <dt id="fastapi_sso.sso.base.SSOBase.token_endpoint"><code class="name">var <span class="ident">token_endpoint</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"><p>Return <code>token_endpoint</code> from discovery document</p></div>
@@ -571,24 +640,47 @@ async def userinfo_endpoint(self) -&gt; Optional[str]:
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="fastapi_sso.sso.base.SSOBase.get_discovery_document"><code class="name flex">
+<span>async def <span class="ident">get_discovery_document</span></span>(<span>self) ‑> Dict[str, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get discovery document containing handy urls</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get_discovery_document(self) -&gt; Dict[str, str]:
+    &#34;&#34;&#34;Get discovery document containing handy urls&#34;&#34;&#34;
+    raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)</code></pre>
+</details>
+</dd>
 <dt id="fastapi_sso.sso.base.SSOBase.get_login_redirect"><code class="name flex">
-<span>async def <span class="ident">get_login_redirect</span></span>(<span>self) ‑> starlette.responses.RedirectResponse</span>
+<span>async def <span class="ident">get_login_redirect</span></span>(<span>self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None) ‑> starlette.responses.RedirectResponse</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return redirect response by Stalette to login page of Oauth SSO provider</p>
+<h2 id="arguments">Arguments</h2>
+<p>redirect_uri {Optional[str]} &ndash; Override redirect_uri specified on this instance (default: None)
+params {Optional[Dict[str, Any]]} &ndash; Add additional query parameters to the login request.</p>
 <h2 id="returns">Returns</h2>
 <p>RedirectResponse &ndash; Starlette response (may directly be returned from FastAPI)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def get_login_redirect(self) -&gt; RedirectResponse:
+<pre><code class="python">async def get_login_redirect(
+    self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None
+) -&gt; RedirectResponse:
     &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
+
+    Arguments:
+        redirect_uri {Optional[str]} -- Override redirect_uri specified on this instance (default: None)
+        params {Optional[Dict[str, Any]]} -- Add additional query parameters to the login request.
 
     Returns:
         RedirectResponse -- Starlette response (may directly be returned from FastAPI)
     &#34;&#34;&#34;
-    login_uri = await self.get_login_url()
+    login_uri = await self.get_login_url(redirect_uri=redirect_uri, params=params)
     response = RedirectResponse(login_uri, 303)
     if self.state is not None and self.use_state:
         response.set_cookie(&#34;ssostate&#34;, self.state, expires=600)
@@ -596,7 +688,7 @@ async def userinfo_endpoint(self) -&gt; Optional[str]:
 </details>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase.get_login_url"><code class="name flex">
-<span>async def <span class="ident">get_login_url</span></span>(<span>self) ‑> str</span>
+<span>async def <span class="ident">get_login_url</span></span>(<span>self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return prepared login url. This is low-level, see {get_login_redirect} instead.</p></div>
@@ -604,30 +696,45 @@ async def userinfo_endpoint(self) -&gt; Optional[str]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def get_login_url(self) -&gt; str:
+<pre><code class="python">async def get_login_url(
+    self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None
+) -&gt; str:
     &#34;&#34;&#34;Return prepared login url. This is low-level, see {get_login_redirect} instead.&#34;&#34;&#34;
+    params = params or {}
+    redirect_uri = redirect_uri or self.redirect_uri
+    if redirect_uri is None:
+        raise ValueError(&#34;redirect_uri must be provided, either at construction or request time&#34;)
     if self.use_state:
         self.state = str(uuid4())
     request_uri = self.oauth_client.prepare_request_uri(
-        await self.authorization_endpoint, redirect_uri=self.redirect_uri, state=self.state, scope=self.scope
+        await self.authorization_endpoint, redirect_uri=redirect_uri, state=self.state, scope=self.scope, **params
     )
     return request_uri</code></pre>
 </details>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase.process_login"><code class="name flex">
-<span>async def <span class="ident">process_login</span></span>(<span>self, code: str, request: starlette.requests.Request) ‑> Optional[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>]</span>
+<span>async def <span class="ident">process_login</span></span>(<span>self, code: str, request: starlette.requests.Request, *, params: Optional[Dict[str, Any]] = None) ‑> Optional[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>This method should be called from callback endpoint to verify the user and request user info endpoint.
-This is low level, you should use {verify_and_process} instead.</p></div>
+This is low level, you should use {verify_and_process} instead.</p>
+<h2 id="arguments">Arguments</h2>
+<p>params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters to pass to the provider</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def process_login(self, code: str, request: Request) -&gt; Optional[OpenID]:
+<pre><code class="python">async def process_login(
+    self, code: str, request: Request, *, params: Optional[Dict[str, Any]] = None
+) -&gt; Optional[OpenID]:
     &#34;&#34;&#34;This method should be called from callback endpoint to verify the user and request user info endpoint.
     This is low level, you should use {verify_and_process} instead.
+
+    Arguments:
+        params {Optional[Dict[str, Any]]} -- Optional additional query parameters to pass to the provider
     &#34;&#34;&#34;
+    # pylint: disable=too-many-locals
+    params = params or {}
     url = request.url
     scheme = url.scheme
     if not self.allow_insecure_http and scheme != &#34;https&#34;:
@@ -638,7 +745,11 @@ This is low level, you should use {verify_and_process} instead.</p></div>
     current_path = f&#34;{scheme}://{url.netloc}{url.path}&#34;
 
     token_url, headers, body = self.oauth_client.prepare_token_request(
-        await self.token_endpoint, authorization_response=current_url, redirect_url=current_path, code=code
+        await self.token_endpoint,
+        authorization_response=current_url,
+        redirect_url=current_path,
+        code=code,
+        **params,
     )  # type: ignore
 
     if token_url is None:
@@ -648,35 +759,40 @@ This is low level, you should use {verify_and_process} instead.</p></div>
     async with httpx.AsyncClient() as session:
         response = await session.post(token_url, headers=headers, content=body, auth=auth)
         content = response.json()
+        self._refresh_token = content.get(&#34;refresh_token&#34;)
         self.oauth_client.parse_request_body_response(json.dumps(content))
 
-        uri, headers, body = self.oauth_client.add_token(await self.userinfo_endpoint)
-        response = await session.get(uri, headers=headers, content=body)
+        uri, headers, _ = self.oauth_client.add_token(await self.userinfo_endpoint)
+        response = await session.get(uri, headers=headers)
         content = response.json()
 
     return await self.openid_from_response(content)</code></pre>
 </details>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase.verify_and_process"><code class="name flex">
-<span>async def <span class="ident">verify_and_process</span></span>(<span>self, request: starlette.requests.Request) ‑> Optional[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>]</span>
+<span>async def <span class="ident">verify_and_process</span></span>(<span>self, request: starlette.requests.Request, *, params: Optional[Dict[str, Any]] = None) ‑> Optional[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get FastAPI (Starlette) Request object and process login.
 This handler should be used for your /callback path.</p>
 <h2 id="arguments">Arguments</h2>
-<p>request {Request} &ndash; FastAPI request object (or Starlette)</p>
+<p>request {Request} &ndash; FastAPI request object (or Starlette)
+params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters to pass to the provider</p>
 <h2 id="returns">Returns</h2>
 <p>Optional[OpenID] &ndash; OpenID if the login was successfull</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def verify_and_process(self, request: Request) -&gt; Optional[OpenID]:
+<pre><code class="python">async def verify_and_process(
+    self, request: Request, *, params: Optional[Dict[str, Any]] = None
+) -&gt; Optional[OpenID]:
     &#34;&#34;&#34;Get FastAPI (Starlette) Request object and process login.
     This handler should be used for your /callback path.
 
     Arguments:
         request {Request} -- FastAPI request object (or Starlette)
+        params {Optional[Dict[str, Any]]} -- Optional additional query parameters to pass to the provider
 
     Returns:
         Optional[OpenID] -- OpenID if the login was successfull
@@ -692,7 +808,7 @@ This handler should be used for your /callback path.</p>
                 &#34;&#39;state&#39; parameter in callback request does not match our internal &#39;state&#39;, &#34;
                 &#34;someone may be trying to do something bad.&#34;,
             )
-    return await self.process_login(code, request)</code></pre>
+    return await self.process_login(code, request, params=params)</code></pre>
 </details>
 </dd>
 </dl>
@@ -763,6 +879,7 @@ This handler should be used for your /callback path.</p>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.process_login" href="#fastapi_sso.sso.base.SSOBase.process_login">process_login</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.provider" href="#fastapi_sso.sso.base.SSOBase.provider">provider</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.redirect_uri" href="#fastapi_sso.sso.base.SSOBase.redirect_uri">redirect_uri</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.refresh_token" href="#fastapi_sso.sso.base.SSOBase.refresh_token">refresh_token</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.scope" href="#fastapi_sso.sso.base.SSOBase.scope">scope</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.state" href="#fastapi_sso.sso.base.SSOBase.state">state</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.token_endpoint" href="#fastapi_sso.sso.base.SSOBase.token_endpoint">token_endpoint</a></code></li>

@@ -42,13 +42,12 @@ class FacebookSSO(SSOBase):
     base_url = &#34;https://graph.facebook.com/v9.0&#34;
     scope = [&#34;email&#34;]
 
-    @classmethod
-    async def get_discovery_document(cls) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; Dict[str, str]:
         &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
         return {
             &#34;authorization_endpoint&#34;: &#34;https://www.facebook.com/v9.0/dialog/oauth&#34;,
-            &#34;token_endpoint&#34;: f&#34;{cls.base_url}/oauth/access_token&#34;,
-            &#34;userinfo_endpoint&#34;: f&#34;{cls.base_url}/me?fields=id,name,email,first_name,last_name,picture&#34;,
+            &#34;token_endpoint&#34;: f&#34;{self.base_url}/oauth/access_token&#34;,
+            &#34;userinfo_endpoint&#34;: f&#34;{self.base_url}/me?fields=id,name,email,first_name,last_name,picture&#34;,
         }
 
     @classmethod
@@ -76,7 +75,7 @@ class FacebookSSO(SSOBase):
 <dl>
 <dt id="fastapi_sso.sso.facebook.FacebookSSO"><code class="flex name class">
 <span>class <span class="ident">FacebookSSO</span></span>
-<span>(</span><span>client_id: str, client_secret: str, redirect_uri: str, allow_insecure_http: bool = False, use_state: bool = True)</span>
+<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = True, scope: Optional[List[str]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Class providing login via Facebook OAuth</p></div>
@@ -91,13 +90,12 @@ class FacebookSSO(SSOBase):
     base_url = &#34;https://graph.facebook.com/v9.0&#34;
     scope = [&#34;email&#34;]
 
-    @classmethod
-    async def get_discovery_document(cls) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; Dict[str, str]:
         &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
         return {
             &#34;authorization_endpoint&#34;: &#34;https://www.facebook.com/v9.0/dialog/oauth&#34;,
-            &#34;token_endpoint&#34;: f&#34;{cls.base_url}/oauth/access_token&#34;,
-            &#34;userinfo_endpoint&#34;: f&#34;{cls.base_url}/me?fields=id,name,email,first_name,last_name,picture&#34;,
+            &#34;token_endpoint&#34;: f&#34;{self.base_url}/oauth/access_token&#34;,
+            &#34;userinfo_endpoint&#34;: f&#34;{self.base_url}/me?fields=id,name,email,first_name,last_name,picture&#34;,
         }
 
     @classmethod
@@ -123,19 +121,7 @@ class FacebookSSO(SSOBase):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.facebook.FacebookSSO.client_id"><code class="name">var <span class="ident">client_id</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="fastapi_sso.sso.facebook.FacebookSSO.client_secret"><code class="name">var <span class="ident">client_secret</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="fastapi_sso.sso.facebook.FacebookSSO.provider"><code class="name">var <span class="ident">provider</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="fastapi_sso.sso.facebook.FacebookSSO.redirect_uri"><code class="name">var <span class="ident">redirect_uri</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -143,32 +129,9 @@ class FacebookSSO(SSOBase):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.facebook.FacebookSSO.state"><code class="name">var <span class="ident">state</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 </dl>
 <h3>Static methods</h3>
 <dl>
-<dt id="fastapi_sso.sso.facebook.FacebookSSO.get_discovery_document"><code class="name flex">
-<span>async def <span class="ident">get_discovery_document</span></span>(<span>) ‑> Dict[str, str]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get document containing handy urls</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-async def get_discovery_document(cls) -&gt; Dict[str, str]:
-    &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
-    return {
-        &#34;authorization_endpoint&#34;: &#34;https://www.facebook.com/v9.0/dialog/oauth&#34;,
-        &#34;token_endpoint&#34;: f&#34;{cls.base_url}/oauth/access_token&#34;,
-        &#34;userinfo_endpoint&#34;: f&#34;{cls.base_url}/me?fields=id,name,email,first_name,last_name,picture&#34;,
-    }</code></pre>
-</details>
-</dd>
 <dt id="fastapi_sso.sso.facebook.FacebookSSO.openid_from_response"><code class="name flex">
 <span>async def <span class="ident">openid_from_response</span></span>(<span>response: dict) ‑> <a title="fastapi_sso.sso.base.OpenID" href="base.html#fastapi_sso.sso.base.OpenID">OpenID</a></span>
 </code></dt>
@@ -193,6 +156,27 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
 </details>
 </dd>
 </dl>
+<h3>Methods</h3>
+<dl>
+<dt id="fastapi_sso.sso.facebook.FacebookSSO.get_discovery_document"><code class="name flex">
+<span>async def <span class="ident">get_discovery_document</span></span>(<span>self) ‑> Dict[str, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get document containing handy urls</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get_discovery_document(self) -&gt; Dict[str, str]:
+    &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
+    return {
+        &#34;authorization_endpoint&#34;: &#34;https://www.facebook.com/v9.0/dialog/oauth&#34;,
+        &#34;token_endpoint&#34;: f&#34;{self.base_url}/oauth/access_token&#34;,
+        &#34;userinfo_endpoint&#34;: f&#34;{self.base_url}/me?fields=id,name,email,first_name,last_name,picture&#34;,
+    }</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="fastapi_sso.sso.base.SSOBase" href="base.html#fastapi_sso.sso.base.SSOBase">SSOBase</a></b></code>:
@@ -203,6 +187,7 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
 <li><code><a title="fastapi_sso.sso.base.SSOBase.get_login_url" href="base.html#fastapi_sso.sso.base.SSOBase.get_login_url">get_login_url</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.oauth_client" href="base.html#fastapi_sso.sso.base.SSOBase.oauth_client">oauth_client</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.process_login" href="base.html#fastapi_sso.sso.base.SSOBase.process_login">process_login</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.refresh_token" href="base.html#fastapi_sso.sso.base.SSOBase.refresh_token">refresh_token</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.token_endpoint" href="base.html#fastapi_sso.sso.base.SSOBase.token_endpoint">token_endpoint</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.userinfo_endpoint" href="base.html#fastapi_sso.sso.base.SSOBase.userinfo_endpoint">userinfo_endpoint</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.verify_and_process" href="base.html#fastapi_sso.sso.base.SSOBase.verify_and_process">verify_and_process</a></code></li>
@@ -230,14 +215,10 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
 <h4><code><a title="fastapi_sso.sso.facebook.FacebookSSO" href="#fastapi_sso.sso.facebook.FacebookSSO">FacebookSSO</a></code></h4>
 <ul class="">
 <li><code><a title="fastapi_sso.sso.facebook.FacebookSSO.base_url" href="#fastapi_sso.sso.facebook.FacebookSSO.base_url">base_url</a></code></li>
-<li><code><a title="fastapi_sso.sso.facebook.FacebookSSO.client_id" href="#fastapi_sso.sso.facebook.FacebookSSO.client_id">client_id</a></code></li>
-<li><code><a title="fastapi_sso.sso.facebook.FacebookSSO.client_secret" href="#fastapi_sso.sso.facebook.FacebookSSO.client_secret">client_secret</a></code></li>
 <li><code><a title="fastapi_sso.sso.facebook.FacebookSSO.get_discovery_document" href="#fastapi_sso.sso.facebook.FacebookSSO.get_discovery_document">get_discovery_document</a></code></li>
 <li><code><a title="fastapi_sso.sso.facebook.FacebookSSO.openid_from_response" href="#fastapi_sso.sso.facebook.FacebookSSO.openid_from_response">openid_from_response</a></code></li>
 <li><code><a title="fastapi_sso.sso.facebook.FacebookSSO.provider" href="#fastapi_sso.sso.facebook.FacebookSSO.provider">provider</a></code></li>
-<li><code><a title="fastapi_sso.sso.facebook.FacebookSSO.redirect_uri" href="#fastapi_sso.sso.facebook.FacebookSSO.redirect_uri">redirect_uri</a></code></li>
 <li><code><a title="fastapi_sso.sso.facebook.FacebookSSO.scope" href="#fastapi_sso.sso.facebook.FacebookSSO.scope">scope</a></code></li>
-<li><code><a title="fastapi_sso.sso.facebook.FacebookSSO.state" href="#fastapi_sso.sso.facebook.FacebookSSO.state">state</a></code></li>
 </ul>
 </li>
 </ul>

@@ -13,13 +13,12 @@ class FacebookSSO(SSOBase):
     base_url = "https://graph.facebook.com/v9.0"
     scope = ["email"]
 
-    @classmethod
-    async def get_discovery_document(cls) -> Dict[str, str]:
+    async def get_discovery_document(self) -> Dict[str, str]:
         """Get document containing handy urls"""
         return {
             "authorization_endpoint": "https://www.facebook.com/v9.0/dialog/oauth",
-            "token_endpoint": f"{cls.base_url}/oauth/access_token",
-            "userinfo_endpoint": f"{cls.base_url}/me?fields=id,name,email,first_name,last_name,picture",
+            "token_endpoint": f"{self.base_url}/oauth/access_token",
+            "userinfo_endpoint": f"{self.base_url}/me?fields=id,name,email,first_name,last_name,picture",
         }
 
     @classmethod

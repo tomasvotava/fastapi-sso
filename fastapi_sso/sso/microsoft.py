@@ -1,35 +1,42 @@
 """Microsoft SSO Oauth Helper class"""
 
-from typing import Dict
+from typing import Dict, List, Optional
 
 from fastapi_sso.sso.base import OpenID, SSOBase
 
 
-class MicrosoftSSOBase(SSOBase):
-    client_tenant: str = NotImplemented  # Microsoft
+class MicrosoftSSO(SSOBase):
+    """Class providing login using Microsoft OAuth"""
+
+    provider = "microsoft"
+    scope = ["openid"]
+    version = "v1.0"
+    tenant: str = "common"
 
     def __init__(
         self,
         client_id: str,
         client_secret: str,
-        client_tenant: str,
-        redirect_uri: str,
+        redirect_uri: Optional[str] = None,
         allow_insecure_http: bool = False,
         use_state: bool = True,
+        scope: Optional[List[str]] = None,
+        tenant: Optional[str] = None,
     ):
-        super().__init__(client_id, client_secret, redirect_uri, allow_insecure_http, use_state)
-        self.client_tenant = client_tenant
-
-
-class MicrosoftSSO(MicrosoftSSOBase):
-    provider = "microsoft"
-    scope = ["openid"]
-    version = "v1.0"
+        super().__init__(
+            client_id=client_id,
+            client_secret=client_secret,
+            redirect_uri=redirect_uri,
+            allow_insecure_http=allow_insecure_http,
+            use_state=use_state,
+            scope=scope,
+        )
+        self.tenant = tenant or self.tenant
 
     async def get_discovery_document(self) -> Dict[str, str]:
         return {
-            "authorization_endpoint": f"https://login.microsoftonline.com/{self.client_tenant}/oauth2/v2.0/authorize",
-            "token_endpoint": f"https://login.microsoftonline.com/{self.client_tenant}/oauth2/v2.0/token",
+            "authorization_endpoint": f"https://login.microsoftonline.com/{self.tenant}/oauth2/v2.0/authorize",
+            "token_endpoint": f"https://login.microsoftonline.com/{self.tenant}/oauth2/v2.0/token",
             "userinfo_endpoint": f"https://graph.microsoft.com/{self.version}/me",
         }
 

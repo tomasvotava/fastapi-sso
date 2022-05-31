@@ -37,7 +37,7 @@ from fastapi_sso.sso.base import OpenID, SSOBase, SSOLoginError
 
 
 class GoogleSSO(SSOBase):
-    &#34;&#34;&#34;Class providing login via Facebook OAuth&#34;&#34;&#34;
+    &#34;&#34;&#34;Class providing login via Google OAuth&#34;&#34;&#34;
 
     discovery_url = &#34;https://accounts.google.com/.well-known/openid-configuration&#34;
     provider = &#34;google&#34;
@@ -58,11 +58,10 @@ class GoogleSSO(SSOBase):
             )
         raise SSOLoginError(401, f&#34;User {response.get(&#39;email&#39;)} is not verified with Google&#34;)
 
-    @classmethod
-    async def get_discovery_document(cls) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; Dict[str, str]:
         &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
         async with httpx.AsyncClient() as session:
-            response = await session.get(cls.discovery_url)
+            response = await session.get(self.discovery_url)
             content = response.json()
             return content</code></pre>
 </details>
@@ -78,16 +77,16 @@ class GoogleSSO(SSOBase):
 <dl>
 <dt id="fastapi_sso.sso.google.GoogleSSO"><code class="flex name class">
 <span>class <span class="ident">GoogleSSO</span></span>
-<span>(</span><span>client_id: str, client_secret: str, redirect_uri: str, allow_insecure_http: bool = False, use_state: bool = True)</span>
+<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = True, scope: Optional[List[str]] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Class providing login via Facebook OAuth</p></div>
+<div class="desc"><p>Class providing login via Google OAuth</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class GoogleSSO(SSOBase):
-    &#34;&#34;&#34;Class providing login via Facebook OAuth&#34;&#34;&#34;
+    &#34;&#34;&#34;Class providing login via Google OAuth&#34;&#34;&#34;
 
     discovery_url = &#34;https://accounts.google.com/.well-known/openid-configuration&#34;
     provider = &#34;google&#34;
@@ -108,11 +107,10 @@ class GoogleSSO(SSOBase):
             )
         raise SSOLoginError(401, f&#34;User {response.get(&#39;email&#39;)} is not verified with Google&#34;)
 
-    @classmethod
-    async def get_discovery_document(cls) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; Dict[str, str]:
         &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
         async with httpx.AsyncClient() as session:
-            response = await session.get(cls.discovery_url)
+            response = await session.get(self.discovery_url)
             content = response.json()
             return content</code></pre>
 </details>
@@ -122,14 +120,6 @@ class GoogleSSO(SSOBase):
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="fastapi_sso.sso.google.GoogleSSO.client_id"><code class="name">var <span class="ident">client_id</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="fastapi_sso.sso.google.GoogleSSO.client_secret"><code class="name">var <span class="ident">client_secret</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="fastapi_sso.sso.google.GoogleSSO.discovery_url"><code class="name">var <span class="ident">discovery_url</span></code></dt>
 <dd>
 <div class="desc"></div>
@@ -138,39 +128,13 @@ class GoogleSSO(SSOBase):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.google.GoogleSSO.redirect_uri"><code class="name">var <span class="ident">redirect_uri</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="fastapi_sso.sso.google.GoogleSSO.scope"><code class="name">var <span class="ident">scope</span> : List[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="fastapi_sso.sso.google.GoogleSSO.state"><code class="name">var <span class="ident">state</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
 <h3>Static methods</h3>
 <dl>
-<dt id="fastapi_sso.sso.google.GoogleSSO.get_discovery_document"><code class="name flex">
-<span>async def <span class="ident">get_discovery_document</span></span>(<span>) ‑> Dict[str, str]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get document containing handy urls</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-async def get_discovery_document(cls) -&gt; Dict[str, str]:
-    &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
-    async with httpx.AsyncClient() as session:
-        response = await session.get(cls.discovery_url)
-        content = response.json()
-        return content</code></pre>
-</details>
-</dd>
 <dt id="fastapi_sso.sso.google.GoogleSSO.openid_from_response"><code class="name flex">
 <span>async def <span class="ident">openid_from_response</span></span>(<span>response: dict) ‑> <a title="fastapi_sso.sso.base.OpenID" href="base.html#fastapi_sso.sso.base.OpenID">OpenID</a></span>
 </code></dt>
@@ -197,6 +161,26 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
 </details>
 </dd>
 </dl>
+<h3>Methods</h3>
+<dl>
+<dt id="fastapi_sso.sso.google.GoogleSSO.get_discovery_document"><code class="name flex">
+<span>async def <span class="ident">get_discovery_document</span></span>(<span>self) ‑> Dict[str, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get document containing handy urls</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get_discovery_document(self) -&gt; Dict[str, str]:
+    &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
+    async with httpx.AsyncClient() as session:
+        response = await session.get(self.discovery_url)
+        content = response.json()
+        return content</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="fastapi_sso.sso.base.SSOBase" href="base.html#fastapi_sso.sso.base.SSOBase">SSOBase</a></b></code>:
@@ -207,6 +191,7 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
 <li><code><a title="fastapi_sso.sso.base.SSOBase.get_login_url" href="base.html#fastapi_sso.sso.base.SSOBase.get_login_url">get_login_url</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.oauth_client" href="base.html#fastapi_sso.sso.base.SSOBase.oauth_client">oauth_client</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.process_login" href="base.html#fastapi_sso.sso.base.SSOBase.process_login">process_login</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.refresh_token" href="base.html#fastapi_sso.sso.base.SSOBase.refresh_token">refresh_token</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.token_endpoint" href="base.html#fastapi_sso.sso.base.SSOBase.token_endpoint">token_endpoint</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.userinfo_endpoint" href="base.html#fastapi_sso.sso.base.SSOBase.userinfo_endpoint">userinfo_endpoint</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.verify_and_process" href="base.html#fastapi_sso.sso.base.SSOBase.verify_and_process">verify_and_process</a></code></li>
@@ -233,15 +218,11 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
 <li>
 <h4><code><a title="fastapi_sso.sso.google.GoogleSSO" href="#fastapi_sso.sso.google.GoogleSSO">GoogleSSO</a></code></h4>
 <ul class="">
-<li><code><a title="fastapi_sso.sso.google.GoogleSSO.client_id" href="#fastapi_sso.sso.google.GoogleSSO.client_id">client_id</a></code></li>
-<li><code><a title="fastapi_sso.sso.google.GoogleSSO.client_secret" href="#fastapi_sso.sso.google.GoogleSSO.client_secret">client_secret</a></code></li>
 <li><code><a title="fastapi_sso.sso.google.GoogleSSO.discovery_url" href="#fastapi_sso.sso.google.GoogleSSO.discovery_url">discovery_url</a></code></li>
 <li><code><a title="fastapi_sso.sso.google.GoogleSSO.get_discovery_document" href="#fastapi_sso.sso.google.GoogleSSO.get_discovery_document">get_discovery_document</a></code></li>
 <li><code><a title="fastapi_sso.sso.google.GoogleSSO.openid_from_response" href="#fastapi_sso.sso.google.GoogleSSO.openid_from_response">openid_from_response</a></code></li>
 <li><code><a title="fastapi_sso.sso.google.GoogleSSO.provider" href="#fastapi_sso.sso.google.GoogleSSO.provider">provider</a></code></li>
-<li><code><a title="fastapi_sso.sso.google.GoogleSSO.redirect_uri" href="#fastapi_sso.sso.google.GoogleSSO.redirect_uri">redirect_uri</a></code></li>
 <li><code><a title="fastapi_sso.sso.google.GoogleSSO.scope" href="#fastapi_sso.sso.google.GoogleSSO.scope">scope</a></code></li>
-<li><code><a title="fastapi_sso.sso.google.GoogleSSO.state" href="#fastapi_sso.sso.google.GoogleSSO.state">state</a></code></li>
 </ul>
 </li>
 </ul>
