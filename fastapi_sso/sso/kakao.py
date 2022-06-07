@@ -1,18 +1,21 @@
-import os
+"""Kakao SSO Oauth Helper class"""
+
 from typing import Dict
 
 from fastapi_sso.sso.base import OpenID, SSOBase
 
 
 class KakaoSSO(SSOBase):
+    """Class providing login using Kakao OAuth"""
+
     provider = "kakao"
     scope = ["openid"]
     version = "v2"
 
     async def get_discovery_document(self) -> Dict[str, str]:
         return {
-            "authorization_endpoint": f"https://kauth.kakao.com/oauth/authorize?client_id={self.client_secret}&response_type=code&redirect_uri={self.redirect_uri}",
-            "token_endpoint": f"https://kauth.kakao.com/oauth/token",
+            "authorization_endpoint": f"https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={self.client_id}&redirect_uri={self.redirect_uri}",
+            "token_endpoint": "https://kauth.kakao.com/oauth/token",
             "userinfo_endpoint": f"https://kapi.kakao.com/{self.version}/user/me",
         }
 
