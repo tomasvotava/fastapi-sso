@@ -14,7 +14,7 @@ class KakaoSSO(SSOBase):
 
     async def get_discovery_document(self) -> Dict[str, str]:
         return {
-            "authorization_endpoint": f"https://kauth.kakao.com/oauth/authorize",
+            "authorization_endpoint": "https://kauth.kakao.com/oauth/authorize",
             "token_endpoint": "https://kauth.kakao.com/oauth/token",
             "userinfo_endpoint": f"https://kapi.kakao.com/{self.version}/user/me",
         }
