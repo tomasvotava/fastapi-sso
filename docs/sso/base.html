@@ -65,7 +65,7 @@ class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
 class SSOBase:
     &#34;&#34;&#34;Base class (mixin) for all SSO providers&#34;&#34;&#34;
 
-    provider = NotImplemented
+    provider: str = NotImplemented
     client_id: str = NotImplemented
     client_secret: str = NotImplemented
     redirect_uri: Optional[str] = NotImplemented
@@ -323,7 +323,7 @@ class SSOBase:
 <pre><code class="python">class SSOBase:
     &#34;&#34;&#34;Base class (mixin) for all SSO providers&#34;&#34;&#34;
 
-    provider = NotImplemented
+    provider: str = NotImplemented
     client_id: str = NotImplemented
     client_secret: str = NotImplemented
     redirect_uri: Optional[str] = NotImplemented
@@ -502,6 +502,7 @@ class SSOBase:
 <ul class="hlist">
 <li><a title="fastapi_sso.sso.facebook.FacebookSSO" href="facebook.html#fastapi_sso.sso.facebook.FacebookSSO">FacebookSSO</a></li>
 <li><a title="fastapi_sso.sso.google.GoogleSSO" href="google.html#fastapi_sso.sso.google.GoogleSSO">GoogleSSO</a></li>
+<li><a title="fastapi_sso.sso.kakao.KakaoSSO" href="kakao.html#fastapi_sso.sso.kakao.KakaoSSO">KakaoSSO</a></li>
 <li><a title="fastapi_sso.sso.microsoft.MicrosoftSSO" href="microsoft.html#fastapi_sso.sso.microsoft.MicrosoftSSO">MicrosoftSSO</a></li>
 <li><a title="fastapi_sso.sso.spotify.SpotifySSO" href="spotify.html#fastapi_sso.sso.spotify.SpotifySSO">SpotifySSO</a></li>
 </ul>
@@ -515,7 +516,7 @@ class SSOBase:
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.SSOBase.provider"><code class="name">var <span class="ident">provider</span></code></dt>
+<dt id="fastapi_sso.sso.base.SSOBase.provider"><code class="name">var <span class="ident">provider</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -815,7 +816,7 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
 </dd>
 <dt id="fastapi_sso.sso.base.SSOLoginError"><code class="flex name class">
 <span>class <span class="ident">SSOLoginError</span></span>
-<span>(</span><span>status_code: int, detail: str = None)</span>
+<span>(</span><span>status_code: int, detail: Optional[str] = None, headers: Optional[dict] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Raised when any login-related error ocurrs
