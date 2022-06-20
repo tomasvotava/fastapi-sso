@@ -4,6 +4,22 @@ FastAPI plugin to enable SSO to most common providers (such as Facebook login, G
 
 This allows you to implement the famous `Login with Google/Facebook/Microsoft` buttons functionality on your backend very easily.
 
+## Supported login providers
+
+### Official
+
+- Google
+- Microsoft
+- Facebook
+- Spotify
+- Fitbit
+
+### Contributed
+
+- Kakao (by Jae-Baek Song - [thdwoqor](https://github.com/thdwoqor))
+
+See [Contributing](#contributing) for a guide on how to contribute your own login provider.
+
 ## Installation
 
 ### Install using `pip`
@@ -134,19 +150,6 @@ google_sso = GoogleSSO("client-id", "client-secret", use_state=False)
 ```
 
 See more on state [here](https://auth0.com/docs/configure/attack-protection/state-parameters).
-
-## Supported login providers
-
-### Official
-
-- Google
-- Microsoft
-- Facebook
-- Spotify
-
-### Contributed
-
-- Kakao (by Jae-Baek Song - [thdwoqor](https://github.com/thdwoqor))
 
 ## Contributing
 
