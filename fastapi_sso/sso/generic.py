@@ -4,6 +4,7 @@ with close to no code
 
 import logging
 from typing import Any, Callable, Dict, List, Optional, Type, Union
+
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 logger = logging.getLogger(__name__)

@@ -3,7 +3,8 @@
 # pylint: disable=too-few-public-methods
 
 import json
-from typing import Any, Dict, List, Optional, TypedDict
+import sys
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
 import httpx
@@ -12,6 +13,11 @@ from oauthlib.oauth2 import WebApplicationClient
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
+
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
 
 DiscoveryDocument = TypedDict(
     "DiscoveryDocument", {"authorization_endpoint": str, "token_endpoint": str, "userinfo_endpoint": str}
