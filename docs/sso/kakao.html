@@ -29,9 +29,8 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Kakao SSO Oauth Helper class&#34;&#34;&#34;
 
-from typing import Dict
 
-from fastapi_sso.sso.base import OpenID, SSOBase
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 
 class KakaoSSO(SSOBase):
@@ -41,7 +40,7 @@ class KakaoSSO(SSOBase):
     scope = [&#34;openid&#34;]
     version = &#34;v2&#34;
 
-    async def get_discovery_document(self) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; DiscoveryDocument:
         return {
             &#34;authorization_endpoint&#34;: &#34;https://kauth.kakao.com/oauth/authorize&#34;,
             &#34;token_endpoint&#34;: &#34;https://kauth.kakao.com/oauth/token&#34;,
@@ -79,7 +78,7 @@ class KakaoSSO(SSOBase):
     scope = [&#34;openid&#34;]
     version = &#34;v2&#34;
 
-    async def get_discovery_document(self) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; DiscoveryDocument:
         return {
             &#34;authorization_endpoint&#34;: &#34;https://kauth.kakao.com/oauth/authorize&#34;,
             &#34;token_endpoint&#34;: &#34;https://kauth.kakao.com/oauth/token&#34;,

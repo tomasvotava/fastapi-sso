@@ -29,9 +29,9 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Microsoft SSO Oauth Helper class&#34;&#34;&#34;
 
-from typing import Dict, List, Optional
+from typing import List, Optional
 
-from fastapi_sso.sso.base import OpenID, SSOBase
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 
 class MicrosoftSSO(SSOBase):
@@ -62,7 +62,7 @@ class MicrosoftSSO(SSOBase):
         )
         self.tenant = tenant or self.tenant
 
-    async def get_discovery_document(self) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; DiscoveryDocument:
         return {
             &#34;authorization_endpoint&#34;: f&#34;https://login.microsoftonline.com/{self.tenant}/oauth2/v2.0/authorize&#34;,
             &#34;token_endpoint&#34;: f&#34;https://login.microsoftonline.com/{self.tenant}/oauth2/v2.0/token&#34;,
@@ -121,7 +121,7 @@ class MicrosoftSSO(SSOBase):
         )
         self.tenant = tenant or self.tenant
 
-    async def get_discovery_document(self) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; DiscoveryDocument:
         return {
             &#34;authorization_endpoint&#34;: f&#34;https://login.microsoftonline.com/{self.tenant}/oauth2/v2.0/authorize&#34;,
             &#34;token_endpoint&#34;: f&#34;https://login.microsoftonline.com/{self.tenant}/oauth2/v2.0/token&#34;,

@@ -32,7 +32,7 @@
 # pylint: disable=too-few-public-methods
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TypedDict
 from uuid import uuid4
 
 import httpx
@@ -41,6 +41,10 @@ from oauthlib.oauth2 import WebApplicationClient
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
+
+DiscoveryDocument = TypedDict(
+    &#34;DiscoveryDocument&#34;, {&#34;authorization_endpoint&#34;: str, &#34;token_endpoint&#34;: str, &#34;userinfo_endpoint&#34;: str}
+)
 
 
 class SSOLoginError(HTTPException):
@@ -52,13 +56,13 @@ class SSOLoginError(HTTPException):
 class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
     &#34;&#34;&#34;Class (schema) to represent information got from sso provider in a common form.&#34;&#34;&#34;
 
-    id: Optional[str]
-    email: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    display_name: Optional[str]
-    picture: Optional[str]
-    provider: Optional[str]
+    id: Optional[str] = None
+    email: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    display_name: Optional[str] = None
+    picture: Optional[str] = None
+    provider: Optional[str] = None
 
 
 # pylint: disable=too-many-instance-attributes
@@ -115,7 +119,7 @@ class SSOBase:
         &#34;&#34;&#34;Return {OpenID} object from provider&#39;s user info endpoint response&#34;&#34;&#34;
         raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)
 
-    async def get_discovery_document(self) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; DiscoveryDocument:
         &#34;&#34;&#34;Get discovery document containing handy urls&#34;&#34;&#34;
         raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
 
@@ -250,6 +254,42 @@ class SSOBase:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="fastapi_sso.sso.base.DiscoveryDocument"><code class="flex name class">
+<span>class <span class="ident">DiscoveryDocument</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+(key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+d = {}
+for k, v in iterable:
+d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+in the keyword argument list.
+For example:
+dict(one=1, two=2)</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.dict</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="fastapi_sso.sso.base.DiscoveryDocument.authorization_endpoint"><code class="name">var <span class="ident">authorization_endpoint</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.DiscoveryDocument.token_endpoint"><code class="name">var <span class="ident">token_endpoint</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.DiscoveryDocument.userinfo_endpoint"><code class="name">var <span class="ident">userinfo_endpoint</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
 <dt id="fastapi_sso.sso.base.OpenID"><code class="flex name class">
 <span>class <span class="ident">OpenID</span></span>
 <span>(</span><span>**data: Any)</span>
@@ -265,13 +305,13 @@ class SSOBase:
 <pre><code class="python">class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
     &#34;&#34;&#34;Class (schema) to represent information got from sso provider in a common form.&#34;&#34;&#34;
 
-    id: Optional[str]
-    email: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    display_name: Optional[str]
-    picture: Optional[str]
-    provider: Optional[str]</code></pre>
+    id: Optional[str] = None
+    email: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    display_name: Optional[str] = None
+    picture: Optional[str] = None
+    provider: Optional[str] = None</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -373,7 +413,7 @@ class SSOBase:
         &#34;&#34;&#34;Return {OpenID} object from provider&#39;s user info endpoint response&#34;&#34;&#34;
         raise NotImplementedError(f&#34;Provider {cls.provider} not supported&#34;)
 
-    async def get_discovery_document(self) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; DiscoveryDocument:
         &#34;&#34;&#34;Get discovery document containing handy urls&#34;&#34;&#34;
         raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
 
@@ -501,6 +541,7 @@ class SSOBase:
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li><a title="fastapi_sso.sso.facebook.FacebookSSO" href="facebook.html#fastapi_sso.sso.facebook.FacebookSSO">FacebookSSO</a></li>
+<li><a title="fastapi_sso.sso.fitbit.FitbitSSO" href="fitbit.html#fastapi_sso.sso.fitbit.FitbitSSO">FitbitSSO</a></li>
 <li><a title="fastapi_sso.sso.google.GoogleSSO" href="google.html#fastapi_sso.sso.google.GoogleSSO">GoogleSSO</a></li>
 <li><a title="fastapi_sso.sso.kakao.KakaoSSO" href="kakao.html#fastapi_sso.sso.kakao.KakaoSSO">KakaoSSO</a></li>
 <li><a title="fastapi_sso.sso.microsoft.MicrosoftSSO" href="microsoft.html#fastapi_sso.sso.microsoft.MicrosoftSSO">MicrosoftSSO</a></li>
@@ -642,7 +683,7 @@ async def userinfo_endpoint(self) -&gt; Optional[str]:
 <h3>Methods</h3>
 <dl>
 <dt id="fastapi_sso.sso.base.SSOBase.get_discovery_document"><code class="name flex">
-<span>async def <span class="ident">get_discovery_document</span></span>(<span>self) ‑> Dict[str, str]</span>
+<span>async def <span class="ident">get_discovery_document</span></span>(<span>self) ‑> <a title="fastapi_sso.sso.base.DiscoveryDocument" href="#fastapi_sso.sso.base.DiscoveryDocument">DiscoveryDocument</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get discovery document containing handy urls</p></div>
@@ -650,7 +691,7 @@ async def userinfo_endpoint(self) -&gt; Optional[str]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def get_discovery_document(self) -&gt; Dict[str, str]:
+<pre><code class="python">async def get_discovery_document(self) -&gt; DiscoveryDocument:
     &#34;&#34;&#34;Get discovery document containing handy urls&#34;&#34;&#34;
     raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)</code></pre>
 </details>
@@ -853,6 +894,14 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="fastapi_sso.sso.base.DiscoveryDocument" href="#fastapi_sso.sso.base.DiscoveryDocument">DiscoveryDocument</a></code></h4>
+<ul class="">
+<li><code><a title="fastapi_sso.sso.base.DiscoveryDocument.authorization_endpoint" href="#fastapi_sso.sso.base.DiscoveryDocument.authorization_endpoint">authorization_endpoint</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.DiscoveryDocument.token_endpoint" href="#fastapi_sso.sso.base.DiscoveryDocument.token_endpoint">token_endpoint</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.DiscoveryDocument.userinfo_endpoint" href="#fastapi_sso.sso.base.DiscoveryDocument.userinfo_endpoint">userinfo_endpoint</a></code></li>
+</ul>
+</li>
 <li>
 <h4><code><a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a></code></h4>
 <ul class="two-column">

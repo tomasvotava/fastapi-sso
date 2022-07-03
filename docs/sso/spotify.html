@@ -30,9 +30,8 @@
 <pre><code class="python">&#34;&#34;&#34;Spotify SSO Login Helper
 &#34;&#34;&#34;
 
-from typing import Dict
 
-from fastapi_sso.sso.base import OpenID, SSOBase
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 
 class SpotifySSO(SSOBase):
@@ -42,7 +41,7 @@ class SpotifySSO(SSOBase):
     scope = [&#34;user-read-private&#34;, &#34;user-read-email&#34;]
 
     # pylint: disable=no-self-use
-    async def get_discovery_document(self) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; DiscoveryDocument:
         &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
         return {
             &#34;authorization_endpoint&#34;: &#34;https://accounts.spotify.com/authorize&#34;,
@@ -92,7 +91,7 @@ class SpotifySSO(SSOBase):
     scope = [&#34;user-read-private&#34;, &#34;user-read-email&#34;]
 
     # pylint: disable=no-self-use
-    async def get_discovery_document(self) -&gt; Dict[str, str]:
+    async def get_discovery_document(self) -&gt; DiscoveryDocument:
         &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
         return {
             &#34;authorization_endpoint&#34;: &#34;https://accounts.spotify.com/authorize&#34;,
@@ -161,7 +160,7 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
 <h3>Methods</h3>
 <dl>
 <dt id="fastapi_sso.sso.spotify.SpotifySSO.get_discovery_document"><code class="name flex">
-<span>async def <span class="ident">get_discovery_document</span></span>(<span>self) ‑> Dict[str, str]</span>
+<span>async def <span class="ident">get_discovery_document</span></span>(<span>self) ‑> <a title="fastapi_sso.sso.base.DiscoveryDocument" href="base.html#fastapi_sso.sso.base.DiscoveryDocument">DiscoveryDocument</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get document containing handy urls</p></div>
@@ -169,7 +168,7 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def get_discovery_document(self) -&gt; Dict[str, str]:
+<pre><code class="python">async def get_discovery_document(self) -&gt; DiscoveryDocument:
     &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
     return {
         &#34;authorization_endpoint&#34;: &#34;https://accounts.spotify.com/authorize&#34;,
