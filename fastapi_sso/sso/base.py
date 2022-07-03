@@ -3,7 +3,7 @@
 # pylint: disable=too-few-public-methods
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TypedDict
 from uuid import uuid4
 
 import httpx
@@ -12,6 +12,10 @@ from oauthlib.oauth2 import WebApplicationClient
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
+
+DiscoveryDocument = TypedDict(
+    "DiscoveryDocument", {"authorization_endpoint": str, "token_endpoint": str, "userinfo_endpoint": str}
+)
 
 
 class SSOLoginError(HTTPException):
@@ -23,13 +27,13 @@ class SSOLoginError(HTTPException):
 class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
     """Class (schema) to represent information got from sso provider in a common form."""
 
-    id: Optional[str]
-    email: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    display_name: Optional[str]
-    picture: Optional[str]
-    provider: Optional[str]
+    id: Optional[str] = None
+    email: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    display_name: Optional[str] = None
+    picture: Optional[str] = None
+    provider: Optional[str] = None
 
 
 # pylint: disable=too-many-instance-attributes
@@ -86,7 +90,7 @@ class SSOBase:
         """Return {OpenID} object from provider's user info endpoint response"""
         raise NotImplementedError(f"Provider {cls.provider} not supported")
 
-    async def get_discovery_document(self) -> Dict[str, str]:
+    async def get_discovery_document(self) -> DiscoveryDocument:
         """Get discovery document containing handy urls"""
         raise NotImplementedError(f"Provider {self.provider} not supported")
 

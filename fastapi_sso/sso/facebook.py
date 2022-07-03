@@ -1,9 +1,7 @@
 """Facebook SSO Login Helper
 """
 
-from typing import Dict
-
-from fastapi_sso.sso.base import OpenID, SSOBase
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 
 class FacebookSSO(SSOBase):
@@ -13,7 +11,7 @@ class FacebookSSO(SSOBase):
     base_url = "https://graph.facebook.com/v9.0"
     scope = ["email"]
 
-    async def get_discovery_document(self) -> Dict[str, str]:
+    async def get_discovery_document(self) -> DiscoveryDocument:
         """Get document containing handy urls"""
         return {
             "authorization_endpoint": "https://www.facebook.com/v9.0/dialog/oauth",

@@ -1,8 +1,8 @@
 """Microsoft SSO Oauth Helper class"""
 
-from typing import Dict, List, Optional
+from typing import List, Optional
 
-from fastapi_sso.sso.base import OpenID, SSOBase
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 
 class MicrosoftSSO(SSOBase):
@@ -33,7 +33,7 @@ class MicrosoftSSO(SSOBase):
         )
         self.tenant = tenant or self.tenant
 
-    async def get_discovery_document(self) -> Dict[str, str]:
+    async def get_discovery_document(self) -> DiscoveryDocument:
         return {
             "authorization_endpoint": f"https://login.microsoftonline.com/{self.tenant}/oauth2/v2.0/authorize",
             "token_endpoint": f"https://login.microsoftonline.com/{self.tenant}/oauth2/v2.0/token",

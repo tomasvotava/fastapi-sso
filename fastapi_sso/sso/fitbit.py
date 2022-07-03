@@ -1,9 +1,7 @@
 """Fitbit OAuth Login Helper
 """
 
-from typing import Dict
-
-from fastapi_sso.sso.base import OpenID, SSOBase, SSOLoginError
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, SSOLoginError
 
 
 class FitbitSSO(SSOBase):
@@ -23,12 +21,10 @@ class FitbitSSO(SSOBase):
             first_name=info["fullName"],
             display_name=info["displayName"],
             picture=info["avatar"],
-            email=None,
-            last_name=None,
             provider=cls.provider,
         )
 
-    async def get_discovery_document(self) -> Dict[str, str]:
+    async def get_discovery_document(self) -> DiscoveryDocument:
         """Get document containing handy urls"""
         return {
             "authorization_endpoint": "https://www.fitbit.com/oauth2/authorize?response_type=code",

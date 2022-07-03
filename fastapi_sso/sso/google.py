@@ -1,10 +1,9 @@
 """Google SSO Login Helper
 """
 
-from typing import Dict
 import httpx
 
-from fastapi_sso.sso.base import OpenID, SSOBase, SSOLoginError
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, SSOLoginError
 
 
 class GoogleSSO(SSOBase):
@@ -29,7 +28,7 @@ class GoogleSSO(SSOBase):
             )
         raise SSOLoginError(401, f"User {response.get('email')} is not verified with Google")
 
-    async def get_discovery_document(self) -> Dict[str, str]:
+    async def get_discovery_document(self) -> DiscoveryDocument:
         """Get document containing handy urls"""
         async with httpx.AsyncClient() as session:
             response = await session.get(self.discovery_url)

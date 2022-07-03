@@ -1,9 +1,8 @@
 """Spotify SSO Login Helper
 """
 
-from typing import Dict
 
-from fastapi_sso.sso.base import OpenID, SSOBase
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 
 class SpotifySSO(SSOBase):
@@ -13,7 +12,7 @@ class SpotifySSO(SSOBase):
     scope = ["user-read-private", "user-read-email"]
 
     # pylint: disable=no-self-use
-    async def get_discovery_document(self) -> Dict[str, str]:
+    async def get_discovery_document(self) -> DiscoveryDocument:
         """Get document containing handy urls"""
         return {
             "authorization_endpoint": "https://accounts.spotify.com/authorize",
