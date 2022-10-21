@@ -178,7 +178,12 @@ class SSOBase:
         return await self.process_login(code, request, params=params, redirect_uri=redirect_uri)
 
     async def process_login(
-        self, code: str, request: Request, *, params: Optional[Dict[str, Any]] = None, redirect_uri: Optional[str] = None
+        self,
+        code: str,
+        request: Request,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        redirect_uri: Optional[str] = None,
     ) -> Optional[OpenID]:
         """This method should be called from callback endpoint to verify the user and request user info endpoint.
         This is low level, you should use {verify_and_process} instead.
@@ -195,12 +200,12 @@ class SSOBase:
             scheme = "https"
         else:
             current_url = str(url)
-        #current_path = f"{scheme}://{url.netloc}{url.path}"
+        current_path = f"{scheme}://{url.netloc}{url.path}"
 
         token_url, headers, body = self.oauth_client.prepare_token_request(
             await self.token_endpoint,
             authorization_response=current_url,
-            redirect_url=redirect_uri or self.redirect_uri,
+            redirect_url=redirect_uri or self.redirect_uri or current_path,
             code=code,
             **params,
         )  # type: ignore
