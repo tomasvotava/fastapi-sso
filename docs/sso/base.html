@@ -32,7 +32,8 @@
 # pylint: disable=too-few-public-methods
 
 import json
-from typing import Any, Dict, List, Optional, TypedDict
+import sys
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
 import httpx
@@ -41,6 +42,11 @@ from oauthlib.oauth2 import WebApplicationClient
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
+
+if sys.version_info &gt;= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
 
 DiscoveryDocument = TypedDict(
     &#34;DiscoveryDocument&#34;, {&#34;authorization_endpoint&#34;: str, &#34;token_endpoint&#34;: str, &#34;userinfo_endpoint&#34;: str}
@@ -76,6 +82,7 @@ class SSOBase:
     scope: List[str] = NotImplemented
     _oauth_client: Optional[WebApplicationClient] = None
     state: Optional[str] = None
+    additional_headers: Optional[Dict[str, Any]] = None
 
     def __init__(
         self,
@@ -175,7 +182,12 @@ class SSOBase:
         return response
 
     async def verify_and_process(
-        self, request: Request, *, params: Optional[Dict[str, Any]] = None
+        self,
+        request: Request,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, Any]] = None,
+        redirect_uri: Optional[str] = None,
     ) -&gt; Optional[OpenID]:
         &#34;&#34;&#34;Get FastAPI (Starlette) Request object and process login.
         This handler should be used for your /callback path.
@@ -187,6 +199,7 @@ class SSOBase:
         Returns:
             Optional[OpenID] -- OpenID if the login was successfull
         &#34;&#34;&#34;
+        headers = headers or {}
         code = request.query_params.get(&#34;code&#34;)
         if code is None:
             raise SSOLoginError(400, &#34;&#39;code&#39; parameter was not found in callback request&#34;)
@@ -198,19 +211,30 @@ class SSOBase:
                     &#34;&#39;state&#39; parameter in callback request does not match our internal &#39;state&#39;, &#34;
                     &#34;someone may be trying to do something bad.&#34;,
                 )
-        return await self.process_login(code, request, params=params)
+        return await self.process_login(
+            code, request, params=params, additional_headers=headers, redirect_uri=redirect_uri
+        )
 
     async def process_login(
-        self, code: str, request: Request, *, params: Optional[Dict[str, Any]] = None
+        self,
+        code: str,
+        request: Request,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        additional_headers: Optional[Dict[str, Any]] = None,
+        redirect_uri: Optional[str] = None,
     ) -&gt; Optional[OpenID]:
         &#34;&#34;&#34;This method should be called from callback endpoint to verify the user and request user info endpoint.
         This is low level, you should use {verify_and_process} instead.
 
         Arguments:
             params {Optional[Dict[str, Any]]} -- Optional additional query parameters to pass to the provider
+            additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
         &#34;&#34;&#34;
         # pylint: disable=too-many-locals
         params = params or {}
+        additional_headers = additional_headers or {}
+        additional_headers.update(self.additional_headers or {})
         url = request.url
         scheme = url.scheme
         if not self.allow_insecure_http and scheme != &#34;https&#34;:
@@ -223,13 +247,15 @@ class SSOBase:
         token_url, headers, body = self.oauth_client.prepare_token_request(
             await self.token_endpoint,
             authorization_response=current_url,
-            redirect_url=current_path,
+            redirect_url=redirect_uri or self.redirect_uri or current_path,
             code=code,
             **params,
         )  # type: ignore
 
         if token_url is None:
             return None
+
+        headers.update(additional_headers)
 
         auth = httpx.BasicAuth(self.client_id, self.client_secret)
         async with httpx.AsyncClient() as session:
@@ -370,6 +396,7 @@ dict(one=1, two=2)</p></div>
     scope: List[str] = NotImplemented
     _oauth_client: Optional[WebApplicationClient] = None
     state: Optional[str] = None
+    additional_headers: Optional[Dict[str, Any]] = None
 
     def __init__(
         self,
@@ -469,7 +496,12 @@ dict(one=1, two=2)</p></div>
         return response
 
     async def verify_and_process(
-        self, request: Request, *, params: Optional[Dict[str, Any]] = None
+        self,
+        request: Request,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, Any]] = None,
+        redirect_uri: Optional[str] = None,
     ) -&gt; Optional[OpenID]:
         &#34;&#34;&#34;Get FastAPI (Starlette) Request object and process login.
         This handler should be used for your /callback path.
@@ -481,6 +513,7 @@ dict(one=1, two=2)</p></div>
         Returns:
             Optional[OpenID] -- OpenID if the login was successfull
         &#34;&#34;&#34;
+        headers = headers or {}
         code = request.query_params.get(&#34;code&#34;)
         if code is None:
             raise SSOLoginError(400, &#34;&#39;code&#39; parameter was not found in callback request&#34;)
@@ -492,19 +525,30 @@ dict(one=1, two=2)</p></div>
                     &#34;&#39;state&#39; parameter in callback request does not match our internal &#39;state&#39;, &#34;
                     &#34;someone may be trying to do something bad.&#34;,
                 )
-        return await self.process_login(code, request, params=params)
+        return await self.process_login(
+            code, request, params=params, additional_headers=headers, redirect_uri=redirect_uri
+        )
 
     async def process_login(
-        self, code: str, request: Request, *, params: Optional[Dict[str, Any]] = None
+        self,
+        code: str,
+        request: Request,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        additional_headers: Optional[Dict[str, Any]] = None,
+        redirect_uri: Optional[str] = None,
     ) -&gt; Optional[OpenID]:
         &#34;&#34;&#34;This method should be called from callback endpoint to verify the user and request user info endpoint.
         This is low level, you should use {verify_and_process} instead.
 
         Arguments:
             params {Optional[Dict[str, Any]]} -- Optional additional query parameters to pass to the provider
+            additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
         &#34;&#34;&#34;
         # pylint: disable=too-many-locals
         params = params or {}
+        additional_headers = additional_headers or {}
+        additional_headers.update(self.additional_headers or {})
         url = request.url
         scheme = url.scheme
         if not self.allow_insecure_http and scheme != &#34;https&#34;:
@@ -517,13 +561,15 @@ dict(one=1, two=2)</p></div>
         token_url, headers, body = self.oauth_client.prepare_token_request(
             await self.token_endpoint,
             authorization_response=current_url,
-            redirect_url=current_path,
+            redirect_url=redirect_uri or self.redirect_uri or current_path,
             code=code,
             **params,
         )  # type: ignore
 
         if token_url is None:
             return None
+
+        headers.update(additional_headers)
 
         auth = httpx.BasicAuth(self.client_id, self.client_secret)
         async with httpx.AsyncClient() as session:
@@ -542,6 +588,7 @@ dict(one=1, two=2)</p></div>
 <ul class="hlist">
 <li><a title="fastapi_sso.sso.facebook.FacebookSSO" href="facebook.html#fastapi_sso.sso.facebook.FacebookSSO">FacebookSSO</a></li>
 <li><a title="fastapi_sso.sso.fitbit.FitbitSSO" href="fitbit.html#fastapi_sso.sso.fitbit.FitbitSSO">FitbitSSO</a></li>
+<li><a title="fastapi_sso.sso.github.GithubSSO" href="github.html#fastapi_sso.sso.github.GithubSSO">GithubSSO</a></li>
 <li><a title="fastapi_sso.sso.google.GoogleSSO" href="google.html#fastapi_sso.sso.google.GoogleSSO">GoogleSSO</a></li>
 <li><a title="fastapi_sso.sso.kakao.KakaoSSO" href="kakao.html#fastapi_sso.sso.kakao.KakaoSSO">KakaoSSO</a></li>
 <li><a title="fastapi_sso.sso.microsoft.MicrosoftSSO" href="microsoft.html#fastapi_sso.sso.microsoft.MicrosoftSSO">MicrosoftSSO</a></li>
@@ -549,6 +596,10 @@ dict(one=1, two=2)</p></div>
 </ul>
 <h3>Class variables</h3>
 <dl>
+<dt id="fastapi_sso.sso.base.SSOBase.additional_headers"><code class="name">var <span class="ident">additional_headers</span> : Optional[Dict[str, Any]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="fastapi_sso.sso.base.SSOBase.client_id"><code class="name">var <span class="ident">client_id</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
@@ -755,28 +806,38 @@ params {Optional[Dict[str, Any]]} &ndash; Add additional query parameters to the
 </details>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase.process_login"><code class="name flex">
-<span>async def <span class="ident">process_login</span></span>(<span>self, code: str, request: starlette.requests.Request, *, params: Optional[Dict[str, Any]] = None) ‑> Optional[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>]</span>
+<span>async def <span class="ident">process_login</span></span>(<span>self, code: str, request: starlette.requests.Request, *, params: Optional[Dict[str, Any]] = None, additional_headers: Optional[Dict[str, Any]] = None, redirect_uri: Optional[str] = None) ‑> Optional[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>This method should be called from callback endpoint to verify the user and request user info endpoint.
 This is low level, you should use {verify_and_process} instead.</p>
 <h2 id="arguments">Arguments</h2>
-<p>params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters to pass to the provider</p></div>
+<p>params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters to pass to the provider
+additional_headers {Optional[Dict[str, Any]]} &ndash; Optional additional headers to be added to all requests</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">async def process_login(
-    self, code: str, request: Request, *, params: Optional[Dict[str, Any]] = None
+    self,
+    code: str,
+    request: Request,
+    *,
+    params: Optional[Dict[str, Any]] = None,
+    additional_headers: Optional[Dict[str, Any]] = None,
+    redirect_uri: Optional[str] = None,
 ) -&gt; Optional[OpenID]:
     &#34;&#34;&#34;This method should be called from callback endpoint to verify the user and request user info endpoint.
     This is low level, you should use {verify_and_process} instead.
 
     Arguments:
         params {Optional[Dict[str, Any]]} -- Optional additional query parameters to pass to the provider
+        additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
     &#34;&#34;&#34;
     # pylint: disable=too-many-locals
     params = params or {}
+    additional_headers = additional_headers or {}
+    additional_headers.update(self.additional_headers or {})
     url = request.url
     scheme = url.scheme
     if not self.allow_insecure_http and scheme != &#34;https&#34;:
@@ -789,13 +850,15 @@ This is low level, you should use {verify_and_process} instead.</p>
     token_url, headers, body = self.oauth_client.prepare_token_request(
         await self.token_endpoint,
         authorization_response=current_url,
-        redirect_url=current_path,
+        redirect_url=redirect_uri or self.redirect_uri or current_path,
         code=code,
         **params,
     )  # type: ignore
 
     if token_url is None:
         return None
+
+    headers.update(additional_headers)
 
     auth = httpx.BasicAuth(self.client_id, self.client_secret)
     async with httpx.AsyncClient() as session:
@@ -812,7 +875,7 @@ This is low level, you should use {verify_and_process} instead.</p>
 </details>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase.verify_and_process"><code class="name flex">
-<span>async def <span class="ident">verify_and_process</span></span>(<span>self, request: starlette.requests.Request, *, params: Optional[Dict[str, Any]] = None) ‑> Optional[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>]</span>
+<span>async def <span class="ident">verify_and_process</span></span>(<span>self, request: starlette.requests.Request, *, params: Optional[Dict[str, Any]] = None, headers: Optional[Dict[str, Any]] = None, redirect_uri: Optional[str] = None) ‑> Optional[<a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get FastAPI (Starlette) Request object and process login.
@@ -827,7 +890,12 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">async def verify_and_process(
-    self, request: Request, *, params: Optional[Dict[str, Any]] = None
+    self,
+    request: Request,
+    *,
+    params: Optional[Dict[str, Any]] = None,
+    headers: Optional[Dict[str, Any]] = None,
+    redirect_uri: Optional[str] = None,
 ) -&gt; Optional[OpenID]:
     &#34;&#34;&#34;Get FastAPI (Starlette) Request object and process login.
     This handler should be used for your /callback path.
@@ -839,6 +907,7 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
     Returns:
         Optional[OpenID] -- OpenID if the login was successfull
     &#34;&#34;&#34;
+    headers = headers or {}
     code = request.query_params.get(&#34;code&#34;)
     if code is None:
         raise SSOLoginError(400, &#34;&#39;code&#39; parameter was not found in callback request&#34;)
@@ -850,7 +919,9 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
                 &#34;&#39;state&#39; parameter in callback request does not match our internal &#39;state&#39;, &#34;
                 &#34;someone may be trying to do something bad.&#34;,
             )
-    return await self.process_login(code, request, params=params)</code></pre>
+    return await self.process_login(
+        code, request, params=params, additional_headers=headers, redirect_uri=redirect_uri
+    )</code></pre>
 </details>
 </dd>
 </dl>
@@ -918,6 +989,7 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
 <h4><code><a title="fastapi_sso.sso.base.SSOBase" href="#fastapi_sso.sso.base.SSOBase">SSOBase</a></code></h4>
 <ul class="">
 <li><code><a title="fastapi_sso.sso.base.SSOBase.access_token" href="#fastapi_sso.sso.base.SSOBase.access_token">access_token</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.additional_headers" href="#fastapi_sso.sso.base.SSOBase.additional_headers">additional_headers</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.authorization_endpoint" href="#fastapi_sso.sso.base.SSOBase.authorization_endpoint">authorization_endpoint</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.client_id" href="#fastapi_sso.sso.base.SSOBase.client_id">client_id</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.client_secret" href="#fastapi_sso.sso.base.SSOBase.client_secret">client_secret</a></code></li>
