@@ -152,7 +152,7 @@ class SSOBase:
         return response
 
     async def verify_and_process(
-        self, request: Request, *, params: Optional[Dict[str, Any]] = None
+        self, request: Request, *, params: Optional[Dict[str, Any]] = None, redirect_uri: Optional[str] = None
     ) -> Optional[OpenID]:
         """Get FastAPI (Starlette) Request object and process login.
         This handler should be used for your /callback path.
@@ -175,10 +175,15 @@ class SSOBase:
                     "'state' parameter in callback request does not match our internal 'state', "
                     "someone may be trying to do something bad.",
                 )
-        return await self.process_login(code, request, params=params)
+        return await self.process_login(code, request, params=params, redirect_uri=redirect_uri)
 
     async def process_login(
-        self, code: str, request: Request, *, params: Optional[Dict[str, Any]] = None
+        self,
+        code: str,
+        request: Request,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        redirect_uri: Optional[str] = None,
     ) -> Optional[OpenID]:
         """This method should be called from callback endpoint to verify the user and request user info endpoint.
         This is low level, you should use {verify_and_process} instead.
@@ -200,7 +205,7 @@ class SSOBase:
         token_url, headers, body = self.oauth_client.prepare_token_request(
             await self.token_endpoint,
             authorization_response=current_url,
-            redirect_url=current_path,
+            redirect_url=redirect_uri or self.redirect_uri or current_path,
             code=code,
             **params,
         )  # type: ignore
