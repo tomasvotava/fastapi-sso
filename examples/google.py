@@ -35,7 +35,4 @@ async def auth_callback(request: Request):
 
 
 if __name__ == "__main__":
-    try:
-        uvicorn.run(app="examples.google:app", host="127.0.0.1", port=5000)
-    except KeyboardInterrupt:
-        pass
+    uvicorn.run(app="examples.google:app", host="127.0.0.1", port=5000)
