@@ -13,6 +13,7 @@ This allows you to implement the famous `Login with Google/Facebook/Microsoft` b
 - Facebook
 - Spotify
 - Fitbit
+- Github (credits to [Brandl](https://github.com/Brandl) for hint using `accept` header)
 - generic (see [docs](https://tomasvotava.github.io/fastapi-sso/sso/generic.html))
 
 ### Contributed
