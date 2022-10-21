@@ -53,6 +53,7 @@ class SSOBase:
     scope: List[str] = NotImplemented
     _oauth_client: Optional[WebApplicationClient] = None
     state: Optional[str] = None
+    additional_headers: Optional[Dict[str, Any]] = None
 
     def __init__(
         self,
@@ -152,7 +153,12 @@ class SSOBase:
         return response
 
     async def verify_and_process(
-        self, request: Request, *, params: Optional[Dict[str, Any]] = None, redirect_uri: Optional[str] = None
+        self,
+        request: Request,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, Any]] = None,
+        redirect_uri: Optional[str] = None,
     ) -> Optional[OpenID]:
         """Get FastAPI (Starlette) Request object and process login.
         This handler should be used for your /callback path.
@@ -164,6 +170,7 @@ class SSOBase:
         Returns:
             Optional[OpenID] -- OpenID if the login was successfull
         """
+        headers = headers or {}
         code = request.query_params.get("code")
         if code is None:
             raise SSOLoginError(400, "'code' parameter was not found in callback request")
@@ -175,7 +182,9 @@ class SSOBase:
                     "'state' parameter in callback request does not match our internal 'state', "
                     "someone may be trying to do something bad.",
                 )
-        return await self.process_login(code, request, params=params, redirect_uri=redirect_uri)
+        return await self.process_login(
+            code, request, params=params, additional_headers=headers, redirect_uri=redirect_uri
+        )
 
     async def process_login(
         self,
@@ -183,6 +192,7 @@ class SSOBase:
         request: Request,
         *,
         params: Optional[Dict[str, Any]] = None,
+        additional_headers: Optional[Dict[str, Any]] = None,
         redirect_uri: Optional[str] = None,
     ) -> Optional[OpenID]:
         """This method should be called from callback endpoint to verify the user and request user info endpoint.
@@ -190,9 +200,12 @@ class SSOBase:
 
         Arguments:
             params {Optional[Dict[str, Any]]} -- Optional additional query parameters to pass to the provider
+            additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
         """
         # pylint: disable=too-many-locals
         params = params or {}
+        additional_headers = additional_headers or {}
+        additional_headers.update(self.additional_headers or {})
         url = request.url
         scheme = url.scheme
         if not self.allow_insecure_http and scheme != "https":
@@ -212,6 +225,8 @@ class SSOBase:
 
         if token_url is None:
             return None
+
+        headers.update(additional_headers)
 
         auth = httpx.BasicAuth(self.client_id, self.client_secret)
         async with httpx.AsyncClient() as session:

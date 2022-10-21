@@ -1,10 +1,10 @@
-"""Google Login Example
+"""Github Login Example
 """
 
 import os
 import uvicorn
 from fastapi import FastAPI, Request
-from fastapi_sso.sso.google import GoogleSSO
+from fastapi_sso.sso.github import GithubSSO
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 CLIENT_ID = os.environ["CLIENT_ID"]
@@ -12,7 +12,7 @@ CLIENT_SECRET = os.environ["CLIENT_SECRET"]
 
 app = FastAPI()
 
-sso = GoogleSSO(
+sso = GithubSSO(
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
     redirect_uri="http://localhost:5000/auth/callback",
@@ -24,7 +24,7 @@ sso = GoogleSSO(
 @app.get("/auth/login")
 async def auth_init():
     """Initialize auth and redirect"""
-    return await sso.get_login_redirect(params={"prompt": "consent", "access_type": "offline"})
+    return await sso.get_login_redirect()
 
 
 @app.get("/auth/callback")
@@ -35,4 +35,4 @@ async def auth_callback(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app="examples.google:app", host="127.0.0.1", port=5000)
+    uvicorn.run(app="examples.github:app", host="127.0.0.1", port=5000)
