@@ -4,6 +4,11 @@ FastAPI plugin to enable SSO to most common providers (such as Facebook login, G
 
 This allows you to implement the famous `Login with Google/Facebook/Microsoft` buttons functionality on your backend very easily.
 
+## Support this project
+
+If you'd like to support this project, consider [buying me a coffee ☕](https://www.buymeacoffee.com/tomas.votava).
+I tend to process Pull Requests faster when properly caffeinated 😉.
+
 ## Supported login providers
 
 ### Official
