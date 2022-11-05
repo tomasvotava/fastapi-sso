@@ -9,6 +9,8 @@ This allows you to implement the famous `Login with Google/Facebook/Microsoft` b
 If you'd like to support this project, consider [buying me a coffee ☕](https://www.buymeacoffee.com/tomas.votava).
 I tend to process Pull Requests faster when properly caffeinated 😉.
 
+<a href="https://www.buymeacoffee.com/tomas.votava" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
 ## Supported login providers
 
 ### Official
