@@ -40,6 +40,9 @@ class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
     display_name: Optional[str] = None
     picture: Optional[str] = None
     provider: Optional[str] = None
+        
+    class Config:
+        extra = "allow"
 
 
 # pylint: disable=too-many-instance-attributes
