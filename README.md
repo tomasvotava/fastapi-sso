@@ -121,7 +121,7 @@ E.g. sometimes you want to specify `access_type=offline` or `prompt=consent` in 
 Google to return `refresh_token`.
 
 ```python
-async def google_login():
+async def google_login(request: Request):
     return await google_sso.get_login_redirect(
         redirect_uri=request.url_for("google_callback"),
         params={"prompt": "consent", "access_type": "offline"}
@@ -149,16 +149,31 @@ See [this issue](https://github.com/tomasvotava/fastapi-sso/issues/2) for more i
 
 ## State
 
-State is used in OAuth to make sure server is responding to the request we send. It may cause you trouble
-as `fastsapi-sso` actually saves the state content as a cookie and attempts reading upon callback and this may
-fail (e.g. when loging in from different domain then the callback is landing on). If this is your case,
-you may want to disable state checking by passing `use_state = False` in SSO class's constructor, such as:
+State is useful if you want the server to return something back to you to help you understand in what
+context the authentication was initiated. It is mostly used to store the url you want your user to be redirected
+to after successful login. You may use `.state` property to get the state returned from the server.
+
+Example:
 
 ```python
-google_sso = GoogleSSO("client-id", "client-secret", use_state=False)
+from fastapi import Request
+from fastapi.responses import RedirectResponse
+
+# E.g. https://example.com/auth/login?return_url=https://example.com/welcome
+async def google_login(return_url: str):
+    google_sso = GoogleSOO("client-id", "client-secret")
+    # Send return_url to Google as a state so that Google knows to return it back to us
+    return await google_sso.get_login_redirect(redirect_uri=request.url_for("google_callback"), state=return_url)
+
+async def google_callback(request: Request):
+    google_sso = GoogleSOO("client-id", "client-secret")
+    user = await google_sso.verify_and_process(request)
+    # google_sso.state now holds your return_url (https://example.com/welcome)
+    return RedirectResponse(google_sso.state)
+
 ```
 
-See more on state [here](https://auth0.com/docs/configure/attack-protection/state-parameters).
+**Deprecation Warning**: legacy `use_state` argument in `SSOBase` constructor is deprecated and will be removed.
 
 ## Contributing
 
