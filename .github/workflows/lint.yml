@@ -26,7 +26,7 @@ jobs:
           POETRY_VIRTUALENVS_CREATE=false ~/.local/bin/poetry install
       - name: Analysing the code with pylint
         run: |
-          python -m pylint fastapi_sso
+          python -m pylint --disable fixme fastapi_sso
       - name: Static type-checking using mypy
         run: |
           python -m mypy fastapi_sso
