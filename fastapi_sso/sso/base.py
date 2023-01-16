@@ -6,7 +6,6 @@ import json
 import sys
 import warnings
 from typing import Any, Dict, List, Optional
-from uuid import uuid4
 
 import httpx
 import pydantic
