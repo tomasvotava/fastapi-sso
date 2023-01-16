@@ -19,7 +19,7 @@ class MicrosoftSSO(SSOBase):
         client_secret: str,
         redirect_uri: Optional[str] = None,
         allow_insecure_http: bool = False,
-        use_state: bool = True,
+        use_state: bool = False,  # TODO: Remove use_state argument
         scope: Optional[List[str]] = None,
         tenant: Optional[str] = None,
     ):
@@ -28,7 +28,7 @@ class MicrosoftSSO(SSOBase):
             client_secret=client_secret,
             redirect_uri=redirect_uri,
             allow_insecure_http=allow_insecure_http,
-            use_state=use_state,
+            use_state=use_state,  # TODO: Remove use_state argument
             scope=scope,
         )
         self.tenant = tenant or self.tenant

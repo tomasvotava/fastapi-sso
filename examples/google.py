@@ -17,7 +17,6 @@ sso = GoogleSSO(
     client_secret=CLIENT_SECRET,
     redirect_uri="http://localhost:5000/auth/callback",
     allow_insecure_http=True,
-    use_state=False,
 )
 
 

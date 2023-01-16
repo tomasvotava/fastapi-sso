@@ -63,7 +63,7 @@ class KakaoSSO(SSOBase):
 <dl>
 <dt id="fastapi_sso.sso.kakao.KakaoSSO"><code class="flex name class">
 <span>class <span class="ident">KakaoSSO</span></span>
-<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = True, scope: Optional[List[str]] = None)</span>
+<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = False, scope: Optional[List[str]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Class providing login using Kakao OAuth</p></div>
@@ -121,6 +121,7 @@ class KakaoSSO(SSOBase):
 <li><code><a title="fastapi_sso.sso.base.SSOBase.openid_from_response" href="base.html#fastapi_sso.sso.base.SSOBase.openid_from_response">openid_from_response</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.process_login" href="base.html#fastapi_sso.sso.base.SSOBase.process_login">process_login</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.refresh_token" href="base.html#fastapi_sso.sso.base.SSOBase.refresh_token">refresh_token</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.state" href="base.html#fastapi_sso.sso.base.SSOBase.state">state</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.token_endpoint" href="base.html#fastapi_sso.sso.base.SSOBase.token_endpoint">token_endpoint</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.userinfo_endpoint" href="base.html#fastapi_sso.sso.base.SSOBase.userinfo_endpoint">userinfo_endpoint</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.verify_and_process" href="base.html#fastapi_sso.sso.base.SSOBase.verify_and_process">verify_and_process</a></code></li>

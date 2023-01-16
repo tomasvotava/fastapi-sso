@@ -17,7 +17,6 @@ sso = FitbitSSO(
     client_secret=CLIENT_SECRET,
     redirect_uri="http://localhost:3000/auth/callback",
     allow_insecure_http=True,
-    use_state=True,
 )
 
 

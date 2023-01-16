@@ -48,7 +48,7 @@ class MicrosoftSSO(SSOBase):
         client_secret: str,
         redirect_uri: Optional[str] = None,
         allow_insecure_http: bool = False,
-        use_state: bool = True,
+        use_state: bool = False,  # TODO: Remove use_state argument
         scope: Optional[List[str]] = None,
         tenant: Optional[str] = None,
     ):
@@ -57,7 +57,7 @@ class MicrosoftSSO(SSOBase):
             client_secret=client_secret,
             redirect_uri=redirect_uri,
             allow_insecure_http=allow_insecure_http,
-            use_state=use_state,
+            use_state=use_state,  # TODO: Remove use_state argument
             scope=scope,
         )
         self.tenant = tenant or self.tenant
@@ -85,7 +85,7 @@ class MicrosoftSSO(SSOBase):
 <dl>
 <dt id="fastapi_sso.sso.microsoft.MicrosoftSSO"><code class="flex name class">
 <span>class <span class="ident">MicrosoftSSO</span></span>
-<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = True, scope: Optional[List[str]] = None, tenant: Optional[str] = None)</span>
+<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = False, scope: Optional[List[str]] = None, tenant: Optional[str] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Class providing login using Microsoft OAuth</p></div>
@@ -107,7 +107,7 @@ class MicrosoftSSO(SSOBase):
         client_secret: str,
         redirect_uri: Optional[str] = None,
         allow_insecure_http: bool = False,
-        use_state: bool = True,
+        use_state: bool = False,  # TODO: Remove use_state argument
         scope: Optional[List[str]] = None,
         tenant: Optional[str] = None,
     ):
@@ -116,7 +116,7 @@ class MicrosoftSSO(SSOBase):
             client_secret=client_secret,
             redirect_uri=redirect_uri,
             allow_insecure_http=allow_insecure_http,
-            use_state=use_state,
+            use_state=use_state,  # TODO: Remove use_state argument
             scope=scope,
         )
         self.tenant = tenant or self.tenant
@@ -168,6 +168,7 @@ class MicrosoftSSO(SSOBase):
 <li><code><a title="fastapi_sso.sso.base.SSOBase.openid_from_response" href="base.html#fastapi_sso.sso.base.SSOBase.openid_from_response">openid_from_response</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.process_login" href="base.html#fastapi_sso.sso.base.SSOBase.process_login">process_login</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.refresh_token" href="base.html#fastapi_sso.sso.base.SSOBase.refresh_token">refresh_token</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.SSOBase.state" href="base.html#fastapi_sso.sso.base.SSOBase.state">state</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.token_endpoint" href="base.html#fastapi_sso.sso.base.SSOBase.token_endpoint">token_endpoint</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.userinfo_endpoint" href="base.html#fastapi_sso.sso.base.SSOBase.userinfo_endpoint">userinfo_endpoint</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.SSOBase.verify_and_process" href="base.html#fastapi_sso.sso.base.SSOBase.verify_and_process">verify_and_process</a></code></li>

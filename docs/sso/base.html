@@ -33,6 +33,7 @@
 
 import json
 import sys
+import warnings
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
@@ -51,6 +52,10 @@ else:
 DiscoveryDocument = TypedDict(
     &#34;DiscoveryDocument&#34;, {&#34;authorization_endpoint&#34;: str, &#34;token_endpoint&#34;: str, &#34;userinfo_endpoint&#34;: str}
 )
+
+
+class UnsetStateWarning(UserWarning):
+    &#34;&#34;&#34;Warning about unset state parameter&#34;&#34;&#34;
 
 
 class SSOLoginError(HTTPException):
@@ -81,7 +86,6 @@ class SSOBase:
     redirect_uri: Optional[str] = NotImplemented
     scope: List[str] = NotImplemented
     _oauth_client: Optional[WebApplicationClient] = None
-    state: Optional[str] = None
     additional_headers: Optional[Dict[str, Any]] = None
 
     def __init__(
@@ -90,7 +94,7 @@ class SSOBase:
         client_secret: str,
         redirect_uri: Optional[str] = None,
         allow_insecure_http: bool = False,
-        use_state: bool = True,
+        use_state: bool = False,
         scope: Optional[List[str]] = None,
     ):
         # pylint: disable=too-many-arguments
@@ -98,9 +102,29 @@ class SSOBase:
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
-        self.use_state = use_state
+        # TODO: Remove use_state argument and attribute
+        if use_state:
+            warnings.warn(
+                (
+                    &#34;Argument &#39;use_state&#39; of SSOBase&#39;s constructor is deprecated and will be removed in &#34;
+                    &#34;future releases. Use &#39;state&#39; argument of individual methods instead.&#34;
+                ),
+                DeprecationWarning,
+            )
         self.scope = scope or self.scope
         self._refresh_token: Optional[str] = None
+        self._state: Optional[str] = None
+
+    @property
+    def state(self) -&gt; Optional[str]:
+        &#34;&#34;&#34;Gets state as it was returned from the server&#34;&#34;&#34;
+        if self._state is None:
+            warnings.warn(
+                &#34;&#39;state&#39; parameter is unset. This means the server either &#34;
+                &#34;didn&#39;t return state (was this expected?) or &#39;verify_and_process&#39; hasn&#39;t been called yet.&#34;,
+                UnsetStateWarning,
+            )
+        return self._state
 
     @property
     def oauth_client(self) -&gt; WebApplicationClient:
@@ -149,36 +173,42 @@ class SSOBase:
         return discovery.get(&#34;userinfo_endpoint&#34;)
 
     async def get_login_url(
-        self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None
+        self,
+        *,
+        redirect_uri: Optional[str] = None,
+        params: Optional[Dict[str, Any]] = None,
+        state: Optional[str] = None,
     ) -&gt; str:
         &#34;&#34;&#34;Return prepared login url. This is low-level, see {get_login_redirect} instead.&#34;&#34;&#34;
         params = params or {}
         redirect_uri = redirect_uri or self.redirect_uri
         if redirect_uri is None:
             raise ValueError(&#34;redirect_uri must be provided, either at construction or request time&#34;)
-        if self.use_state:
-            self.state = str(uuid4())
         request_uri = self.oauth_client.prepare_request_uri(
-            await self.authorization_endpoint, redirect_uri=redirect_uri, state=self.state, scope=self.scope, **params
+            await self.authorization_endpoint, redirect_uri=redirect_uri, state=state, scope=self.scope, **params
         )
         return request_uri
 
     async def get_login_redirect(
-        self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None
+        self,
+        *,
+        redirect_uri: Optional[str] = None,
+        params: Optional[Dict[str, Any]] = None,
+        state: Optional[str] = None,
     ) -&gt; RedirectResponse:
         &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
 
         Arguments:
             redirect_uri {Optional[str]} -- Override redirect_uri specified on this instance (default: None)
             params {Optional[Dict[str, Any]]} -- Add additional query parameters to the login request.
+            state {Optional[str]} -- Add state parameter. This is useful if you want
+                                    the server to return something specific back to you.
 
         Returns:
             RedirectResponse -- Starlette response (may directly be returned from FastAPI)
         &#34;&#34;&#34;
-        login_uri = await self.get_login_url(redirect_uri=redirect_uri, params=params)
+        login_uri = await self.get_login_url(redirect_uri=redirect_uri, params=params, state=state)
         response = RedirectResponse(login_uri, 303)
-        if self.state is not None and self.use_state:
-            response.set_cookie(&#34;ssostate&#34;, self.state, expires=600)
         return response
 
     async def verify_and_process(
@@ -203,14 +233,7 @@ class SSOBase:
         code = request.query_params.get(&#34;code&#34;)
         if code is None:
             raise SSOLoginError(400, &#34;&#39;code&#39; parameter was not found in callback request&#34;)
-        if self.state is not None and self.use_state:
-            ssostate = request.cookies.get(&#34;ssostate&#34;)
-            if ssostate is None or ssostate != self.state:
-                raise SSOLoginError(
-                    401,
-                    &#34;&#39;state&#39; parameter in callback request does not match our internal &#39;state&#39;, &#34;
-                    &#34;someone may be trying to do something bad.&#34;,
-                )
+        self._state = request.query_params.get(&#34;state&#34;)
         return await self.process_login(
             code, request, params=params, additional_headers=headers, redirect_uri=redirect_uri
         )
@@ -378,7 +401,7 @@ dict(one=1, two=2)</p></div>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase"><code class="flex name class">
 <span>class <span class="ident">SSOBase</span></span>
-<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = True, scope: Optional[List[str]] = None)</span>
+<span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = False, scope: Optional[List[str]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Base class (mixin) for all SSO providers</p></div>
@@ -395,7 +418,6 @@ dict(one=1, two=2)</p></div>
     redirect_uri: Optional[str] = NotImplemented
     scope: List[str] = NotImplemented
     _oauth_client: Optional[WebApplicationClient] = None
-    state: Optional[str] = None
     additional_headers: Optional[Dict[str, Any]] = None
 
     def __init__(
@@ -404,7 +426,7 @@ dict(one=1, two=2)</p></div>
         client_secret: str,
         redirect_uri: Optional[str] = None,
         allow_insecure_http: bool = False,
-        use_state: bool = True,
+        use_state: bool = False,
         scope: Optional[List[str]] = None,
     ):
         # pylint: disable=too-many-arguments
@@ -412,9 +434,29 @@ dict(one=1, two=2)</p></div>
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
-        self.use_state = use_state
+        # TODO: Remove use_state argument and attribute
+        if use_state:
+            warnings.warn(
+                (
+                    &#34;Argument &#39;use_state&#39; of SSOBase&#39;s constructor is deprecated and will be removed in &#34;
+                    &#34;future releases. Use &#39;state&#39; argument of individual methods instead.&#34;
+                ),
+                DeprecationWarning,
+            )
         self.scope = scope or self.scope
         self._refresh_token: Optional[str] = None
+        self._state: Optional[str] = None
+
+    @property
+    def state(self) -&gt; Optional[str]:
+        &#34;&#34;&#34;Gets state as it was returned from the server&#34;&#34;&#34;
+        if self._state is None:
+            warnings.warn(
+                &#34;&#39;state&#39; parameter is unset. This means the server either &#34;
+                &#34;didn&#39;t return state (was this expected?) or &#39;verify_and_process&#39; hasn&#39;t been called yet.&#34;,
+                UnsetStateWarning,
+            )
+        return self._state
 
     @property
     def oauth_client(self) -&gt; WebApplicationClient:
@@ -463,36 +505,42 @@ dict(one=1, two=2)</p></div>
         return discovery.get(&#34;userinfo_endpoint&#34;)
 
     async def get_login_url(
-        self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None
+        self,
+        *,
+        redirect_uri: Optional[str] = None,
+        params: Optional[Dict[str, Any]] = None,
+        state: Optional[str] = None,
     ) -&gt; str:
         &#34;&#34;&#34;Return prepared login url. This is low-level, see {get_login_redirect} instead.&#34;&#34;&#34;
         params = params or {}
         redirect_uri = redirect_uri or self.redirect_uri
         if redirect_uri is None:
             raise ValueError(&#34;redirect_uri must be provided, either at construction or request time&#34;)
-        if self.use_state:
-            self.state = str(uuid4())
         request_uri = self.oauth_client.prepare_request_uri(
-            await self.authorization_endpoint, redirect_uri=redirect_uri, state=self.state, scope=self.scope, **params
+            await self.authorization_endpoint, redirect_uri=redirect_uri, state=state, scope=self.scope, **params
         )
         return request_uri
 
     async def get_login_redirect(
-        self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None
+        self,
+        *,
+        redirect_uri: Optional[str] = None,
+        params: Optional[Dict[str, Any]] = None,
+        state: Optional[str] = None,
     ) -&gt; RedirectResponse:
         &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
 
         Arguments:
             redirect_uri {Optional[str]} -- Override redirect_uri specified on this instance (default: None)
             params {Optional[Dict[str, Any]]} -- Add additional query parameters to the login request.
+            state {Optional[str]} -- Add state parameter. This is useful if you want
+                                    the server to return something specific back to you.
 
         Returns:
             RedirectResponse -- Starlette response (may directly be returned from FastAPI)
         &#34;&#34;&#34;
-        login_uri = await self.get_login_url(redirect_uri=redirect_uri, params=params)
+        login_uri = await self.get_login_url(redirect_uri=redirect_uri, params=params, state=state)
         response = RedirectResponse(login_uri, 303)
-        if self.state is not None and self.use_state:
-            response.set_cookie(&#34;ssostate&#34;, self.state, expires=600)
         return response
 
     async def verify_and_process(
@@ -517,14 +565,7 @@ dict(one=1, two=2)</p></div>
         code = request.query_params.get(&#34;code&#34;)
         if code is None:
             raise SSOLoginError(400, &#34;&#39;code&#39; parameter was not found in callback request&#34;)
-        if self.state is not None and self.use_state:
-            ssostate = request.cookies.get(&#34;ssostate&#34;)
-            if ssostate is None or ssostate != self.state:
-                raise SSOLoginError(
-                    401,
-                    &#34;&#39;state&#39; parameter in callback request does not match our internal &#39;state&#39;, &#34;
-                    &#34;someone may be trying to do something bad.&#34;,
-                )
+        self._state = request.query_params.get(&#34;state&#34;)
         return await self.process_login(
             code, request, params=params, additional_headers=headers, redirect_uri=redirect_uri
         )
@@ -620,10 +661,6 @@ dict(one=1, two=2)</p></div>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="fastapi_sso.sso.base.SSOBase.state"><code class="name">var <span class="ident">state</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 </dl>
 <h3>Static methods</h3>
 <dl>
@@ -702,6 +739,25 @@ def refresh_token(self) -&gt; Optional[str]:
     return self._refresh_token or self.oauth_client.refresh_token</code></pre>
 </details>
 </dd>
+<dt id="fastapi_sso.sso.base.SSOBase.state"><code class="name">var <span class="ident">state</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"><p>Gets state as it was returned from the server</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def state(self) -&gt; Optional[str]:
+    &#34;&#34;&#34;Gets state as it was returned from the server&#34;&#34;&#34;
+    if self._state is None:
+        warnings.warn(
+            &#34;&#39;state&#39; parameter is unset. This means the server either &#34;
+            &#34;didn&#39;t return state (was this expected?) or &#39;verify_and_process&#39; hasn&#39;t been called yet.&#34;,
+            UnsetStateWarning,
+        )
+    return self._state</code></pre>
+</details>
+</dd>
 <dt id="fastapi_sso.sso.base.SSOBase.token_endpoint"><code class="name">var <span class="ident">token_endpoint</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"><p>Return <code>token_endpoint</code> from discovery document</p></div>
@@ -748,13 +804,15 @@ async def userinfo_endpoint(self) -&gt; Optional[str]:
 </details>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase.get_login_redirect"><code class="name flex">
-<span>async def <span class="ident">get_login_redirect</span></span>(<span>self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None) ‑> starlette.responses.RedirectResponse</span>
+<span>async def <span class="ident">get_login_redirect</span></span>(<span>self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None, state: Optional[str] = None) ‑> starlette.responses.RedirectResponse</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return redirect response by Stalette to login page of Oauth SSO provider</p>
 <h2 id="arguments">Arguments</h2>
 <p>redirect_uri {Optional[str]} &ndash; Override redirect_uri specified on this instance (default: None)
-params {Optional[Dict[str, Any]]} &ndash; Add additional query parameters to the login request.</p>
+params {Optional[Dict[str, Any]]} &ndash; Add additional query parameters to the login request.
+state {Optional[str]} &ndash; Add state parameter. This is useful if you want
+the server to return something specific back to you.</p>
 <h2 id="returns">Returns</h2>
 <p>RedirectResponse &ndash; Starlette response (may directly be returned from FastAPI)</p></div>
 <details class="source">
@@ -762,26 +820,30 @@ params {Optional[Dict[str, Any]]} &ndash; Add additional query parameters to the
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">async def get_login_redirect(
-    self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None
+    self,
+    *,
+    redirect_uri: Optional[str] = None,
+    params: Optional[Dict[str, Any]] = None,
+    state: Optional[str] = None,
 ) -&gt; RedirectResponse:
     &#34;&#34;&#34;Return redirect response by Stalette to login page of Oauth SSO provider
 
     Arguments:
         redirect_uri {Optional[str]} -- Override redirect_uri specified on this instance (default: None)
         params {Optional[Dict[str, Any]]} -- Add additional query parameters to the login request.
+        state {Optional[str]} -- Add state parameter. This is useful if you want
+                                the server to return something specific back to you.
 
     Returns:
         RedirectResponse -- Starlette response (may directly be returned from FastAPI)
     &#34;&#34;&#34;
-    login_uri = await self.get_login_url(redirect_uri=redirect_uri, params=params)
+    login_uri = await self.get_login_url(redirect_uri=redirect_uri, params=params, state=state)
     response = RedirectResponse(login_uri, 303)
-    if self.state is not None and self.use_state:
-        response.set_cookie(&#34;ssostate&#34;, self.state, expires=600)
     return response</code></pre>
 </details>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase.get_login_url"><code class="name flex">
-<span>async def <span class="ident">get_login_url</span></span>(<span>self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None) ‑> str</span>
+<span>async def <span class="ident">get_login_url</span></span>(<span>self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None, state: Optional[str] = None) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return prepared login url. This is low-level, see {get_login_redirect} instead.</p></div>
@@ -790,17 +852,19 @@ params {Optional[Dict[str, Any]]} &ndash; Add additional query parameters to the
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">async def get_login_url(
-    self, *, redirect_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None
+    self,
+    *,
+    redirect_uri: Optional[str] = None,
+    params: Optional[Dict[str, Any]] = None,
+    state: Optional[str] = None,
 ) -&gt; str:
     &#34;&#34;&#34;Return prepared login url. This is low-level, see {get_login_redirect} instead.&#34;&#34;&#34;
     params = params or {}
     redirect_uri = redirect_uri or self.redirect_uri
     if redirect_uri is None:
         raise ValueError(&#34;redirect_uri must be provided, either at construction or request time&#34;)
-    if self.use_state:
-        self.state = str(uuid4())
     request_uri = self.oauth_client.prepare_request_uri(
-        await self.authorization_endpoint, redirect_uri=redirect_uri, state=self.state, scope=self.scope, **params
+        await self.authorization_endpoint, redirect_uri=redirect_uri, state=state, scope=self.scope, **params
     )
     return request_uri</code></pre>
 </details>
@@ -911,14 +975,7 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
     code = request.query_params.get(&#34;code&#34;)
     if code is None:
         raise SSOLoginError(400, &#34;&#39;code&#39; parameter was not found in callback request&#34;)
-    if self.state is not None and self.use_state:
-        ssostate = request.cookies.get(&#34;ssostate&#34;)
-        if ssostate is None or ssostate != self.state:
-            raise SSOLoginError(
-                401,
-                &#34;&#39;state&#39; parameter in callback request does not match our internal &#39;state&#39;, &#34;
-                &#34;someone may be trying to do something bad.&#34;,
-            )
+    self._state = request.query_params.get(&#34;state&#34;)
     return await self.process_login(
         code, request, params=params, additional_headers=headers, redirect_uri=redirect_uri
     )</code></pre>
@@ -945,6 +1002,27 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>starlette.exceptions.HTTPException</li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="fastapi_sso.sso.base.UnsetStateWarning"><code class="flex name class">
+<span>class <span class="ident">UnsetStateWarning</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Warning about unset state parameter</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UnsetStateWarning(UserWarning):
+    &#34;&#34;&#34;Warning about unset state parameter&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.UserWarning</li>
+<li>builtins.Warning</li>
 <li>builtins.Exception</li>
 <li>builtins.BaseException</li>
 </ul>
@@ -1011,6 +1089,9 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
 </li>
 <li>
 <h4><code><a title="fastapi_sso.sso.base.SSOLoginError" href="#fastapi_sso.sso.base.SSOLoginError">SSOLoginError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="fastapi_sso.sso.base.UnsetStateWarning" href="#fastapi_sso.sso.base.UnsetStateWarning">UnsetStateWarning</a></code></h4>
 </li>
 </ul>
 </li>
