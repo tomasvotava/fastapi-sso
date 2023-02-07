@@ -1,6 +1,6 @@
 """Naver SSO Oauth Helper class"""
 
-
+from typing import List
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 
@@ -8,14 +8,14 @@ class NaverSSO(SSOBase):
     """Class providing login using Naver OAuth"""
 
     provider = "naver"
-    scope = []
+    scope: List[str] = []
     additional_headers = {"accept": "application/json"}
 
     async def get_discovery_document(self) -> DiscoveryDocument:
         return {
             "authorization_endpoint": "https://nid.naver.com/oauth2.0/authorize",
             "token_endpoint": "https://nid.naver.com/oauth2.0/token",
-            "userinfo_endpoint": f"https://openapi.naver.com/v1/nid/me",
+            "userinfo_endpoint": "https://openapi.naver.com/v1/nid/me",
         }
 
     @classmethod
