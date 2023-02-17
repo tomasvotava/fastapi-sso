@@ -53,22 +53,25 @@ For more examples, see [`examples`](/examples/) directory.
 """This is an example usage of fastapi-sso.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from starlette.requests import Request
 from fastapi_sso.sso.google import GoogleSSO
 
 app = FastAPI()
 
-google_sso = GoogleSSO("my-client-id", "my-client-secret", "https://my.awesome-web.com/google/callback")
+def get_google_sso() -> GoogleSSO:
+    # the sso object keeps state, esp during verify_and_process so it's safer
+    # if each incoming request has it's own object.
+    return GoogleSSO("my-client-id", "my-client-secret", "https://my.awesome-web.com/google/callback")
 
 @app.get("/google/login")
-async def google_login():
+async def google_login(google_sso: GoogleSSO = Depends(get_google_sso)):
     """Generate login url and redirect"""
     return await google_sso.get_login_redirect()
 
 
 @app.get("/google/callback")
-async def google_callback(request: Request):
+async def google_callback(request: Request, google_sso: GoogleSSO = Depends(get_google_sso)):
     """Process login response from Google and return user info"""
     user = await google_sso.verify_and_process(request)
     return {
