@@ -26,6 +26,7 @@ I tend to process Pull Requests faster when properly caffeinated 😉.
 ### Contributed
 
 - Kakao (by Jae-Baek Song - [thdwoqor](https://github.com/thdwoqor))
+- Naver (by 1tang2bang92) - [1tang2bang92](https://github.com/1tang2bang92)
 
 See [Contributing](#contributing) for a guide on how to contribute your own login provider.
 
