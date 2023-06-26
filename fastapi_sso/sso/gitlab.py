@@ -7,7 +7,7 @@ class GitlabSSO(SSOBase):
     """Class providing login via Gitlab SSO"""
 
     provider = "gitlab"
-    scope = ["read_user"]
+    scope = ["read_user", "openid", "profile"]
     additional_headers = {"accept": "application/json"}
 
     async def get_discovery_document(self) -> DiscoveryDocument:
@@ -23,6 +23,6 @@ class GitlabSSO(SSOBase):
             email=response["email"],
             provider=cls.provider,
             id=response["id"],
-            display_name=response["login"],
+            display_name=response["username"],
             picture=response["avatar_url"],
         )
