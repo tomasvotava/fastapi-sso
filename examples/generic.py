@@ -48,13 +48,15 @@ sso = GenericSSO(
 @app.get("/login")
 async def sso_login():
     """Generate login url and redirect"""
-    return await sso.get_login_redirect()
+    with sso:
+        return await sso.get_login_redirect()
 
 
 @app.get("/callback")
 async def sso_callback(request: Request):
     """Process login response from OIDC and return user info"""
-    user = await sso.verify_and_process(request)
+    with sso:
+        user = await sso.verify_and_process(request)
     if user is None:
         raise HTTPException(401, "Failed to fetch user information")
     return {

@@ -4,6 +4,14 @@ FastAPI plugin to enable SSO to most common providers (such as Facebook login, G
 
 This allows you to implement the famous `Login with Google/Facebook/Microsoft` buttons functionality on your backend very easily.
 
+## Security warning
+
+Please note that versions preceding `0.7.0` had a security vulnerability.
+The SSO instance could share state between requests, which could lead to security issues. **Please update to `0.7.0` or newer**.
+
+Also, the preferred way of using the SSO instances is to use `with` statement, which will ensure the state is cleared.
+See example below.
+
 ## Support this project
 
 If you'd like to support this project, consider [buying me a coffee ☕](https://www.buymeacoffee.com/tomas.votava).
@@ -27,6 +35,7 @@ I tend to process Pull Requests faster when properly caffeinated 😉.
 
 - Kakao (by Jae-Baek Song - [thdwoqor](https://github.com/thdwoqor))
 - Naver (by 1tang2bang92) - [1tang2bang92](https://github.com/1tang2bang92)
+- Gitlab (by Alessandro Pischedda) - [Cereal84](https://github.com/Cereal84)
 
 See [Contributing](#contributing) for a guide on how to contribute your own login provider.
 
@@ -65,13 +74,15 @@ google_sso = GoogleSSO("my-client-id", "my-client-secret", "https://my.awesome-w
 @app.get("/google/login")
 async def google_login():
     """Generate login url and redirect"""
-    return await google_sso.get_login_redirect()
+    with google_sso:
+        return await google_sso.get_login_redirect()
 
 
 @app.get("/google/callback")
 async def google_callback(request: Request):
     """Process login response from Google and return user info"""
-    user = await google_sso.verify_and_process(request)
+    with google_sso:
+        user = await google_sso.verify_and_process(request)
     return {
         "id": user.id,
         "picture": user.picture,
