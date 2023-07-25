@@ -34,7 +34,8 @@
 import json
 import sys
 import warnings
-from typing import Any, Dict, List, Optional
+from types import TracebackType
+from typing import Any, Dict, List, Optional, Type
 
 import httpx
 import pydantic
@@ -55,6 +56,10 @@ DiscoveryDocument = TypedDict(
 
 class UnsetStateWarning(UserWarning):
     &#34;&#34;&#34;Warning about unset state parameter&#34;&#34;&#34;
+
+
+class ReusedOauthClientWarning(UserWarning):
+    &#34;&#34;&#34;Warning about reused oauth client instance&#34;&#34;&#34;
 
 
 class SSOLoginError(HTTPException):
@@ -84,7 +89,6 @@ class SSOBase:
     client_secret: str = NotImplemented
     redirect_uri: Optional[str] = NotImplemented
     scope: List[str] = NotImplemented
-    _oauth_client: Optional[WebApplicationClient] = None
     additional_headers: Optional[Dict[str, Any]] = None
 
     def __init__(
@@ -101,6 +105,7 @@ class SSOBase:
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
+        self._oauth_client: Optional[WebApplicationClient] = None
         # TODO: Remove use_state argument and attribute
         if use_state:
             warnings.warn(
@@ -237,6 +242,19 @@ class SSOBase:
             code, request, params=params, additional_headers=headers, redirect_uri=redirect_uri
         )
 
+    def __enter__(self) -&gt; &#34;SSOBase&#34;:
+        self._oauth_client = None
+        self._refresh_token = None
+        return self
+
+    def __exit__(
+        self,
+        _exc_type: Optional[Type[BaseException]],
+        _exc_val: Optional[BaseException],
+        _exc_tb: Optional[TracebackType],
+    ) -&gt; None:
+        return None
+
     async def process_login(
         self,
         code: str,
@@ -254,6 +272,16 @@ class SSOBase:
             additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
         &#34;&#34;&#34;
         # pylint: disable=too-many-locals
+        if self._oauth_client is not None:
+            self._oauth_client = None
+            self._refresh_token = None
+            warnings.warn(
+                (
+                    &#34;Reusing the SSO object is not safe and caused a security issue in previous versions.&#34;
+                    &#34;To make sure you don&#39;t see this warning, please use the SSO object as a context manager.&#34;
+                ),
+                ReusedOauthClientWarning,
+            )
         params = params or {}
         additional_headers = additional_headers or {}
         additional_headers.update(self.additional_headers or {})
@@ -398,6 +426,27 @@ dict(one=1, two=2)</p></div>
 </dd>
 </dl>
 </dd>
+<dt id="fastapi_sso.sso.base.ReusedOauthClientWarning"><code class="flex name class">
+<span>class <span class="ident">ReusedOauthClientWarning</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Warning about reused oauth client instance</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ReusedOauthClientWarning(UserWarning):
+    &#34;&#34;&#34;Warning about reused oauth client instance&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.UserWarning</li>
+<li>builtins.Warning</li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
 <dt id="fastapi_sso.sso.base.SSOBase"><code class="flex name class">
 <span>class <span class="ident">SSOBase</span></span>
 <span>(</span><span>client_id: str, client_secret: str, redirect_uri: Optional[str] = None, allow_insecure_http: bool = False, use_state: bool = False, scope: Optional[List[str]] = None)</span>
@@ -416,7 +465,6 @@ dict(one=1, two=2)</p></div>
     client_secret: str = NotImplemented
     redirect_uri: Optional[str] = NotImplemented
     scope: List[str] = NotImplemented
-    _oauth_client: Optional[WebApplicationClient] = None
     additional_headers: Optional[Dict[str, Any]] = None
 
     def __init__(
@@ -433,6 +481,7 @@ dict(one=1, two=2)</p></div>
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
+        self._oauth_client: Optional[WebApplicationClient] = None
         # TODO: Remove use_state argument and attribute
         if use_state:
             warnings.warn(
@@ -569,6 +618,19 @@ dict(one=1, two=2)</p></div>
             code, request, params=params, additional_headers=headers, redirect_uri=redirect_uri
         )
 
+    def __enter__(self) -&gt; &#34;SSOBase&#34;:
+        self._oauth_client = None
+        self._refresh_token = None
+        return self
+
+    def __exit__(
+        self,
+        _exc_type: Optional[Type[BaseException]],
+        _exc_val: Optional[BaseException],
+        _exc_tb: Optional[TracebackType],
+    ) -&gt; None:
+        return None
+
     async def process_login(
         self,
         code: str,
@@ -586,6 +648,16 @@ dict(one=1, two=2)</p></div>
             additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
         &#34;&#34;&#34;
         # pylint: disable=too-many-locals
+        if self._oauth_client is not None:
+            self._oauth_client = None
+            self._refresh_token = None
+            warnings.warn(
+                (
+                    &#34;Reusing the SSO object is not safe and caused a security issue in previous versions.&#34;
+                    &#34;To make sure you don&#39;t see this warning, please use the SSO object as a context manager.&#34;
+                ),
+                ReusedOauthClientWarning,
+            )
         params = params or {}
         additional_headers = additional_headers or {}
         additional_headers.update(self.additional_headers or {})
@@ -629,6 +701,7 @@ dict(one=1, two=2)</p></div>
 <li><a title="fastapi_sso.sso.facebook.FacebookSSO" href="facebook.html#fastapi_sso.sso.facebook.FacebookSSO">FacebookSSO</a></li>
 <li><a title="fastapi_sso.sso.fitbit.FitbitSSO" href="fitbit.html#fastapi_sso.sso.fitbit.FitbitSSO">FitbitSSO</a></li>
 <li><a title="fastapi_sso.sso.github.GithubSSO" href="github.html#fastapi_sso.sso.github.GithubSSO">GithubSSO</a></li>
+<li><a title="fastapi_sso.sso.gitlab.GitlabSSO" href="gitlab.html#fastapi_sso.sso.gitlab.GitlabSSO">GitlabSSO</a></li>
 <li><a title="fastapi_sso.sso.google.GoogleSSO" href="google.html#fastapi_sso.sso.google.GoogleSSO">GoogleSSO</a></li>
 <li><a title="fastapi_sso.sso.kakao.KakaoSSO" href="kakao.html#fastapi_sso.sso.kakao.KakaoSSO">KakaoSSO</a></li>
 <li><a title="fastapi_sso.sso.microsoft.MicrosoftSSO" href="microsoft.html#fastapi_sso.sso.microsoft.MicrosoftSSO">MicrosoftSSO</a></li>
@@ -899,6 +972,16 @@ additional_headers {Optional[Dict[str, Any]]} &ndash; Optional additional header
         additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
     &#34;&#34;&#34;
     # pylint: disable=too-many-locals
+    if self._oauth_client is not None:
+        self._oauth_client = None
+        self._refresh_token = None
+        warnings.warn(
+            (
+                &#34;Reusing the SSO object is not safe and caused a security issue in previous versions.&#34;
+                &#34;To make sure you don&#39;t see this warning, please use the SSO object as a context manager.&#34;
+            ),
+            ReusedOauthClientWarning,
+        )
     params = params or {}
     additional_headers = additional_headers or {}
     additional_headers.update(self.additional_headers or {})
@@ -1062,6 +1145,9 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
 <li><code><a title="fastapi_sso.sso.base.OpenID.picture" href="#fastapi_sso.sso.base.OpenID.picture">picture</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.provider" href="#fastapi_sso.sso.base.OpenID.provider">provider</a></code></li>
 </ul>
+</li>
+<li>
+<h4><code><a title="fastapi_sso.sso.base.ReusedOauthClientWarning" href="#fastapi_sso.sso.base.ReusedOauthClientWarning">ReusedOauthClientWarning</a></code></h4>
 </li>
 <li>
 <h4><code><a title="fastapi_sso.sso.base.SSOBase" href="#fastapi_sso.sso.base.SSOBase">SSOBase</a></code></h4>
