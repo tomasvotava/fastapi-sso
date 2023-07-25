@@ -6,7 +6,7 @@ import json
 import sys
 import warnings
 from types import TracebackType
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type
 
 import httpx
 import pydantic
@@ -219,7 +219,10 @@ class SSOBase:
         return self
 
     def __exit__(
-        self, _exc_type: type[BaseException] | None, _exc_val: BaseException | None, _exc_tb: TracebackType | None
+        self,
+        _exc_type: Optional[Type[BaseException]],
+        _exc_val: Optional[BaseException],
+        _exc_tb: Optional[TracebackType],
     ) -> None:
         return None
 
