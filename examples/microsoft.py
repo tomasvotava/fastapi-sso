@@ -25,13 +25,15 @@ sso = MicrosoftSSO(
 @app.get("/auth/login")
 async def auth_init():
     """Initialize auth and redirect"""
-    return await sso.get_login_redirect()
+    with sso:
+        return await sso.get_login_redirect()
 
 
 @app.get("/auth/callback")
 async def auth_callback(request: Request):
     """Verify login"""
-    return await sso.verify_and_process(request)
+    with sso:
+        return await sso.verify_and_process(request)
 
 
 if __name__ == "__main__":
