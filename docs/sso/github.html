@@ -51,7 +51,7 @@ class GithubSSO(SSOBase):
         return OpenID(
             email=response[&#34;email&#34;],
             provider=cls.provider,
-            id=response[&#34;id&#34;],
+            id=str(response[&#34;id&#34;]),
             display_name=response[&#34;login&#34;],
             picture=response[&#34;avatar_url&#34;],
         )</code></pre>
@@ -95,7 +95,7 @@ class GithubSSO(SSOBase):
         return OpenID(
             email=response[&#34;email&#34;],
             provider=cls.provider,
-            id=response[&#34;id&#34;],
+            id=str(response[&#34;id&#34;]),
             display_name=response[&#34;login&#34;],
             picture=response[&#34;avatar_url&#34;],
         )</code></pre>
