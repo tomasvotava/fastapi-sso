@@ -15,19 +15,19 @@ line_length = 119
 
 [tool.poetry.dependencies]
 python = ">=3.7,<4.0"
-fastapi = "<1"
+fastapi = ">=0.80"
 oauthlib = ">=3.1.0"
 starlette = ">=0.13.6"
-pydantic = ">=1.8.1"
-httpx = "^0.23.0"
+pydantic = ">=1.8.0"
+httpx = ">=0.23.0"
 
 [tool.poetry.dev-dependencies]
-black = "^22.3"
-pylint = "^2.7.2"
+black = ">=22.3"
+pylint = ">=2.7.2"
 fastapi = "<1"
-pdoc3 = "^0.9.2"
-uvicorn = "^0.17.6"
-mypy = "^0.960"
+pdoc3 = ">=0.9.2"
+uvicorn = ">=0.17.6"
+mypy = ">=0.960"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
