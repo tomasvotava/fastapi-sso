@@ -1,6 +1,7 @@
 """Naver SSO Oauth Helper class"""
 
 from typing import List
+
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 
