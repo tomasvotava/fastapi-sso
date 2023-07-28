@@ -1,4 +1,4 @@
-name: Pylint
+name: Code quality
 
 on: [push, pull_request]
 
@@ -8,10 +8,10 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"
+          - "3.11"
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
@@ -25,11 +25,10 @@ jobs:
         run: |
           POETRY_VIRTUALENVS_CREATE=false ~/.local/bin/poetry install
       - name: Analysing the code with pylint
-        run: |
-          python -m pylint --disable fixme fastapi_sso
+        run: ~/.local/bin/poetry run poe pylint
       - name: Static type-checking using mypy
-        run: |
-          python -m mypy fastapi_sso
+        run: ~/.local/bin/poetry run poe mypy
       - name: Format checking using black
-        run: |
-          python -m black --check fastapi_sso
+        run: ~/.local/bin/poetry run poe black-check
+      - name: Format checking using isort
+        run: ~/.local/bin/poetry run poe isort-check
