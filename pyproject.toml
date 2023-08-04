@@ -10,6 +10,11 @@ homepage = "https://tomasvotava.github.io/fastapi-sso/"
 documentation = "https://tomasvotava.github.io/fastapi-sso/"
 keywords = ["fastapi", "sso", "oauth", "google", "facebook", "spotify"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests/"]
+asyncio_mode = "auto"
+addopts = ["-v", "--cov=fastapi_sso", "--cov-report=xml:cov.xml"]
+
 [tool.poe.tasks]
 pylint = "pylint --disable fixme fastapi_sso"
 todos = "pylint --disable all --enable fixme fastapi_sso"
@@ -22,6 +27,8 @@ isort-check = "isort --check-only fastapi_sso"
 format = ["black", "isort"]
 lint = ["pylint", "mypy", "black-check", "isort-check"]
 
+test = "pytest"
+
 [tool.poetry.group.dev.dependencies]
 black = ">=23.7.0"
 pylint = ">=2.17.5"
@@ -33,6 +40,7 @@ pytest-cov = "^4.1.0"
 tox = "^4"
 poethepoet = "^0.21.1"
 isort = "^5.12.0"
+pytest-asyncio = "^0.21.1"
 
 [tool.black]
 line_length = 119

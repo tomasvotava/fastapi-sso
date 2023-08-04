@@ -18,7 +18,7 @@ from starlette.responses import RedirectResponse
 if sys.version_info >= (3, 8):
     from typing import TypedDict
 else:
-    from typing_extensions import TypedDict
+    from typing_extensions import TypedDict  # pragma: no cover
 
 DiscoveryDocument = TypedDict(
     "DiscoveryDocument", {"authorization_endpoint": str, "token_endpoint": str, "userinfo_endpoint": str}
@@ -105,7 +105,7 @@ class SSOBase:
     def oauth_client(self) -> WebApplicationClient:
         """OAuth Client to help us generate requests and parse responses"""
         if self.client_id == NotImplemented:
-            raise NotImplementedError(f"Provider {self.provider} not supported")
+            raise NotImplementedError(f"Provider {self.provider} not supported")  # pragma: no cover
         if self._oauth_client is None:
             self._oauth_client = WebApplicationClient(self.client_id)
         return self._oauth_client
