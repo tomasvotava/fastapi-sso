@@ -23,6 +23,8 @@ jobs:
       - name: Install poetry
         run: |
           curl -sSL https://install.python-poetry.org | python -
+      - name: Install dependencies
+        run: ~/.local/bin/poetry install
       - name: pytest
         run: ~/.local/bin/poetry run poe test --junitxml=pytest-results-${{ matrix.python-version }}.xml
       - name: coverage
