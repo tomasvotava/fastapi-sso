@@ -1,0 +1,47 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    env:
+      POETRY_VIRTUALENVS_CREATE: "false"
+    strategy:
+      matrix:
+        python-version:
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python -
+      - name: pytest
+        run: ~/.local/bin/poetry run poe test --junitxml=pytest-results-${{ matrix.python-version }}.xml
+      - name: coverage
+        run: ~/.local/bin/poetry run poe coverage
+      - name: Upload pytest results
+        uses: actions/upload-artifact@v3
+        with:
+          name: pytest-results-${{ matrix.python-version }}
+          path: pytest-results-${{ matrix.python-version }}.xml
+        if: ${{ always() }}
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-${{ matrix.python-version }}
+          path: cov.xml
+        if: ${{ always() }}
+      - name: Upload coverage database
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-${{ matrix.python-version }}.sqlite3
+          path: .coverage
+        if: ${{ always() }}

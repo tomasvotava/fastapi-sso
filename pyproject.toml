@@ -28,6 +28,7 @@ format = ["black", "isort"]
 lint = ["pylint", "mypy", "black-check", "isort-check"]
 
 test = "pytest"
+coverage = "coverage report"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=23.7.0"

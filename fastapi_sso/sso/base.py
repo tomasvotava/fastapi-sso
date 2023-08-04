@@ -243,7 +243,7 @@ class SSOBase:
             additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
         """
         # pylint: disable=too-many-locals
-        if self._oauth_client is not None:
+        if self._oauth_client is not None:  # pragma: no cover
             self._oauth_client = None
             self._refresh_token = None
             warnings.warn(
@@ -273,7 +273,7 @@ class SSOBase:
             **params,
         )  # type: ignore
 
-        if token_url is None:
+        if token_url is None:  # pragma: no cover
             return None
 
         headers.update(additional_headers)

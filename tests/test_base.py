@@ -1,15 +1,9 @@
 # type: ignore
 
 import pytest
+from utils import Request
 
-from fastapi_sso.sso.base import SSOBase, UnsetStateWarning, SSOLoginError
-from starlette.datastructures import URL
-
-
-class Request:
-    def __init__(self, url="http://localhost", query_params=None):
-        self.url = URL("http://localhost")
-        self.query_params = query_params or {}
+from fastapi_sso.sso.base import SSOBase, SSOLoginError, UnsetStateWarning
 
 
 class TestSSOBase:
