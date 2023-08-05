@@ -19,6 +19,8 @@ addopts = [
     "--cov-report=xml:coverage.xml",
     "--cov-report=json:coverage.json",
     "--cov-report=term-missing",
+    "-n",
+    "auto",
 ]
 
 [tool.poe.tasks]
@@ -48,6 +50,7 @@ tox = "^4"
 poethepoet = "^0.21.1"
 isort = "^5.12.0"
 pytest-asyncio = "^0.21.1"
+pytest-xdist = "^3.3.1"
 
 [tool.black]
 line_length = 119
