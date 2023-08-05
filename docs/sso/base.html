@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.2" />
+<meta name="generator" content="pdoc 0.10.0" />
 <title>fastapi_sso.sso.base API documentation</title>
 <meta name="description" content="SSO login base dependency" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -47,7 +47,7 @@ from starlette.responses import RedirectResponse
 if sys.version_info &gt;= (3, 8):
     from typing import TypedDict
 else:
-    from typing_extensions import TypedDict
+    from typing_extensions import TypedDict  # pragma: no cover
 
 DiscoveryDocument = TypedDict(
     &#34;DiscoveryDocument&#34;, {&#34;authorization_endpoint&#34;: str, &#34;token_endpoint&#34;: str, &#34;userinfo_endpoint&#34;: str}
@@ -134,7 +134,7 @@ class SSOBase:
     def oauth_client(self) -&gt; WebApplicationClient:
         &#34;&#34;&#34;OAuth Client to help us generate requests and parse responses&#34;&#34;&#34;
         if self.client_id == NotImplemented:
-            raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
+            raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)  # pragma: no cover
         if self._oauth_client is None:
             self._oauth_client = WebApplicationClient(self.client_id)
         return self._oauth_client
@@ -272,7 +272,7 @@ class SSOBase:
             additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
         &#34;&#34;&#34;
         # pylint: disable=too-many-locals
-        if self._oauth_client is not None:
+        if self._oauth_client is not None:  # pragma: no cover
             self._oauth_client = None
             self._refresh_token = None
             warnings.warn(
@@ -302,7 +302,7 @@ class SSOBase:
             **params,
         )  # type: ignore
 
-        if token_url is None:
+        if token_url is None:  # pragma: no cover
             return None
 
         headers.update(additional_headers)
@@ -373,7 +373,10 @@ dict(one=1, two=2)</p></div>
 <dd>
 <div class="desc"><p>Class (schema) to represent information got from sso provider in a common form.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
+allow <code>self</code> as a field name.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -392,7 +395,6 @@ dict(one=1, two=2)</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.main.BaseModel</li>
-<li>pydantic.utils.Representation</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -413,6 +415,14 @@ dict(one=1, two=2)</p></div>
 <div class="desc"></div>
 </dd>
 <dt id="fastapi_sso.sso.base.OpenID.last_name"><code class="name">var <span class="ident">last_name</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.OpenID.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.OpenID.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -510,7 +520,7 @@ dict(one=1, two=2)</p></div>
     def oauth_client(self) -&gt; WebApplicationClient:
         &#34;&#34;&#34;OAuth Client to help us generate requests and parse responses&#34;&#34;&#34;
         if self.client_id == NotImplemented:
-            raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
+            raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)  # pragma: no cover
         if self._oauth_client is None:
             self._oauth_client = WebApplicationClient(self.client_id)
         return self._oauth_client
@@ -648,7 +658,7 @@ dict(one=1, two=2)</p></div>
             additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
         &#34;&#34;&#34;
         # pylint: disable=too-many-locals
-        if self._oauth_client is not None:
+        if self._oauth_client is not None:  # pragma: no cover
             self._oauth_client = None
             self._refresh_token = None
             warnings.warn(
@@ -678,7 +688,7 @@ dict(one=1, two=2)</p></div>
             **params,
         )  # type: ignore
 
-        if token_url is None:
+        if token_url is None:  # pragma: no cover
             return None
 
         headers.update(additional_headers)
@@ -793,7 +803,7 @@ async def authorization_endpoint(self) -&gt; Optional[str]:
 def oauth_client(self) -&gt; WebApplicationClient:
     &#34;&#34;&#34;OAuth Client to help us generate requests and parse responses&#34;&#34;&#34;
     if self.client_id == NotImplemented:
-        raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
+        raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)  # pragma: no cover
     if self._oauth_client is None:
         self._oauth_client = WebApplicationClient(self.client_id)
     return self._oauth_client</code></pre>
@@ -972,7 +982,7 @@ additional_headers {Optional[Dict[str, Any]]} &ndash; Optional additional header
         additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
     &#34;&#34;&#34;
     # pylint: disable=too-many-locals
-    if self._oauth_client is not None:
+    if self._oauth_client is not None:  # pragma: no cover
         self._oauth_client = None
         self._refresh_token = None
         warnings.warn(
@@ -1002,7 +1012,7 @@ additional_headers {Optional[Dict[str, Any]]} &ndash; Optional additional header
         **params,
     )  # type: ignore
 
-    if token_url is None:
+    if token_url is None:  # pragma: no cover
         return None
 
     headers.update(additional_headers)
@@ -1142,6 +1152,8 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
 <li><code><a title="fastapi_sso.sso.base.OpenID.first_name" href="#fastapi_sso.sso.base.OpenID.first_name">first_name</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.id" href="#fastapi_sso.sso.base.OpenID.id">id</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.last_name" href="#fastapi_sso.sso.base.OpenID.last_name">last_name</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.OpenID.model_config" href="#fastapi_sso.sso.base.OpenID.model_config">model_config</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.OpenID.model_fields" href="#fastapi_sso.sso.base.OpenID.model_fields">model_fields</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.picture" href="#fastapi_sso.sso.base.OpenID.picture">picture</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.provider" href="#fastapi_sso.sso.base.OpenID.provider">provider</a></code></li>
 </ul>
@@ -1185,7 +1197,7 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
 </footer>
 </body>
 </html>
