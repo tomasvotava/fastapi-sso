@@ -29,26 +29,18 @@ jobs:
         run: ~/.local/bin/poetry run poe test --junitxml=pytest-results-${{ matrix.python-version }}.xml
       - name: coverage
         run: ~/.local/bin/poetry run poe coverage
-      - name: Upload pytest results
-        uses: actions/upload-artifact@v3
-        with:
-          name: pytest-results-${{ matrix.python-version }}
-          path: pytest-results-${{ matrix.python-version }}.xml
-        if: ${{ always() }}
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-${{ matrix.python-version }}
-          path: cov.xml
-        if: ${{ always() }}
-      - name: Upload coverage database
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-${{ matrix.python-version }}.sqlite3
-          path: .coverage
-        if: ${{ always() }}
       - name: Get Coverage Report Comment
         uses: orgoro/coverage@v3.1
         with:
-          coverageFile: cov.xml
+          coverageFile: coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ github.event_name == 'pull_request'}}
+      - id: set_var
+        run: echo "::set-output name=coverage::$(cat coverage.json)"
+      - name: Set commit status to display coverage
+        uses: myrotvorets/set-commit-status-action@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          status: success
+          # sha: ${{ github.sha }}
+          description: ${{ fromJson(steps.set_var.outputs.coverage).totals.percent_covered_display }}

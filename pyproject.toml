@@ -13,7 +13,13 @@ keywords = ["fastapi", "sso", "oauth", "google", "facebook", "spotify"]
 [tool.pytest.ini_options]
 testpaths = ["tests/"]
 asyncio_mode = "auto"
-addopts = ["-v", "--cov=fastapi_sso", "--cov-report=xml:cov.xml"]
+addopts = [
+    "-v",
+    "--cov=fastapi_sso",
+    "--cov-report=xml:coverage.xml",
+    "--cov-report=json:coverage.json",
+    "--cov-report=term-missing",
+]
 
 [tool.poe.tasks]
 pylint = "pylint --disable fixme fastapi_sso"
