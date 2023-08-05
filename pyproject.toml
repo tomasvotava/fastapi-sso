@@ -10,13 +10,49 @@ homepage = "https://tomasvotava.github.io/fastapi-sso/"
 documentation = "https://tomasvotava.github.io/fastapi-sso/"
 keywords = ["fastapi", "sso", "oauth", "google", "facebook", "spotify"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests/"]
+asyncio_mode = "auto"
+addopts = [
+    "-v",
+    "--cov=fastapi_sso",
+    "--cov-report=xml:coverage.xml",
+    "--cov-report=json:coverage.json",
+    "--cov-report=term-missing",
+    "-n",
+    "auto",
+]
+
+[tool.poe.tasks]
+pylint = "pylint --disable fixme --rcfile .pylintrc fastapi_sso"
+todos = "pylint --disable all --enable fixme --rcfile .pylintrc fastapi_sso"
+black = "black fastapi_sso"
+isort = "isort --settings-path .isort.cfg fastapi_sso"
+mypy = "mypy --config-file mypy.ini fastapi_sso"
+black-check = "black --check fastapi_sso"
+isort-check = "isort --settings-path .isort.cfg --check-only fastapi_sso"
+
+format = ["black", "isort"]
+lint = ["pylint", "mypy", "black-check", "isort-check"]
+pre-commit = "pre-commit"
+
+test = "pytest"
+coverage = "coverage report"
+
 [tool.poetry.group.dev.dependencies]
 black = ">=23.7.0"
 pylint = ">=2.17.5"
 pdoc3 = ">=0.10.0"
 uvicorn = ">=0.23.1"
 mypy = ">=1.4.1"
-
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+tox = "^4"
+poethepoet = "^0.21.1"
+isort = "^5.12.0"
+pytest-asyncio = "^0.21.1"
+pytest-xdist = "^3.3.1"
+pre-commit = "^3.3.3"
 
 [tool.black]
 line_length = 119
