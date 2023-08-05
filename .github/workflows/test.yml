@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       POETRY_VIRTUALENVS_CREATE: "false"
+      coverage_json: "{}"
     strategy:
       matrix:
         python-version:
@@ -36,11 +37,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
         if: ${{ github.event_name == 'pull_request'}}
       - id: set_var
-        run: echo "::set-output name=coverage::$(cat coverage.json)"
+        run: echo "coverage_json=$(cat coverage.json)" >> "$GITHUB_ENV"
       - name: Set commit status to display coverage
         uses: myrotvorets/set-commit-status-action@master
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           status: success
           # sha: ${{ github.sha }}
-          description: ${{ fromJson(steps.set_var.outputs.coverage).totals.percent_covered_display }}
+          description: ${{ fromJson(env.coverage_json).totals.percent_covered_display }}
