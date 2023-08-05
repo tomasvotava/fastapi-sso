@@ -1,5 +1,17 @@
 # FastAPI SSO
 
+![Supported Python Versions](https://img.shields.io/pypi/pyversions/fastapi-sso)
+![Test Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgist.githubusercontent.com%2Ftomasvotava%2F328acf6207500c2e836b1c68b5c910f7%2Fraw%2Fe0d04f38af03ec982a695b2438b37e22013edf8d%2Fcoverage.json&query=total&suffix=%25&logo=pytest&label=coverage&color=blue
+)
+![Tests Workflow Status](https://img.shields.io/github/actions/workflow/status/tomasvotava/fastapi-sso/test.yml?label=tests)
+![Pylint Workflow Status](https://img.shields.io/github/actions/workflow/status/tomasvotava/fastapi-sso/lint.yml?label=pylint)
+![Mypy Workflow Status](https://img.shields.io/github/actions/workflow/status/tomasvotava/fastapi-sso/lint.yml?label=mypy)
+![Black Workflow Status](https://img.shields.io/github/actions/workflow/status/tomasvotava/fastapi-sso/lint.yml?label=black)
+![CodeQL Workflow Status](https://img.shields.io/github/actions/workflow/status/tomasvotava/fastapi-sso/codeql-analysis.yml?label=CodeQL)
+![PyPi weekly downloads](https://img.shields.io/pypi/dw/fastapi-sso)
+![Project License](https://img.shields.io/github/license/tomasvotava/fastapi-sso)
+![PyPi Version](https://img.shields.io/pypi/v/fastapi-sso)
+
 FastAPI plugin to enable SSO to most common providers (such as Facebook login, Google login and login via Microsoft Office 365 account).
 
 This allows you to implement the famous `Login with Google/Facebook/Microsoft` buttons functionality on your backend very easily.
