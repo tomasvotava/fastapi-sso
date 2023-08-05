@@ -43,4 +43,4 @@ jobs:
           gist_id: 328acf6207500c2e836b1c68b5c910f7
           file_path: coverage.json
           file_type: text
-        if: ${{ matrix.python-version == '3.11' && github.ref_name == 'master' }}
+        if: ${{ matrix.python-version == '3.11' && github.ref_name == 'feat/pytest' }}
