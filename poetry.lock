@@ -135,13 +135,13 @@ files = [
 
 [[package]]
 name = "chardet"
-version = "5.1.0"
+version = "5.2.0"
 description = "Universal encoding detector for Python 3"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "chardet-5.1.0-py3-none-any.whl", hash = "sha256:362777fb014af596ad31334fde1e8c327dfdb076e1960d1694662d46a6917ab9"},
-    {file = "chardet-5.1.0.tar.gz", hash = "sha256:0d62712b956bc154f85fb0a266e2a3c5913c2967e00348701b32411d6def31e5"},
+    {file = "chardet-5.2.0-py3-none-any.whl", hash = "sha256:e1cf59446890a00105fe7b7912492ea04b6e6f06d4b742b2c788469e34c82970"},
+    {file = "chardet-5.2.0.tar.gz", hash = "sha256:1b3b6ff479a8c414bc3fa2c0852995695c4a026dcd6d0633b2dd092ca39c1cf7"},
 ]
 
 [[package]]
@@ -299,17 +299,17 @@ testing = ["hatch", "pre-commit", "pytest", "tox"]
 
 [[package]]
 name = "fastapi"
-version = "0.100.0"
+version = "0.101.0"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "fastapi-0.100.0-py3-none-any.whl", hash = "sha256:271662daf986da8fa98dc2b7c7f61c4abdfdccfb4786d79ed8b2878f172c6d5f"},
-    {file = "fastapi-0.100.0.tar.gz", hash = "sha256:acb5f941ea8215663283c10018323ba7ea737c571b67fc7e88e9469c7eb1d12e"},
+    {file = "fastapi-0.101.0-py3-none-any.whl", hash = "sha256:494eb3494d89e8079c20859d7ca695f66eaccc40f46fe8c75ab6186d15f05ffd"},
+    {file = "fastapi-0.101.0.tar.gz", hash = "sha256:ca2ae65fe42f6a34b5cf6c994337149154b1b400c39809d7b2dccdceb5ae77af"},
 ]
 
 [package.dependencies]
-pydantic = ">=1.7.4,<1.8 || >1.8,<1.8.1 || >1.8.1,<2.0.0 || >2.0.0,<2.0.1 || >2.0.1,<3.0.0"
+pydantic = ">=1.7.4,<1.8 || >1.8,<1.8.1 || >1.8.1,<2.0.0 || >2.0.0,<2.0.1 || >2.0.1,<2.1.0 || >2.1.0,<3.0.0"
 starlette = ">=0.27.0,<0.28.0"
 typing-extensions = ">=4.5.0"
 
@@ -721,13 +721,13 @@ files = [
 
 [[package]]
 name = "pathspec"
-version = "0.11.1"
+version = "0.11.2"
 description = "Utility library for gitignore style pattern matching of file paths."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pathspec-0.11.1-py3-none-any.whl", hash = "sha256:d8af70af76652554bd134c22b3e8a1cc46ed7d91edcdd721ef1a0c51a84a5293"},
-    {file = "pathspec-0.11.1.tar.gz", hash = "sha256:2798de800fa92780e33acca925945e9a19a133b715067cf165b8866c15a31687"},
+    {file = "pathspec-0.11.2-py3-none-any.whl", hash = "sha256:1d6ed233af05e679efb96b1851550ea95bbb64b7c490b0f5aa52996c11e92a20"},
+    {file = "pathspec-0.11.2.tar.gz", hash = "sha256:e0d8d0ac2f12da61956eb2306b69f9469b42f4deb0f3cb6ed47b9cce9996ced3"},
 ]
 
 [[package]]
@@ -747,18 +747,18 @@ markdown = ">=3.0"
 
 [[package]]
 name = "platformdirs"
-version = "3.9.1"
+version = "3.10.0"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "platformdirs-3.9.1-py3-none-any.whl", hash = "sha256:ad8291ae0ae5072f66c16945166cb11c63394c7a3ad1b1bc9828ca3162da8c2f"},
-    {file = "platformdirs-3.9.1.tar.gz", hash = "sha256:1b42b450ad933e981d56e59f1b97495428c9bd60698baab9f3eb3d00d5822421"},
+    {file = "platformdirs-3.10.0-py3-none-any.whl", hash = "sha256:d7c24979f292f916dc9cbf8648319032f551ea8c49a4c9bf2fb556a02070ec1d"},
+    {file = "platformdirs-3.10.0.tar.gz", hash = "sha256:b45696dab2d7cc691a3226759c0d3b00c47c8b6e293d96f6436f733303f77f6d"},
 ]
 
 [package.extras]
-docs = ["furo (>=2023.5.20)", "proselint (>=0.13)", "sphinx (>=7.0.1)", "sphinx-autodoc-typehints (>=1.23,!=1.23.4)"]
-test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.3.1)", "pytest-cov (>=4.1)", "pytest-mock (>=3.10)"]
+docs = ["furo (>=2023.7.26)", "proselint (>=0.13)", "sphinx (>=7.1.1)", "sphinx-autodoc-typehints (>=1.24)"]
+test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.4)", "pytest-cov (>=4.1)", "pytest-mock (>=3.11.1)"]
 
 [[package]]
 name = "pluggy"
@@ -1176,13 +1176,13 @@ files = [
 
 [[package]]
 name = "tomlkit"
-version = "0.12.0"
+version = "0.12.1"
 description = "Style preserving TOML library"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "tomlkit-0.12.0-py3-none-any.whl", hash = "sha256:926f1f37a1587c7a4f6c7484dae538f1345d96d793d9adab5d3675957b1d0766"},
-    {file = "tomlkit-0.12.0.tar.gz", hash = "sha256:01f0477981119c7d8ee0f67ebe0297a7c95b14cf9f4b102b45486deb77018716"},
+    {file = "tomlkit-0.12.1-py3-none-any.whl", hash = "sha256:712cbd236609acc6a3e2e97253dfc52d4c2082982a88f61b640ecf0817eab899"},
+    {file = "tomlkit-0.12.1.tar.gz", hash = "sha256:38e1ff8edb991273ec9f6181244a6a391ac30e9f5098e7535640ea6be97a7c86"},
 ]
 
 [[package]]
@@ -1225,13 +1225,13 @@ files = [
 
 [[package]]
 name = "uvicorn"
-version = "0.23.1"
+version = "0.23.2"
 description = "The lightning-fast ASGI server."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "uvicorn-0.23.1-py3-none-any.whl", hash = "sha256:1d55d46b83ee4ce82b4e82f621f2050adb3eb7b5481c13f9af1744951cae2f1f"},
-    {file = "uvicorn-0.23.1.tar.gz", hash = "sha256:da9b0c8443b2d7ee9db00a345f1eee6db7317432c9d4400f5049cc8d358383be"},
+    {file = "uvicorn-0.23.2-py3-none-any.whl", hash = "sha256:1f9be6558f01239d4fdf22ef8126c39cb1ad0addf76c40e760549d2c2f43ab53"},
+    {file = "uvicorn-0.23.2.tar.gz", hash = "sha256:4d3cc12d7727ba72b64d12d3cc7743124074c0a69f7b201512fc50c3e3f1569a"},
 ]
 
 [package.dependencies]
@@ -1364,4 +1364,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0"
-content-hash = "40e8c474dea7cae698264392729f662e01745b062154d21aacb0fc2917cc2456"
+content-hash = "8758b68362a7dc4b1027865859f4d6e70fa418ea3a0d7f986974bd4cf7f9d97d"
