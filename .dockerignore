@@ -1,0 +1,10 @@
+.github/
+.mypy_cache/
+.pytest_cache/
+.tox/
+.venv/
+venv/
+.vscode/
+.coverage
+coverage.json
+coverage.xml
