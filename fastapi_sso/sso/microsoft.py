@@ -9,7 +9,7 @@ class MicrosoftSSO(SSOBase):
     """Class providing login using Microsoft OAuth"""
 
     provider = "microsoft"
-    scope = ["openid"]
+    scope = ["openid", "User.Read"]
     version = "v1.0"
     tenant: str = "common"
 
@@ -42,4 +42,11 @@ class MicrosoftSSO(SSOBase):
 
     @classmethod
     async def openid_from_response(cls, response: dict) -> OpenID:
-        return OpenID(email=response["mail"], display_name=response["displayName"], provider=cls.provider)
+        return OpenID(
+            email=response["mail"],
+            display_name=response["displayName"],
+            provider=cls.provider,
+            id=response.get("id"),
+            first_name=response.get("givenName"),
+            last_name=response.get("surname"),
+        )
