@@ -25,4 +25,5 @@ class GithubSSO(SSOBase):
             id=str(response["id"]),
             display_name=response["login"],
             picture=response["avatar_url"],
+            data=response,
         )

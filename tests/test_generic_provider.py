@@ -32,13 +32,22 @@ class TestGenericProvider:
         Provider = create_provider(
             discovery_document=DISCOVERY,
             response_convertor=lambda response: OpenID(
-                id=response["id"], email=response["email"], display_name=response["display_name"]
+                id=response["id"],
+                email=response["email"],
+                display_name=response["display_name"],
+                data={"gibberish": "lorem ipsum"},
             ),
         )
         sso = Provider("client_id", "client_secret")
-        openid_response = {"id": "test", "email": "email@example.com", "display_name": "Test"}
+        openid_response = {
+            "id": "test",
+            "email": "email@example.com",
+            "display_name": "Test",
+            "data": {"gibberish": "lorem ipsum"}
+        }
         openid = await sso.openid_from_response(openid_response)
         assert openid.provider is None
         assert openid.id == openid_response["id"]
         assert openid.email == openid_response["email"]
         assert openid.display_name == openid_response["display_name"]
+        assert openid.data == openid_response["data"]

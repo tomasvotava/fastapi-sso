@@ -49,4 +49,5 @@ class MicrosoftSSO(SSOBase):
             id=response.get("id"),
             first_name=response.get("givenName"),
             last_name=response.get("surname"),
+            data=response,
         )

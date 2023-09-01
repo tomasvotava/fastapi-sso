@@ -5,6 +5,7 @@
 import json
 import sys
 import warnings
+from collections.abc import Mapping
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Type
 
@@ -49,6 +50,7 @@ class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
     display_name: Optional[str] = None
     picture: Optional[str] = None
     provider: Optional[str] = None
+    data: Optional[Mapping[str, Any]] = None
 
 
 # pylint: disable=too-many-instance-attributes

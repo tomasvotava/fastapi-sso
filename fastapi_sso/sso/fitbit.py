@@ -22,6 +22,7 @@ class FitbitSSO(SSOBase):
             display_name=info["displayName"],
             picture=info["avatar"],
             provider=cls.provider,
+            data=response,
         )
 
     async def get_discovery_document(self) -> DiscoveryDocument:

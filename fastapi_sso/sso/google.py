@@ -25,6 +25,7 @@ class GoogleSSO(SSOBase):
                 last_name=response.get("family_name"),
                 display_name=response.get("name"),
                 picture=response.get("picture"),
+                data=response,
             )
         raise SSOLoginError(401, f"User {response.get('email')} is not verified with Google")
 
