@@ -34,6 +34,7 @@
 import json
 import sys
 import warnings
+from collections.abc import Mapping
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Type
 
@@ -78,6 +79,7 @@ class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
     display_name: Optional[str] = None
     picture: Optional[str] = None
     provider: Optional[str] = None
+    data: Optional[Mapping[str, Any]] = None
 
 
 # pylint: disable=too-many-instance-attributes
@@ -390,7 +392,8 @@ allow <code>self</code> as a field name.</p></div>
     last_name: Optional[str] = None
     display_name: Optional[str] = None
     picture: Optional[str] = None
-    provider: Optional[str] = None</code></pre>
+    provider: Optional[str] = None
+    data: Optional[Mapping[str, Any]] = None</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -398,6 +401,10 @@ allow <code>self</code> as a field name.</p></div>
 </ul>
 <h3>Class variables</h3>
 <dl>
+<dt id="fastapi_sso.sso.base.OpenID.data"><code class="name">var <span class="ident">data</span> : Optional[collections.abc.Mapping[str, typing.Any]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="fastapi_sso.sso.base.OpenID.display_name"><code class="name">var <span class="ident">display_name</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
@@ -1147,6 +1154,7 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
 <li>
 <h4><code><a title="fastapi_sso.sso.base.OpenID" href="#fastapi_sso.sso.base.OpenID">OpenID</a></code></h4>
 <ul class="two-column">
+<li><code><a title="fastapi_sso.sso.base.OpenID.data" href="#fastapi_sso.sso.base.OpenID.data">data</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.display_name" href="#fastapi_sso.sso.base.OpenID.display_name">display_name</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.email" href="#fastapi_sso.sso.base.OpenID.email">email</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.first_name" href="#fastapi_sso.sso.base.OpenID.first_name">first_name</a></code></li>

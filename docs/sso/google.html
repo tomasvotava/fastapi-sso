@@ -54,6 +54,7 @@ class GoogleSSO(SSOBase):
                 last_name=response.get(&#34;family_name&#34;),
                 display_name=response.get(&#34;name&#34;),
                 picture=response.get(&#34;picture&#34;),
+                data=response,
             )
         raise SSOLoginError(401, f&#34;User {response.get(&#39;email&#39;)} is not verified with Google&#34;)
 
@@ -103,6 +104,7 @@ class GoogleSSO(SSOBase):
                 last_name=response.get(&#34;family_name&#34;),
                 display_name=response.get(&#34;name&#34;),
                 picture=response.get(&#34;picture&#34;),
+                data=response,
             )
         raise SSOLoginError(401, f&#34;User {response.get(&#39;email&#39;)} is not verified with Google&#34;)
 
@@ -155,6 +157,7 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
             last_name=response.get(&#34;family_name&#34;),
             display_name=response.get(&#34;name&#34;),
             picture=response.get(&#34;picture&#34;),
+            data=response,
         )
     raise SSOLoginError(401, f&#34;User {response.get(&#39;email&#39;)} is not verified with Google&#34;)</code></pre>
 </details>

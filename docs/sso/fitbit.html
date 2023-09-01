@@ -51,6 +51,7 @@ class FitbitSSO(SSOBase):
             display_name=info[&#34;displayName&#34;],
             picture=info[&#34;avatar&#34;],
             provider=cls.provider,
+            data=response,
         )
 
     async def get_discovery_document(self) -&gt; DiscoveryDocument:
@@ -99,6 +100,7 @@ class FitbitSSO(SSOBase):
             display_name=info[&#34;displayName&#34;],
             picture=info[&#34;avatar&#34;],
             provider=cls.provider,
+            data=response,
         )
 
     async def get_discovery_document(self) -&gt; DiscoveryDocument:
@@ -147,6 +149,7 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
         display_name=info[&#34;displayName&#34;],
         picture=info[&#34;avatar&#34;],
         provider=cls.provider,
+        data=response,
     )</code></pre>
 </details>
 </dd>
