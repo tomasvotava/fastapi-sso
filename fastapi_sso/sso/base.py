@@ -142,6 +142,13 @@ class SSOBase:
         discovery = await self.get_discovery_document()
         return discovery.get("userinfo_endpoint")
 
+    @property
+    async def emails_endpoint(self) -> Optional[str]:
+        """Return `emails_endpoint` from discovery document"""
+        discovery = await self.get_discovery_document()
+        print(discovery)
+        return discovery.get("emails_endpoint")
+
     async def get_login_url(
         self,
         *,
@@ -208,6 +215,21 @@ class SSOBase:
             code, request, params=params, additional_headers=headers, redirect_uri=redirect_uri
         )
 
+    async def get_emails(self) -> List[str]:
+        async with httpx.AsyncClient() as session:
+            #response = await session.post(token_url, headers=headers, content=body, auth=auth)
+            #content = response.json()
+            #self._refresh_token = content.get("refresh_token")
+            #self.oauth_client.parse_request_body_response(json.dumps(content))
+
+            uri, headers, _ = self.oauth_client.add_token(await self.emails_endpoint)
+            response = await session.get(uri, headers=headers)
+            content = response.json()
+            print("Requested emails")
+            print(content)
+
+        return content
+
     async def process_login(
         self,
         code: str,
@@ -260,5 +282,16 @@ class SSOBase:
             uri, headers, _ = self.oauth_client.add_token(await self.userinfo_endpoint)
             response = await session.get(uri, headers=headers)
             content = response.json()
+
+            if self.provider == "github":
+                if content["email"] is None:
+                    print("Request emails using {}".format(await self.emails_endpoint))
+                    uri, headers, _ = self.oauth_client.add_token(await self.emails_endpoint)
+                    email_response = await session.get(uri, headers=headers)
+                    emails = email_response.json()
+                    for email in emails:
+                        if email["primary"]:
+                            content["email"] = email["email"]
+                            break
 
         return await self.openid_from_response(content)
