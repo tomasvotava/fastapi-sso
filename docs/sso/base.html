@@ -34,8 +34,9 @@
 import json
 import sys
 import warnings
+
 from types import TracebackType
-from typing import Any, Dict, List, NotRequired, Optional
+from typing import Any, Dict, List, Optional, Type
 
 import httpx
 import pydantic
@@ -49,8 +50,19 @@ if sys.version_info &gt;= (3, 8):
 else:
     from typing_extensions import TypedDict  # pragma: no cover
 
+if sys.version_info &gt;= (3, 11):
+    from typing import NotRequired
+else:
+    from typing_extensions import NotRequired  # pragma: no cover
+
 DiscoveryDocument = TypedDict(
-    &#34;DiscoveryDocument&#34;, {&#34;authorization_endpoint&#34;: str, &#34;token_endpoint&#34;: str, &#34;userinfo_endpoint&#34;: str, &#34;emails_endpoint&#34;: NotRequired[str]}
+    &#34;DiscoveryDocument&#34;,
+    {
+        &#34;authorization_endpoint&#34;: str,
+        &#34;token_endpoint&#34;: str,
+        &#34;userinfo_endpoint&#34;: str,
+        &#34;emails_endpoint&#34;: NotRequired[str],
+    },
 )
 
 
@@ -383,10 +395,7 @@ dict(one=1, two=2)</p></div>
 <dd>
 <div class="desc"><p>Class (schema) to represent information got from sso provider in a common form.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
-allow <code>self</code> as a field name.</p></div>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -405,6 +414,7 @@ allow <code>self</code> as a field name.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -425,14 +435,6 @@ allow <code>self</code> as a field name.</p></div>
 <div class="desc"></div>
 </dd>
 <dt id="fastapi_sso.sso.base.OpenID.last_name"><code class="name">var <span class="ident">last_name</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="fastapi_sso.sso.base.OpenID.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="fastapi_sso.sso.base.OpenID.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1185,8 +1187,6 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
 <li><code><a title="fastapi_sso.sso.base.OpenID.first_name" href="#fastapi_sso.sso.base.OpenID.first_name">first_name</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.id" href="#fastapi_sso.sso.base.OpenID.id">id</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.last_name" href="#fastapi_sso.sso.base.OpenID.last_name">last_name</a></code></li>
-<li><code><a title="fastapi_sso.sso.base.OpenID.model_config" href="#fastapi_sso.sso.base.OpenID.model_config">model_config</a></code></li>
-<li><code><a title="fastapi_sso.sso.base.OpenID.model_fields" href="#fastapi_sso.sso.base.OpenID.model_fields">model_fields</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.picture" href="#fastapi_sso.sso.base.OpenID.picture">picture</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.provider" href="#fastapi_sso.sso.base.OpenID.provider">provider</a></code></li>
 </ul>

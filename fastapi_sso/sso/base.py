@@ -32,7 +32,8 @@ DiscoveryDocument = TypedDict(
         "authorization_endpoint": str,
         "token_endpoint": str,
         "userinfo_endpoint": str,
-        "emails_endpoint": NotRequired[str]}
+        "emails_endpoint": NotRequired[str],
+    },
 )
 
 
