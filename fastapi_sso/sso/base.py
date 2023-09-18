@@ -17,9 +17,14 @@ from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
 if sys.version_info >= (3, 8):
-    from typing import NotRequired, TypedDict
+    from typing import TypedDict
 else:
-    from typing_extensions import NotRequired, TypedDict  # pragma: no cover
+    from typing_extensions import TypedDict  # pragma: no cover
+
+if sys.version_info <= (3, 11):
+    from typing import NotRequired
+else:
+    from typing_extensions import NotRequired  # pragma: no cover
 
 DiscoveryDocument = TypedDict(
     "DiscoveryDocument",
