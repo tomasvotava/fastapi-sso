@@ -2,6 +2,7 @@
 
 
 from typing import Dict, Optional
+
 import httpx
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, SSOLoginError

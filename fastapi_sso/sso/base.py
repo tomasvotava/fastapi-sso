@@ -5,7 +5,6 @@
 import json
 import sys
 import warnings
-
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Type
 
