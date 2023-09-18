@@ -7,7 +7,7 @@ import sys
 import warnings
 
 from types import TracebackType
-from typing import Any, Dict, List, NotRequired, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 
 import httpx
 import pydantic
@@ -17,9 +17,9 @@ from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
 if sys.version_info >= (3, 8):
-    from typing import TypedDict
+    from typing import NotRequired, TypedDict
 else:
-    from typing_extensions import TypedDict  # pragma: no cover
+    from typing_extensions import NotRequired, TypedDict  # pragma: no cover
 
 DiscoveryDocument = TypedDict(
     "DiscoveryDocument",
