@@ -1,7 +1,7 @@
 """Github SSO Oauth Helper class"""
 
 
-from typing import Dict, Optional
+from typing import Dict
 
 import httpx
 
