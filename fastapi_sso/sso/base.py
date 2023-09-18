@@ -220,7 +220,7 @@ class SSOBase:
         # just to avoid "unused argument" in pylint checks
         _ = session
         return content
-      
+
     def __enter__(self) -> "SSOBase":
         self._oauth_client = None
         self._refresh_token = None
