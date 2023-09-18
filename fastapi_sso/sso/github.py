@@ -6,6 +6,7 @@ import httpx
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, SSOLoginError
 
+
 class GithubSSO(SSOBase):
     """Class providing login via Github SSO"""
 
