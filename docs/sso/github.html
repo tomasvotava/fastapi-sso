@@ -43,20 +43,14 @@ class GithubSSO(SSOBase):
     provider = &#34;github&#34;
     scope = [&#34;user:email&#34;]
     additional_headers = {&#34;accept&#34;: &#34;application/json&#34;}
+    emails_endpoint = &#34;https://api.github.com/user/emails&#34;
 
     async def get_discovery_document(self) -&gt; DiscoveryDocument:
         return {
             &#34;authorization_endpoint&#34;: &#34;https://github.com/login/oauth/authorize&#34;,
-            &#34;emails_endpoint&#34;: &#34;https://api.github.com/user/emails&#34;,
             &#34;token_endpoint&#34;: &#34;https://github.com/login/oauth/access_token&#34;,
             &#34;userinfo_endpoint&#34;: &#34;https://api.github.com/user&#34;,
         }
-
-    @property
-    async def emails_endpoint(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Return `emails_endpoint` from discovery document&#34;&#34;&#34;
-        discovery = await self.get_discovery_document()
-        return discovery.get(&#34;emails_endpoint&#34;)
 
     async def get_extra_data(self, content: Dict, session: httpx.AsyncClient) -&gt; Dict:
         # if the email is empty then it means that the user has set it has private
@@ -65,7 +59,7 @@ class GithubSSO(SSOBase):
         if content[&#34;email&#34;] is not None:
             return content
 
-        uri, headers, _ = self.oauth_client.add_token(await self.emails_endpoint)
+        uri, headers, _ = self.oauth_client.add_token(self.emails_endpoint)
         email_response = await session.get(uri, headers=headers)
         emails = email_response.json()
         for email in emails:
@@ -114,20 +108,14 @@ class GithubSSO(SSOBase):
     provider = &#34;github&#34;
     scope = [&#34;user:email&#34;]
     additional_headers = {&#34;accept&#34;: &#34;application/json&#34;}
+    emails_endpoint = &#34;https://api.github.com/user/emails&#34;
 
     async def get_discovery_document(self) -&gt; DiscoveryDocument:
         return {
             &#34;authorization_endpoint&#34;: &#34;https://github.com/login/oauth/authorize&#34;,
-            &#34;emails_endpoint&#34;: &#34;https://api.github.com/user/emails&#34;,
             &#34;token_endpoint&#34;: &#34;https://github.com/login/oauth/access_token&#34;,
             &#34;userinfo_endpoint&#34;: &#34;https://api.github.com/user&#34;,
         }
-
-    @property
-    async def emails_endpoint(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Return `emails_endpoint` from discovery document&#34;&#34;&#34;
-        discovery = await self.get_discovery_document()
-        return discovery.get(&#34;emails_endpoint&#34;)
 
     async def get_extra_data(self, content: Dict, session: httpx.AsyncClient) -&gt; Dict:
         # if the email is empty then it means that the user has set it has private
@@ -136,7 +124,7 @@ class GithubSSO(SSOBase):
         if content[&#34;email&#34;] is not None:
             return content
 
-        uri, headers, _ = self.oauth_client.add_token(await self.emails_endpoint)
+        uri, headers, _ = self.oauth_client.add_token(self.emails_endpoint)
         email_response = await session.get(uri, headers=headers)
         emails = email_response.json()
         for email in emails:
@@ -169,6 +157,10 @@ class GithubSSO(SSOBase):
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="fastapi_sso.sso.github.GithubSSO.emails_endpoint"><code class="name">var <span class="ident">emails_endpoint</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="fastapi_sso.sso.github.GithubSSO.provider"><code class="name">var <span class="ident">provider</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
@@ -176,23 +168,6 @@ class GithubSSO(SSOBase):
 <dt id="fastapi_sso.sso.github.GithubSSO.scope"><code class="name">var <span class="ident">scope</span> : List[str]</code></dt>
 <dd>
 <div class="desc"></div>
-</dd>
-</dl>
-<h3>Instance variables</h3>
-<dl>
-<dt id="fastapi_sso.sso.github.GithubSSO.emails_endpoint"><code class="name">var <span class="ident">emails_endpoint</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"><p>Return <code>emails_endpoint</code> from discovery document</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-async def emails_endpoint(self) -&gt; Optional[str]:
-    &#34;&#34;&#34;Return `emails_endpoint` from discovery document&#34;&#34;&#34;
-    discovery = await self.get_discovery_document()
-    return discovery.get(&#34;emails_endpoint&#34;)</code></pre>
-</details>
 </dd>
 </dl>
 <h3>Inherited members</h3>

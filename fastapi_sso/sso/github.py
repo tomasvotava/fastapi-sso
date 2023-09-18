@@ -14,20 +14,14 @@ class GithubSSO(SSOBase):
     provider = "github"
     scope = ["user:email"]
     additional_headers = {"accept": "application/json"}
+    emails_endpoint = "https://api.github.com/user/emails"
 
     async def get_discovery_document(self) -> DiscoveryDocument:
         return {
             "authorization_endpoint": "https://github.com/login/oauth/authorize",
-            "emails_endpoint": "https://api.github.com/user/emails",
             "token_endpoint": "https://github.com/login/oauth/access_token",
             "userinfo_endpoint": "https://api.github.com/user",
         }
-
-    @property
-    async def emails_endpoint(self) -> Optional[str]:
-        """Return `emails_endpoint` from discovery document"""
-        discovery = await self.get_discovery_document()
-        return discovery.get("emails_endpoint")
 
     async def get_extra_data(self, content: Dict, session: httpx.AsyncClient) -> Dict:
         # if the email is empty then it means that the user has set it has private
@@ -36,7 +30,7 @@ class GithubSSO(SSOBase):
         if content["email"] is not None:
             return content
 
-        uri, headers, _ = self.oauth_client.add_token(await self.emails_endpoint)
+        uri, headers, _ = self.oauth_client.add_token(self.emails_endpoint)
         email_response = await session.get(uri, headers=headers)
         emails = email_response.json()
         for email in emails:

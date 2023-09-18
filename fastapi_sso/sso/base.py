@@ -20,18 +20,12 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import TypedDict  # pragma: no cover
 
-if sys.version_info >= (3, 11):
-    from typing import NotRequired
-else:
-    from typing_extensions import NotRequired  # pragma: no cover
-
 DiscoveryDocument = TypedDict(
     "DiscoveryDocument",
     {
         "authorization_endpoint": str,
         "token_endpoint": str,
         "userinfo_endpoint": str,
-        "emails_endpoint": NotRequired[str],
     },
 )
 
