@@ -1,9 +1,10 @@
 """Github SSO Oauth Helper class"""
 
-from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, SSOLoginError 
-from typing import Dict, Optional
-from httpx import AsyncClient
 
+from typing import Dict, Optional
+import httpx
+
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, SSOLoginError
 
 class GithubSSO(SSOBase):
     """Class providing login via Github SSO"""
@@ -15,9 +16,9 @@ class GithubSSO(SSOBase):
     async def get_discovery_document(self) -> DiscoveryDocument:
         return {
             "authorization_endpoint": "https://github.com/login/oauth/authorize",
+            "emails_endpoint": "https://api.github.com/user/emails",
             "token_endpoint": "https://github.com/login/oauth/access_token",
             "userinfo_endpoint": "https://api.github.com/user",
-            "emails_endpoint": "https://api.github.com/user/emails",
         }
 
     @property
@@ -26,7 +27,7 @@ class GithubSSO(SSOBase):
         discovery = await self.get_discovery_document()
         return discovery.get("emails_endpoint")
 
-    async def get_extra_data(self, content: Dict, session: AsyncClient) -> Dict:
+    async def get_extra_data(self, content: Dict, session: httpx.AsyncClient) -> Dict:
         # if the email is empty then it means that the user has set it has private
         # so the email must be retrieved using emails_endopoint.
         # This endpoint return the list of all the email addresses.

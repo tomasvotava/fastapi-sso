@@ -5,7 +5,7 @@
 import json
 import sys
 import warnings
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, NotRequired, Optional
 
 import httpx
 import pydantic
@@ -20,7 +20,7 @@ else:
     from typing_extensions import TypedDict
 
 DiscoveryDocument = TypedDict(
-    "DiscoveryDocument", {"authorization_endpoint": str, "token_endpoint": str, "userinfo_endpoint": str}
+    "DiscoveryDocument", {"authorization_endpoint": str, "token_endpoint": str, "userinfo_endpoint": str, "emails_endpoint": NotRequired[str]}
 )
 
 
@@ -210,6 +210,8 @@ class SSOBase:
 
     async def get_extra_data(self, content: Dict, session: httpx.AsyncClient) -> Dict:
         """Each subclass can reimplement this method if extra data and checks are needed"""
+        # just to avoid "unused argument" in pylint checks
+        _ = session
         return content
 
     async def process_login(
