@@ -22,7 +22,8 @@ else:
     from typing_extensions import TypedDict  # pragma: no cover
 
 DiscoveryDocument = TypedDict(
-    "DiscoveryDocument", {"authorization_endpoint": str, "token_endpoint": str, "userinfo_endpoint": str, "emails_endpoint": NotRequired[str]}
+    "DiscoveryDocument", {"authorization_endpoint": str, "token_endpoint": str,
+                          "userinfo_endpoint": str, "emails_endpoint": NotRequired[str]}
 )
 
 
