@@ -40,7 +40,6 @@ class SpotifySSO(SSOBase):
     provider = &#34;spotify&#34;
     scope = [&#34;user-read-private&#34;, &#34;user-read-email&#34;]
 
-    # pylint: disable=no-self-use
     async def get_discovery_document(self) -&gt; DiscoveryDocument:
         &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
         return {
@@ -90,7 +89,6 @@ class SpotifySSO(SSOBase):
     provider = &#34;spotify&#34;
     scope = [&#34;user-read-private&#34;, &#34;user-read-email&#34;]
 
-    # pylint: disable=no-self-use
     async def get_discovery_document(self) -&gt; DiscoveryDocument:
         &#34;&#34;&#34;Get document containing handy urls&#34;&#34;&#34;
         return {

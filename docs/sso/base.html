@@ -34,6 +34,7 @@
 import json
 import sys
 import warnings
+from types import TracebackType
 from typing import Any, Dict, List, NotRequired, Optional
 
 import httpx
@@ -46,7 +47,7 @@ from starlette.responses import RedirectResponse
 if sys.version_info &gt;= (3, 8):
     from typing import TypedDict
 else:
-    from typing_extensions import TypedDict
+    from typing_extensions import TypedDict  # pragma: no cover
 
 DiscoveryDocument = TypedDict(
     &#34;DiscoveryDocument&#34;, {&#34;authorization_endpoint&#34;: str, &#34;token_endpoint&#34;: str, &#34;userinfo_endpoint&#34;: str, &#34;emails_endpoint&#34;: NotRequired[str]}
@@ -55,6 +56,10 @@ DiscoveryDocument = TypedDict(
 
 class UnsetStateWarning(UserWarning):
     &#34;&#34;&#34;Warning about unset state parameter&#34;&#34;&#34;
+
+
+class ReusedOauthClientWarning(UserWarning):
+    &#34;&#34;&#34;Warning about reused oauth client instance&#34;&#34;&#34;
 
 
 class SSOLoginError(HTTPException):
@@ -84,7 +89,6 @@ class SSOBase:
     client_secret: str = NotImplemented
     redirect_uri: Optional[str] = NotImplemented
     scope: List[str] = NotImplemented
-    _oauth_client: Optional[WebApplicationClient] = None
     additional_headers: Optional[Dict[str, Any]] = None
 
     def __init__(
@@ -101,6 +105,7 @@ class SSOBase:
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
+        self._oauth_client: Optional[WebApplicationClient] = None
         # TODO: Remove use_state argument and attribute
         if use_state:
             warnings.warn(
@@ -129,7 +134,7 @@ class SSOBase:
     def oauth_client(self) -&gt; WebApplicationClient:
         &#34;&#34;&#34;OAuth Client to help us generate requests and parse responses&#34;&#34;&#34;
         if self.client_id == NotImplemented:
-            raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
+            raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)  # pragma: no cover
         if self._oauth_client is None:
             self._oauth_client = WebApplicationClient(self.client_id)
         return self._oauth_client
@@ -243,6 +248,19 @@ class SSOBase:
         _ = session
         return content
 
+    def __enter__(self) -&gt; &#34;SSOBase&#34;:
+        self._oauth_client = None
+        self._refresh_token = None
+        return self
+
+    def __exit__(
+        self,
+        _exc_type: Optional[Type[BaseException]],
+        _exc_val: Optional[BaseException],
+        _exc_tb: Optional[TracebackType],
+    ) -&gt; None:
+        return None
+
     async def process_login(
         self,
         code: str,
@@ -260,6 +278,16 @@ class SSOBase:
             additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
         &#34;&#34;&#34;
         # pylint: disable=too-many-locals
+        if self._oauth_client is not None:  # pragma: no cover
+            self._oauth_client = None
+            self._refresh_token = None
+            warnings.warn(
+                (
+                    &#34;Reusing the SSO object is not safe and caused a security issue in previous versions.&#34;
+                    &#34;To make sure you don&#39;t see this warning, please use the SSO object as a context manager.&#34;
+                ),
+                ReusedOauthClientWarning,
+            )
         params = params or {}
         additional_headers = additional_headers or {}
         additional_headers.update(self.additional_headers or {})
@@ -280,7 +308,7 @@ class SSOBase:
             **params,
         )  # type: ignore
 
-        if token_url is None:
+        if token_url is None:  # pragma: no cover
             return None
 
         headers.update(additional_headers)
@@ -355,7 +383,10 @@ dict(one=1, two=2)</p></div>
 <dd>
 <div class="desc"><p>Class (schema) to represent information got from sso provider in a common form.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
+allow <code>self</code> as a field name.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -374,7 +405,6 @@ dict(one=1, two=2)</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.main.BaseModel</li>
-<li>pydantic.utils.Representation</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -398,6 +428,14 @@ dict(one=1, two=2)</p></div>
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="fastapi_sso.sso.base.OpenID.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="fastapi_sso.sso.base.OpenID.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="fastapi_sso.sso.base.OpenID.picture"><code class="name">var <span class="ident">picture</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
@@ -407,6 +445,27 @@ dict(one=1, two=2)</p></div>
 <div class="desc"></div>
 </dd>
 </dl>
+</dd>
+<dt id="fastapi_sso.sso.base.ReusedOauthClientWarning"><code class="flex name class">
+<span>class <span class="ident">ReusedOauthClientWarning</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Warning about reused oauth client instance</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ReusedOauthClientWarning(UserWarning):
+    &#34;&#34;&#34;Warning about reused oauth client instance&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.UserWarning</li>
+<li>builtins.Warning</li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
 </dd>
 <dt id="fastapi_sso.sso.base.SSOBase"><code class="flex name class">
 <span>class <span class="ident">SSOBase</span></span>
@@ -426,7 +485,6 @@ dict(one=1, two=2)</p></div>
     client_secret: str = NotImplemented
     redirect_uri: Optional[str] = NotImplemented
     scope: List[str] = NotImplemented
-    _oauth_client: Optional[WebApplicationClient] = None
     additional_headers: Optional[Dict[str, Any]] = None
 
     def __init__(
@@ -443,6 +501,7 @@ dict(one=1, two=2)</p></div>
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
+        self._oauth_client: Optional[WebApplicationClient] = None
         # TODO: Remove use_state argument and attribute
         if use_state:
             warnings.warn(
@@ -471,7 +530,7 @@ dict(one=1, two=2)</p></div>
     def oauth_client(self) -&gt; WebApplicationClient:
         &#34;&#34;&#34;OAuth Client to help us generate requests and parse responses&#34;&#34;&#34;
         if self.client_id == NotImplemented:
-            raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
+            raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)  # pragma: no cover
         if self._oauth_client is None:
             self._oauth_client = WebApplicationClient(self.client_id)
         return self._oauth_client
@@ -585,6 +644,19 @@ dict(one=1, two=2)</p></div>
         _ = session
         return content
 
+    def __enter__(self) -&gt; &#34;SSOBase&#34;:
+        self._oauth_client = None
+        self._refresh_token = None
+        return self
+
+    def __exit__(
+        self,
+        _exc_type: Optional[Type[BaseException]],
+        _exc_val: Optional[BaseException],
+        _exc_tb: Optional[TracebackType],
+    ) -&gt; None:
+        return None
+
     async def process_login(
         self,
         code: str,
@@ -602,6 +674,16 @@ dict(one=1, two=2)</p></div>
             additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
         &#34;&#34;&#34;
         # pylint: disable=too-many-locals
+        if self._oauth_client is not None:  # pragma: no cover
+            self._oauth_client = None
+            self._refresh_token = None
+            warnings.warn(
+                (
+                    &#34;Reusing the SSO object is not safe and caused a security issue in previous versions.&#34;
+                    &#34;To make sure you don&#39;t see this warning, please use the SSO object as a context manager.&#34;
+                ),
+                ReusedOauthClientWarning,
+            )
         params = params or {}
         additional_headers = additional_headers or {}
         additional_headers.update(self.additional_headers or {})
@@ -622,7 +704,7 @@ dict(one=1, two=2)</p></div>
             **params,
         )  # type: ignore
 
-        if token_url is None:
+        if token_url is None:  # pragma: no cover
             return None
 
         headers.update(additional_headers)
@@ -737,7 +819,7 @@ async def authorization_endpoint(self) -&gt; Optional[str]:
 def oauth_client(self) -&gt; WebApplicationClient:
     &#34;&#34;&#34;OAuth Client to help us generate requests and parse responses&#34;&#34;&#34;
     if self.client_id == NotImplemented:
-        raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)
+        raise NotImplementedError(f&#34;Provider {self.provider} not supported&#34;)  # pragma: no cover
     if self._oauth_client is None:
         self._oauth_client = WebApplicationClient(self.client_id)
     return self._oauth_client</code></pre>
@@ -932,6 +1014,16 @@ additional_headers {Optional[Dict[str, Any]]} &ndash; Optional additional header
         additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
     &#34;&#34;&#34;
     # pylint: disable=too-many-locals
+    if self._oauth_client is not None:  # pragma: no cover
+        self._oauth_client = None
+        self._refresh_token = None
+        warnings.warn(
+            (
+                &#34;Reusing the SSO object is not safe and caused a security issue in previous versions.&#34;
+                &#34;To make sure you don&#39;t see this warning, please use the SSO object as a context manager.&#34;
+            ),
+            ReusedOauthClientWarning,
+        )
     params = params or {}
     additional_headers = additional_headers or {}
     additional_headers.update(self.additional_headers or {})
@@ -952,7 +1044,7 @@ additional_headers {Optional[Dict[str, Any]]} &ndash; Optional additional header
         **params,
     )  # type: ignore
 
-    if token_url is None:
+    if token_url is None:  # pragma: no cover
         return None
 
     headers.update(additional_headers)
@@ -1093,9 +1185,14 @@ params {Optional[Dict[str, Any]]} &ndash; Optional additional query parameters t
 <li><code><a title="fastapi_sso.sso.base.OpenID.first_name" href="#fastapi_sso.sso.base.OpenID.first_name">first_name</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.id" href="#fastapi_sso.sso.base.OpenID.id">id</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.last_name" href="#fastapi_sso.sso.base.OpenID.last_name">last_name</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.OpenID.model_config" href="#fastapi_sso.sso.base.OpenID.model_config">model_config</a></code></li>
+<li><code><a title="fastapi_sso.sso.base.OpenID.model_fields" href="#fastapi_sso.sso.base.OpenID.model_fields">model_fields</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.picture" href="#fastapi_sso.sso.base.OpenID.picture">picture</a></code></li>
 <li><code><a title="fastapi_sso.sso.base.OpenID.provider" href="#fastapi_sso.sso.base.OpenID.provider">provider</a></code></li>
 </ul>
+</li>
+<li>
+<h4><code><a title="fastapi_sso.sso.base.ReusedOauthClientWarning" href="#fastapi_sso.sso.base.ReusedOauthClientWarning">ReusedOauthClientWarning</a></code></h4>
 </li>
 <li>
 <h4><code><a title="fastapi_sso.sso.base.SSOBase" href="#fastapi_sso.sso.base.SSOBase">SSOBase</a></code></h4>

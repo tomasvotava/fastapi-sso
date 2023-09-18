@@ -5,7 +5,7 @@ of your abilities and possibilities.
 
 ## Dependencies management
 
-Seing the file `poetry.lock` you may have guessed this project relies on [Poetry](https://python-poetry.org/)
+Seeing the file `poetry.lock` you may have guessed this project relies on [Poetry](https://python-poetry.org/)
 to manage dependencies.
 
 If there is a need for a 3rd party dependency in order to integrate login provider, please try to make
@@ -34,10 +34,10 @@ the `line_length` parameter. `119` is the number I, partly as a joke, chose, so 
 It is easy to reformat the code by calling `black` from the repository root:
 
 ```console
-$ black fastapi_sso
+$ poe black
 
 All done! ✨ 🍰 ✨
-7 files left unchanged.
+13 files left unchanged.
 ```
 
 ### Linting
@@ -47,7 +47,7 @@ I use `pylint`. Detailed configuration is to be found in `.pylintrc` file.
 Check your code by calling:
 
 ```console
-$ pylint fastapi_sso
+$ poe pylint
 
 --------------------------------------------------------------------
 Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
@@ -62,9 +62,35 @@ when you submit the PR.
 Try to keep the code statically typechecked using `mypy`. Check that everything is alright by running:
 
 ```console
-$ mypy fastapi_sso
+$ poe mypy
 
-Success: no issues found in 7 source files
+Success: no issues found in 13 source files
+```
+
+### Pre-commit
+
+I use `pre-commit` to run all the above checks before committing. You can install it by calling:
+
+```console
+$ poe pre-commit install
+pre-commit installed at .git/hooks/pre-commit
+```
+
+### Tests
+
+I use `pytest` for testing. Please try to provide tests for your code. If you are not sure how to
+do it, let me know in the PR and I'll try to help you.
+
+Run the tests by calling:
+
+```console
+poe test
+```
+
+Or using `tox`:
+
+```console
+tox
 ```
 
 ## Rebuild docs

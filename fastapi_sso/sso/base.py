@@ -5,7 +5,9 @@
 import json
 import sys
 import warnings
-from typing import Any, Dict, List, NotRequired, Optional
+
+from types import TracebackType
+from typing import Any, Dict, List, NotRequired, Optional, Type
 
 import httpx
 import pydantic
@@ -17,7 +19,7 @@ from starlette.responses import RedirectResponse
 if sys.version_info >= (3, 8):
     from typing import TypedDict
 else:
-    from typing_extensions import TypedDict
+    from typing_extensions import TypedDict  # pragma: no cover
 
 DiscoveryDocument = TypedDict(
     "DiscoveryDocument", {"authorization_endpoint": str, "token_endpoint": str, "userinfo_endpoint": str, "emails_endpoint": NotRequired[str]}
@@ -26,6 +28,10 @@ DiscoveryDocument = TypedDict(
 
 class UnsetStateWarning(UserWarning):
     """Warning about unset state parameter"""
+
+
+class ReusedOauthClientWarning(UserWarning):
+    """Warning about reused oauth client instance"""
 
 
 class SSOLoginError(HTTPException):
@@ -55,7 +61,6 @@ class SSOBase:
     client_secret: str = NotImplemented
     redirect_uri: Optional[str] = NotImplemented
     scope: List[str] = NotImplemented
-    _oauth_client: Optional[WebApplicationClient] = None
     additional_headers: Optional[Dict[str, Any]] = None
 
     def __init__(
@@ -72,6 +77,7 @@ class SSOBase:
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.allow_insecure_http = allow_insecure_http
+        self._oauth_client: Optional[WebApplicationClient] = None
         # TODO: Remove use_state argument and attribute
         if use_state:
             warnings.warn(
@@ -100,7 +106,7 @@ class SSOBase:
     def oauth_client(self) -> WebApplicationClient:
         """OAuth Client to help us generate requests and parse responses"""
         if self.client_id == NotImplemented:
-            raise NotImplementedError(f"Provider {self.provider} not supported")
+            raise NotImplementedError(f"Provider {self.provider} not supported")  # pragma: no cover
         if self._oauth_client is None:
             self._oauth_client = WebApplicationClient(self.client_id)
         return self._oauth_client
@@ -213,6 +219,19 @@ class SSOBase:
         # just to avoid "unused argument" in pylint checks
         _ = session
         return content
+      
+    def __enter__(self) -> "SSOBase":
+        self._oauth_client = None
+        self._refresh_token = None
+        return self
+
+    def __exit__(
+        self,
+        _exc_type: Optional[Type[BaseException]],
+        _exc_val: Optional[BaseException],
+        _exc_tb: Optional[TracebackType],
+    ) -> None:
+        return None
 
     async def process_login(
         self,
@@ -231,6 +250,16 @@ class SSOBase:
             additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
         """
         # pylint: disable=too-many-locals
+        if self._oauth_client is not None:  # pragma: no cover
+            self._oauth_client = None
+            self._refresh_token = None
+            warnings.warn(
+                (
+                    "Reusing the SSO object is not safe and caused a security issue in previous versions."
+                    "To make sure you don't see this warning, please use the SSO object as a context manager."
+                ),
+                ReusedOauthClientWarning,
+            )
         params = params or {}
         additional_headers = additional_headers or {}
         additional_headers.update(self.additional_headers or {})
@@ -251,7 +280,7 @@ class SSOBase:
             **params,
         )  # type: ignore
 
-        if token_url is None:
+        if token_url is None:  # pragma: no cover
             return None
 
         headers.update(additional_headers)

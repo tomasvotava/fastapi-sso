@@ -52,7 +52,7 @@ class GithubSSO(SSOBase):
         return OpenID(
             email=response["email"],
             provider=cls.provider,
-            id=response["id"],
+            id=str(response["id"]),
             display_name=response["login"],
             picture=response["avatar_url"],
         )

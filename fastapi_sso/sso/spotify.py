@@ -11,7 +11,6 @@ class SpotifySSO(SSOBase):
     provider = "spotify"
     scope = ["user-read-private", "user-read-email"]
 
-    # pylint: disable=no-self-use
     async def get_discovery_document(self) -> DiscoveryDocument:
         """Get document containing handy urls"""
         return {

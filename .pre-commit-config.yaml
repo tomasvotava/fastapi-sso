@@ -1,0 +1,28 @@
+repos:
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: poe pylint
+        language: system
+        types: [python]
+
+      - id: black
+        name: black
+        entry: poe black-check
+        language: system
+        types: [python]
+
+      - id: mypy
+        name: mypy
+        entry: poe mypy
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      - id: isort
+        name: isort
+        entry: poe isort-check
+        language: system
+        types: [python]
+        pass_filenames: false

@@ -1,8 +1,28 @@
 # FastAPI SSO
 
+![Supported Python Versions](https://img.shields.io/pypi/pyversions/fastapi-sso)
+![Test Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgist.githubusercontent.com%2Ftomasvotava%2F328acf6207500c2e836b1c68b5c910f7%2Fraw%2F&query=totals.percent_covered_display&suffix=%25&logo=pytest&label=coverage&color=blue&cacheSeconds=300
+)
+![Tests Workflow Status](https://img.shields.io/github/actions/workflow/status/tomasvotava/fastapi-sso/test.yml?label=tests)
+![Pylint Workflow Status](https://img.shields.io/github/actions/workflow/status/tomasvotava/fastapi-sso/lint.yml?label=pylint)
+![Mypy Workflow Status](https://img.shields.io/github/actions/workflow/status/tomasvotava/fastapi-sso/lint.yml?label=mypy)
+![Black Workflow Status](https://img.shields.io/github/actions/workflow/status/tomasvotava/fastapi-sso/lint.yml?label=black)
+![CodeQL Workflow Status](https://img.shields.io/github/actions/workflow/status/tomasvotava/fastapi-sso/codeql-analysis.yml?label=CodeQL)
+![PyPi weekly downloads](https://img.shields.io/pypi/dw/fastapi-sso)
+![Project License](https://img.shields.io/github/license/tomasvotava/fastapi-sso)
+![PyPi Version](https://img.shields.io/pypi/v/fastapi-sso)
+
 FastAPI plugin to enable SSO to most common providers (such as Facebook login, Google login and login via Microsoft Office 365 account).
 
 This allows you to implement the famous `Login with Google/Facebook/Microsoft` buttons functionality on your backend very easily.
+
+## Security warning
+
+Please note that versions preceding `0.7.0` had a security vulnerability.
+The SSO instance could share state between requests, which could lead to security issues. **Please update to `0.7.0` or newer**.
+
+Also, the preferred way of using the SSO instances is to use `with` statement, which will ensure the state is cleared.
+See example below.
 
 ## Support this project
 
@@ -27,6 +47,7 @@ I tend to process Pull Requests faster when properly caffeinated 😉.
 
 - Kakao (by Jae-Baek Song - [thdwoqor](https://github.com/thdwoqor))
 - Naver (by 1tang2bang92) - [1tang2bang92](https://github.com/1tang2bang92)
+- Gitlab (by Alessandro Pischedda) - [Cereal84](https://github.com/Cereal84)
 
 See [Contributing](#contributing) for a guide on how to contribute your own login provider.
 
@@ -65,13 +86,15 @@ google_sso = GoogleSSO("my-client-id", "my-client-secret", "https://my.awesome-w
 @app.get("/google/login")
 async def google_login():
     """Generate login url and redirect"""
-    return await google_sso.get_login_redirect()
+    with google_sso:
+        return await google_sso.get_login_redirect()
 
 
 @app.get("/google/callback")
 async def google_callback(request: Request):
     """Process login response from Google and return user info"""
-    user = await google_sso.verify_and_process(request)
+    with google_sso:
+        user = await google_sso.verify_and_process(request)
     return {
         "id": user.id,
         "picture": user.picture,
@@ -96,7 +119,8 @@ google_sso = GoogleSSO("my-client-id", "my-client-secret")
 @app.get("/google/login")
 async def google_login(request: Request):
     """Generate login url and redirect"""
-    return await google_sso.get_login_redirect(redirect_uri=request.url_for("google_callback"))
+    with google_sso:
+        return await google_sso.get_login_redirect(redirect_uri=request.url_for("google_callback"))
 
 @app.get("/google/callback")
 async def google_callback(request: Request):
@@ -123,10 +147,11 @@ Google to return `refresh_token`.
 
 ```python
 async def google_login(request: Request):
-    return await google_sso.get_login_redirect(
-        redirect_uri=request.url_for("google_callback"),
-        params={"prompt": "consent", "access_type": "offline"}
-        )
+    with google_sso:
+        return await google_sso.get_login_redirect(
+            redirect_uri=request.url_for("google_callback"),
+            params={"prompt": "consent", "access_type": "offline"}
+            )
 
 ```
 
@@ -162,15 +187,17 @@ from fastapi.responses import RedirectResponse
 
 # E.g. https://example.com/auth/login?return_url=https://example.com/welcome
 async def google_login(return_url: str):
-    google_sso = GoogleSOO("client-id", "client-secret")
-    # Send return_url to Google as a state so that Google knows to return it back to us
-    return await google_sso.get_login_redirect(redirect_uri=request.url_for("google_callback"), state=return_url)
+    with google_sso:
+        google_sso = GoogleSOO("client-id", "client-secret")
+        # Send return_url to Google as a state so that Google knows to return it back to us
+        return await google_sso.get_login_redirect(redirect_uri=request.url_for("google_callback"), state=return_url)
 
 async def google_callback(request: Request):
-    google_sso = GoogleSOO("client-id", "client-secret")
-    user = await google_sso.verify_and_process(request)
-    # google_sso.state now holds your return_url (https://example.com/welcome)
-    return RedirectResponse(google_sso.state)
+    with google_sso:
+        google_sso = GoogleSOO("client-id", "client-secret")
+        user = await google_sso.verify_and_process(request)
+        # google_sso.state now holds your return_url (https://example.com/welcome)
+        return RedirectResponse(google_sso.state)
 
 ```
 
