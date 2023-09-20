@@ -124,6 +124,11 @@ async def google_login(request: Request):
 @app.get("/google/callback")
 async def google_callback(request: Request):
     ...
+    with google_sso:
+        user = await google_sso.verify_and_process(
+            request, redirect_uri=str(request.url_for("google_callback"))
+        )
+    ...
 ```
 
 ### Specify scope
