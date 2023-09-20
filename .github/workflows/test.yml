@@ -30,19 +30,8 @@ jobs:
         run: ~/.local/bin/poetry run poe test --junitxml=pytest-results-${{ matrix.python-version }}.xml
       - name: coverage
         run: ~/.local/bin/poetry run poe coverage
-      - name: Get Coverage Report Comment
-        uses: orgoro/coverage@v3.1
-        continue-on-error: true
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
         with:
-          coverageFile: coverage.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-        if: ${{ github.event_name == 'pull_request'}}
-      - name: Upload coverage.json as a gist
-        uses: exuanbo/actions-deploy-gist@v1
-        continue-on-error: true
-        with:
-          token: ${{ secrets.GIST_TOKEN }}
-          gist_id: 328acf6207500c2e836b1c68b5c910f7
-          file_path: coverage.json
-          file_type: text
-        if: ${{ matrix.python-version == '3.11' && github.ref_name == 'master' }}
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS,PYTHON
