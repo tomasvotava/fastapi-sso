@@ -27,7 +27,7 @@ GenericProvider = create_provider(
         "token_endpoint": "https://example.com/token",
         "userinfo_endpoint": "https://example.com/userinfo",
     },
-    response_convertor=lambda _: OpenID(id="test", email="test@example.com", display_name="Test"),
+    response_convertor=lambda _, __: OpenID(id="test", email="test@example.com", display_name="Test"),
 )
 
 tested_providers = (
@@ -45,6 +45,16 @@ tested_providers = (
 
 # Run all tests for each of the listed providers
 pytestmark = pytest.mark.parametrize("Provider", tested_providers)
+
+
+@pytest.fixture(autouse=True)
+def mock_google_dicscovery_document(monkeypatch: pytest.MonkeyPatch):
+    """GoogleSSO has a discovery document dependent on Google API"""
+
+    async def _fake_get_discovery_document(_):
+        return await GenericProvider("test", "test").get_discovery_document()
+
+    monkeypatch.setattr(GoogleSSO, "get_discovery_document", _fake_get_discovery_document)
 
 
 class TestProviders:
@@ -117,7 +127,7 @@ class TestProviders:
             ),
         )
 
-        async def fake_openid_from_response(_):
+        async def fake_openid_from_response(_, __):
             return OpenID(id="test", email="email@example.com", display_name="Test")
 
         monkeypatch.setattr("httpx.AsyncClient", FakeAsyncClient)

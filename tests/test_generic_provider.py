@@ -31,7 +31,7 @@ class TestGenericProvider:
     async def test_response_convertor(self):
         Provider = create_provider(
             discovery_document=DISCOVERY,
-            response_convertor=lambda response: OpenID(
+            response_convertor=lambda response, _: OpenID(
                 id=response["id"], email=response["email"], display_name=response["display_name"]
             ),
         )

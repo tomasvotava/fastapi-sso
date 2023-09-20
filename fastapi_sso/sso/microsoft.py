@@ -1,8 +1,11 @@
 """Microsoft SSO Oauth Helper class"""
 
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
+
+if TYPE_CHECKING:
+    import httpx
 
 
 class MicrosoftSSO(SSOBase):
@@ -40,12 +43,11 @@ class MicrosoftSSO(SSOBase):
             "userinfo_endpoint": f"https://graph.microsoft.com/{self.version}/me",
         }
 
-    @classmethod
-    async def openid_from_response(cls, response: dict) -> OpenID:
+    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         return OpenID(
             email=response["mail"],
             display_name=response["displayName"],
-            provider=cls.provider,
+            provider=self.provider,
             id=response.get("id"),
             first_name=response.get("givenName"),
             last_name=response.get("surname"),

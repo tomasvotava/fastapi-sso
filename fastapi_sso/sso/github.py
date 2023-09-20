@@ -1,6 +1,11 @@
 """Github SSO Oauth Helper class"""
 
+from typing import TYPE_CHECKING, Optional
+
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
+
+if TYPE_CHECKING:
+    import httpx
 
 
 class GithubSSO(SSOBase):
@@ -17,11 +22,10 @@ class GithubSSO(SSOBase):
             "userinfo_endpoint": "https://api.github.com/user",
         }
 
-    @classmethod
-    async def openid_from_response(cls, response: dict) -> OpenID:
+    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         return OpenID(
             email=response["email"],
-            provider=cls.provider,
+            provider=self.provider,
             id=str(response["id"]),
             display_name=response["login"],
             picture=response["avatar_url"],

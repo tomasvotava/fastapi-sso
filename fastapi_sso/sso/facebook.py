@@ -1,7 +1,12 @@
 """Facebook SSO Login Helper
 """
 
+from typing import TYPE_CHECKING, Optional
+
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
+
+if TYPE_CHECKING:
+    import httpx
 
 
 class FacebookSSO(SSOBase):
@@ -19,15 +24,14 @@ class FacebookSSO(SSOBase):
             "userinfo_endpoint": f"{self.base_url}/me?fields=id,name,email,first_name,last_name,picture",
         }
 
-    @classmethod
-    async def openid_from_response(cls, response: dict) -> OpenID:
+    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         """Return OpenID from user information provided by Facebook"""
         return OpenID(
             email=response.get("email", ""),
             first_name=response.get("first_name"),
             last_name=response.get("last_name"),
             display_name=response.get("name"),
-            provider=cls.provider,
+            provider=self.provider,
             id=response.get("id"),
             picture=response.get("picture", {}).get("data", {}).get("url", None),
         )
