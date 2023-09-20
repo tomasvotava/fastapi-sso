@@ -1,6 +1,11 @@
 """Gitlab SSO Oauth Helper class"""
 
+from typing import TYPE_CHECKING, Optional
+
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
+
+if TYPE_CHECKING:
+    import httpx
 
 
 class GitlabSSO(SSOBase):
@@ -17,11 +22,10 @@ class GitlabSSO(SSOBase):
             "userinfo_endpoint": "https://gitlab.com/api/v4/user",
         }
 
-    @classmethod
-    async def openid_from_response(cls, response: dict) -> OpenID:
+    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         return OpenID(
             email=response["email"],
-            provider=cls.provider,
+            provider=self.provider,
             id=response["id"],
             display_name=response["username"],
             picture=response["avatar_url"],

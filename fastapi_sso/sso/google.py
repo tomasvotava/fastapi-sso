@@ -1,6 +1,8 @@
 """Google SSO Login Helper
 """
 
+from typing import Optional
+
 import httpx
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, SSOLoginError
@@ -13,13 +15,12 @@ class GoogleSSO(SSOBase):
     provider = "google"
     scope = ["openid", "email", "profile"]
 
-    @classmethod
-    async def openid_from_response(cls, response: dict) -> OpenID:
+    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         """Return OpenID from user information provided by Google"""
         if response.get("email_verified"):
             return OpenID(
                 email=response.get("email", ""),
-                provider=cls.provider,
+                provider=self.provider,
                 id=response.get("sub"),
                 first_name=response.get("given_name"),
                 last_name=response.get("family_name"),

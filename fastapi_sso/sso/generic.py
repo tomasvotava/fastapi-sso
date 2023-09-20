@@ -3,9 +3,12 @@ with close to no code
 """
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
+
+if TYPE_CHECKING:
+    import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +18,7 @@ def create_provider(
     name: str = "generic",
     default_scope: Optional[List[str]] = None,
     discovery_document: Union[DiscoveryDocument, Callable[[SSOBase], DiscoveryDocument]],
-    response_convertor: Optional[Callable[[Dict[str, Any]], OpenID]] = None
+    response_convertor: Optional[Callable[[Dict[str, Any], Optional["httpx.AsyncClient"]], OpenID]] = None
 ) -> Type[SSOBase]:
     """A factory to create a generic OAuth client usable with almost any OAuth provider.
     Returns a class.
@@ -61,13 +64,12 @@ def create_provider(
                 return discovery_document(self)
             return discovery_document
 
-        @classmethod
-        async def openid_from_response(cls, response: dict) -> OpenID:
+        async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
             if not response_convertor:
                 logger.warning("No response convertor was provided, returned OpenID will always be empty")
                 return OpenID(
-                    provider=cls.provider,
+                    provider=self.provider,
                 )
-            return response_convertor(response)
+            return response_convertor(response, session)
 
     return GenericSSOProvider

@@ -120,10 +120,9 @@ class SSOBase:
         """Get refresh token (if returned from provider)"""
         return self._refresh_token or self.oauth_client.refresh_token
 
-    @classmethod
-    async def openid_from_response(cls, response: dict) -> OpenID:
+    async def openid_from_response(self, response: dict, session: Optional[httpx.AsyncClient] = None) -> OpenID:
         """Return {OpenID} object from provider's user info endpoint response"""
-        raise NotImplementedError(f"Provider {cls.provider} not supported")
+        raise NotImplementedError(f"Provider {self.provider} not supported")
 
     async def get_discovery_document(self) -> DiscoveryDocument:
         """Get discovery document containing handy urls"""
@@ -289,4 +288,4 @@ class SSOBase:
             response = await session.get(uri, headers=headers)
             content = response.json()
 
-        return await self.openid_from_response(content)
+        return await self.openid_from_response(content, session)
