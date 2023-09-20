@@ -32,12 +32,14 @@ jobs:
         run: ~/.local/bin/poetry run poe coverage
       - name: Get Coverage Report Comment
         uses: orgoro/coverage@v3.1
+        continue-on-error: true
         with:
           coverageFile: coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
         if: ${{ github.event_name == 'pull_request'}}
       - name: Upload coverage.json as a gist
         uses: exuanbo/actions-deploy-gist@v1
+        continue-on-error: true
         with:
           token: ${{ secrets.GIST_TOKEN }}
           gist_id: 328acf6207500c2e836b1c68b5c910f7
