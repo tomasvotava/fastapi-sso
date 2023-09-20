@@ -1,8 +1,7 @@
 # FastAPI SSO
 
 ![Supported Python Versions](https://img.shields.io/pypi/pyversions/fastapi-sso)
-![Test Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgist.githubusercontent.com%2Ftomasvotava%2F328acf6207500c2e836b1c68b5c910f7%2Fraw%2F&query=totals.percent_covered_display&suffix=%25&logo=pytest&label=coverage&color=blue&cacheSeconds=300
-)
+[![Test coverage](https://codecov.io/gh/tomasvotava/fastapi-sso/graph/badge.svg?token=SIFCTVSSOS)](https://codecov.io/gh/tomasvotava/fastapi-sso)
 ![Tests Workflow Status](https://img.shields.io/github/actions/workflow/status/tomasvotava/fastapi-sso/test.yml?label=tests)
 ![Pylint Workflow Status](https://img.shields.io/github/actions/workflow/status/tomasvotava/fastapi-sso/lint.yml?label=pylint)
 ![Mypy Workflow Status](https://img.shields.io/github/actions/workflow/status/tomasvotava/fastapi-sso/lint.yml?label=mypy)
