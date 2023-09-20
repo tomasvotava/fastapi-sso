@@ -49,7 +49,11 @@ class KakaoSSO(SSOBase):
 
     @classmethod
     async def openid_from_response(cls, response: dict) -&gt; OpenID:
-        return OpenID(display_name=response[&#34;properties&#34;][&#34;nickname&#34;], provider=cls.provider)</code></pre>
+        return OpenID(
+            display_name=response[&#34;properties&#34;][&#34;nickname&#34;],
+            provider=cls.provider,
+            data=response,
+        )</code></pre>
 </details>
 </section>
 <section>
@@ -87,7 +91,11 @@ class KakaoSSO(SSOBase):
 
     @classmethod
     async def openid_from_response(cls, response: dict) -&gt; OpenID:
-        return OpenID(display_name=response[&#34;properties&#34;][&#34;nickname&#34;], provider=cls.provider)</code></pre>
+        return OpenID(
+            display_name=response[&#34;properties&#34;][&#34;nickname&#34;],
+            provider=cls.provider,
+            data=response,
+        )</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">

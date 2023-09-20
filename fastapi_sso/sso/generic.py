@@ -67,6 +67,7 @@ def create_provider(
                 logger.warning("No response convertor was provided, returned OpenID will always be empty")
                 return OpenID(
                     provider=cls.provider,
+                    data=response,
                 )
             return response_convertor(response)
 

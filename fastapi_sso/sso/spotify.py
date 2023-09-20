@@ -32,4 +32,5 @@ class SpotifySSO(SSOBase):
             provider=cls.provider,
             id=response.get("id"),
             picture=picture,
+            data=response,
         )

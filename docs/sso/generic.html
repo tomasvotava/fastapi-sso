@@ -98,6 +98,7 @@ def create_provider(
                 logger.warning(&#34;No response convertor was provided, returned OpenID will always be empty&#34;)
                 return OpenID(
                     provider=cls.provider,
+                    data=response,
                 )
             return response_convertor(response)
 
@@ -207,6 +208,7 @@ sso = SSOProvider(
                 logger.warning(&#34;No response convertor was provided, returned OpenID will always be empty&#34;)
                 return OpenID(
                     provider=cls.provider,
+                    data=response,
                 )
             return response_convertor(response)
 

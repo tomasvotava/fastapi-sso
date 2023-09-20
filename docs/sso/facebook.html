@@ -59,6 +59,7 @@ class FacebookSSO(SSOBase):
             provider=cls.provider,
             id=response.get(&#34;id&#34;),
             picture=response.get(&#34;picture&#34;, {}).get(&#34;data&#34;, {}).get(&#34;url&#34;, None),
+            data=response,
         )</code></pre>
 </details>
 </section>
@@ -107,6 +108,7 @@ class FacebookSSO(SSOBase):
             provider=cls.provider,
             id=response.get(&#34;id&#34;),
             picture=response.get(&#34;picture&#34;, {}).get(&#34;data&#34;, {}).get(&#34;url&#34;, None),
+            data=response,
         )</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -150,6 +152,7 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
         provider=cls.provider,
         id=response.get(&#34;id&#34;),
         picture=response.get(&#34;picture&#34;, {}).get(&#34;data&#34;, {}).get(&#34;url&#34;, None),
+        data=response,
     )</code></pre>
 </details>
 </dd>

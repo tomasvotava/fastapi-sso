@@ -38,7 +38,7 @@ class MicrosoftSSO(SSOBase):
     &#34;&#34;&#34;Class providing login using Microsoft OAuth&#34;&#34;&#34;
 
     provider = &#34;microsoft&#34;
-    scope = [&#34;openid&#34;]
+    scope = [&#34;openid&#34;, &#34;User.Read&#34;]
     version = &#34;v1.0&#34;
     tenant: str = &#34;common&#34;
 
@@ -71,7 +71,15 @@ class MicrosoftSSO(SSOBase):
 
     @classmethod
     async def openid_from_response(cls, response: dict) -&gt; OpenID:
-        return OpenID(email=response[&#34;mail&#34;], display_name=response[&#34;displayName&#34;], provider=cls.provider)</code></pre>
+        return OpenID(
+            email=response[&#34;mail&#34;],
+            display_name=response[&#34;displayName&#34;],
+            provider=cls.provider,
+            id=response.get(&#34;id&#34;),
+            first_name=response.get(&#34;givenName&#34;),
+            last_name=response.get(&#34;surname&#34;),
+            data=response,
+        )</code></pre>
 </details>
 </section>
 <section>
@@ -97,7 +105,7 @@ class MicrosoftSSO(SSOBase):
     &#34;&#34;&#34;Class providing login using Microsoft OAuth&#34;&#34;&#34;
 
     provider = &#34;microsoft&#34;
-    scope = [&#34;openid&#34;]
+    scope = [&#34;openid&#34;, &#34;User.Read&#34;]
     version = &#34;v1.0&#34;
     tenant: str = &#34;common&#34;
 
@@ -130,7 +138,15 @@ class MicrosoftSSO(SSOBase):
 
     @classmethod
     async def openid_from_response(cls, response: dict) -&gt; OpenID:
-        return OpenID(email=response[&#34;mail&#34;], display_name=response[&#34;displayName&#34;], provider=cls.provider)</code></pre>
+        return OpenID(
+            email=response[&#34;mail&#34;],
+            display_name=response[&#34;displayName&#34;],
+            provider=cls.provider,
+            id=response.get(&#34;id&#34;),
+            first_name=response.get(&#34;givenName&#34;),
+            last_name=response.get(&#34;surname&#34;),
+            data=response,
+        )</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">

@@ -61,6 +61,7 @@ class SpotifySSO(SSOBase):
             provider=cls.provider,
             id=response.get(&#34;id&#34;),
             picture=picture,
+            data=response,
         )</code></pre>
 </details>
 </section>
@@ -110,6 +111,7 @@ class SpotifySSO(SSOBase):
             provider=cls.provider,
             id=response.get(&#34;id&#34;),
             picture=picture,
+            data=response,
         )</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -151,6 +153,7 @@ async def openid_from_response(cls, response: dict) -&gt; OpenID:
         provider=cls.provider,
         id=response.get(&#34;id&#34;),
         picture=picture,
+        data=response,
     )</code></pre>
 </details>
 </dd>

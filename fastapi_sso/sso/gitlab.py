@@ -25,4 +25,5 @@ class GitlabSSO(SSOBase):
             id=response["id"],
             display_name=response["username"],
             picture=response["avatar_url"],
+            data=response,
         )

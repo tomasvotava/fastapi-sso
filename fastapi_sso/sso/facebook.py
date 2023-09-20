@@ -30,4 +30,5 @@ class FacebookSSO(SSOBase):
             provider=cls.provider,
             id=response.get("id"),
             picture=response.get("picture", {}).get("data", {}).get("url", None),
+            data=response,
         )

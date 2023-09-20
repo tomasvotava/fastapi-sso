@@ -21,4 +21,8 @@ class NaverSSO(SSOBase):
 
     @classmethod
     async def openid_from_response(cls, response: dict) -> OpenID:
-        return OpenID(display_name=response["properties"]["nickname"], provider=cls.provider)
+        return OpenID(
+            display_name=response["properties"]["nickname"],
+            provider=cls.provider,
+            data=response,
+        )
