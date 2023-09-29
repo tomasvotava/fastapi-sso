@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - master
-      - docs/build-in-ci
   workflow_dispatch:
 
 concurrency:
