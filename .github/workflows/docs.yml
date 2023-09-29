@@ -32,6 +32,7 @@ jobs:
           path: ./public
 
   deploy:
+    needs: build
     permissions:
       pages: write
       id-token: write
