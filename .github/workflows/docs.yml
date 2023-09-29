@@ -6,8 +6,14 @@ on:
       - docs/build-in-ci
   workflow_dispatch:
 
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 permissions:
   contents: write
+  id-token: write
+  pages: write
 
 jobs:
   build:
@@ -25,17 +31,16 @@ jobs:
         run: ~/.local/bin/poetry install
       - name: Build docs
         run: ~/.local/bin/poetry run poe docs
-      - name: Upload docs as artifact
-        uses: actions/upload-artifact@v3
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v3
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v2
         with:
-          name: github-pages
           path: ./public
 
   deploy:
     needs: build
-    permissions:
-      pages: write
-      id-token: write
     runs-on: ubuntu-latest
     environment:
       name: github-pages
