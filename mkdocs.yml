@@ -56,7 +56,15 @@ copyright: >
 plugins:
   - search
   - social
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            summary: true
+            docstring_style: google
 markdown_extensions:
   - admonition
   - pymdownx.highlight:
