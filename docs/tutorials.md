@@ -40,8 +40,9 @@ Save the file as `example.py` and run it using `uvicorn example:app`.
 
 Now, visit [http://localhost:3000/google/login](http://localhost:3000/google/login).
 
-You should be redirected to Google login page. After successful login, you should be redirected back to
-`http://localhost:3000/google/callback` and see a JSON response containing your user data.
+!!! note "Does it work?"
+    You should be redirected to Google login page. After successful login, you should be redirected back to
+    `http://localhost:3000/google/callback` and see a JSON response containing your user data.
 
 ## Using SSO as a dependency
 

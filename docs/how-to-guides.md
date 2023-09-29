@@ -38,7 +38,9 @@ async def google_callback(request: Request):
 
 ## Request additional scopes
 
-Since `0.4.0` you may specify `scope` when initializing the SSO class.
+!!! info "Added in `0.4.0`"
+
+You may specify `scope` when initializing the SSO class.
 This is useful when you need to request additional scopes from the user.
 The access token returned after verification will contain all the scopes
 and you may use it to access the user's data.
@@ -68,8 +70,9 @@ async def google_callback(request: Request):
 
 ## Additional query parameters
 
-Since `0.4.0` you may provide additional query parameters to be
-sent to the login screen.
+!!! info "Added in `0.4.0`"
+
+You may provide additional query parameters to be sent to the login screen.
 
 E.g. sometimes you want to specify `access_type=offline` or `prompt=consent` in order for Google to return `refresh_token`.
 
@@ -93,7 +96,9 @@ async def google_callback(request: Request):
 
 ## HTTP and development
 
-**You should always use `https` in production**. But in case you need to test on `localhost` and do not want to
+!!! danger "You should always use `https` in production"
+
+In case you need to test on `localhost` and do not want to
 use a self-signed certificate, make sure you set up redirect uri within your SSO provider to `http://localhost:{port}`
 and then add this to your environment:
 
