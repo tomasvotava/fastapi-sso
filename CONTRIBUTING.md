@@ -10,7 +10,8 @@ to manage dependencies.
 
 If there is a need for a 3rd party dependency in order to integrate login provider, please try to make
 use of [extras](https://python-poetry.org/docs/pyproject/#extras) in order not to make `fastapi-sso`
-any heavier. Any dependency apart from the ones listed in `tool.poetry.dependencies` in [`pyproject.toml`](./pyproject.toml)
+any heavier. Any dependency apart from the ones listed in `tool.poetry.dependencies` in
+[`pyproject.toml`](https://github.com/tomasvotava/fastapi-sso/tree/master/pyproject.toml)
 should be an extra along with it being optional. If you are not shure how to do this, let me know
 the dependency in PR and I will add it before merging your code.
 
@@ -18,7 +19,8 @@ Also, **please strictly separate runtime dependencies from dev dependencies**.
 
 ## Provide examples
 
-Please, try to provide examples for the login provider in the [`examples/`](./examples/) directory.
+Please, try to provide examples for the login provider in the
+[`examples/`](https://github.com/tomasvotava/fastapi-sso/tree/master/examples) directory.
 **Always make sure your code contains no credentials before submitting the PR**.
 
 ## Code quality
@@ -29,7 +31,8 @@ code quality, but let's keep the code up to at least some standards.
 ### Formatting
 
 As visible in `pyproject.toml`, I use `black` as a formatter with all the default settings except for
-the `line_length` parameter. `119` is the number I, partly as a joke, chose, so let's all use it.
+the `line_length` parameter. As seen in the file, I set it to 120 characters. Please try to keep
+the code formatted this way.
 
 It is easy to reformat the code by calling `black` from the repository root:
 
@@ -93,9 +96,8 @@ Or using `tox`:
 tox
 ```
 
-## Rebuild docs
+## Documentation
 
-Before submitting the PR, please rebuild the docs by running `./build-docs.sh`. If you cannot
-or do not know how to run the script, let me know in the PR and I'll add commit with the latest docs.
-
-I'll try to automate this using Github Actions, but as I come from Gitlab, I don't feel courageous enough yet.
+Please try to provide documentation for your code. I use `mkdocs` to generate the documentation.
+In most cases, it should be enough to use docstrings (`pylint` will complain if you don't) and to provide
+examples in the aforementioned `examples/` directory.

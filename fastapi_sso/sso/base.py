@@ -92,7 +92,17 @@ class SSOBase:
 
     @property
     def state(self) -> Optional[str]:
-        """Gets state as it was returned from the server"""
+        """
+        Retrieves the state as it was returned from the server.
+
+        Warning:
+            This will emit a warning if the state is unset, implying either that
+            the server didn't return a state or `verify_and_process` hasn't been
+            called yet.
+
+        Returns:
+            Optional[str]: The state parameter returned from the server.
+        """
         if self._state is None:
             warnings.warn(
                 "'state' parameter is unset. This means the server either "
@@ -103,7 +113,15 @@ class SSOBase:
 
     @property
     def oauth_client(self) -> WebApplicationClient:
-        """OAuth Client to help us generate requests and parse responses"""
+        """
+        Retrieves the OAuth Client to aid in generating requests and parsing responses.
+
+        Raises:
+            NotImplementedError: If the provider is not supported or `client_id` is not set.
+
+        Returns:
+            WebApplicationClient: OAuth client instance.
+        """
         if self.client_id == NotImplemented:
             raise NotImplementedError(f"Provider {self.provider} not supported")  # pragma: no cover
         if self._oauth_client is None:
@@ -112,20 +130,50 @@ class SSOBase:
 
     @property
     def access_token(self) -> Optional[str]:
-        """Access token from token endpoint"""
+        """
+        Retrieves the access token from token endpoint.
+
+        Returns:
+            Optional[str]: The access token if available.
+        """
         return self.oauth_client.access_token
 
     @property
     def refresh_token(self) -> Optional[str]:
-        """Get refresh token (if returned from provider)"""
+        """
+        Retrieves the refresh token if returned from provider.
+
+        Returns:
+            Optional[str]: The refresh token if available.
+        """
         return self._refresh_token or self.oauth_client.refresh_token
 
     async def openid_from_response(self, response: dict, session: Optional[httpx.AsyncClient] = None) -> OpenID:
-        """Return {OpenID} object from provider's user info endpoint response"""
+        """
+        Converts a response from the provider's user info endpoint to an OpenID object.
+
+        Args:
+            response (dict): The response from the user info endpoint.
+            session (Optional[httpx.AsyncClient]): The HTTPX AsyncClient session.
+
+        Raises:
+            NotImplementedError: If the provider is not supported.
+
+        Returns:
+            OpenID: The user information in a standardized format.
+        """
         raise NotImplementedError(f"Provider {self.provider} not supported")
 
     async def get_discovery_document(self) -> DiscoveryDocument:
-        """Get discovery document containing handy urls"""
+        """
+        Retrieves the discovery document containing useful URLs.
+
+        Raises:
+            NotImplementedError: If the provider is not supported.
+
+        Returns:
+            DiscoveryDocument: A dictionary containing important endpoints like authorization, token and userinfo.
+        """
         raise NotImplementedError(f"Provider {self.provider} not supported")
 
     @property
@@ -153,7 +201,20 @@ class SSOBase:
         params: Optional[Dict[str, Any]] = None,
         state: Optional[str] = None,
     ) -> str:
-        """Return prepared login url. This is low-level, see {get_login_redirect} instead."""
+        """
+        Generates and returns the prepared login URL.
+
+        Args:
+            redirect_uri (Optional[str]): Overrides the `redirect_uri` specified on this instance.
+            params (Optional[Dict[str, Any]]): Additional query parameters to add to the login request.
+            state (Optional[str]): The state parameter for the OAuth 2.0 authorization request.
+
+        Raises:
+            ValueError: If `redirect_uri` is not provided either at construction or request time.
+
+        Returns:
+            str: The prepared login URL.
+        """
         params = params or {}
         redirect_uri = redirect_uri or self.redirect_uri
         if redirect_uri is None:
@@ -170,16 +231,16 @@ class SSOBase:
         params: Optional[Dict[str, Any]] = None,
         state: Optional[str] = None,
     ) -> RedirectResponse:
-        """Return redirect response by Stalette to login page of Oauth SSO provider
+        """
+        Constructs and returns a redirect response to the login page of OAuth SSO provider.
 
-        Arguments:
-            redirect_uri {Optional[str]} -- Override redirect_uri specified on this instance (default: None)
-            params {Optional[Dict[str, Any]]} -- Add additional query parameters to the login request.
-            state {Optional[str]} -- Add state parameter. This is useful if you want
-                                    the server to return something specific back to you.
+        Args:
+            redirect_uri (Optional[str]): Overrides the `redirect_uri` specified on this instance.
+            params (Optional[Dict[str, Any]]): Additional query parameters to add to the login request.
+            state (Optional[str]): The state parameter for the OAuth 2.0 authorization request.
 
         Returns:
-            RedirectResponse -- Starlette response (may directly be returned from FastAPI)
+            RedirectResponse: A Starlette response directing to the login page of the OAuth SSO provider.
         """
         login_uri = await self.get_login_url(redirect_uri=redirect_uri, params=params, state=state)
         response = RedirectResponse(login_uri, 303)
@@ -193,15 +254,20 @@ class SSOBase:
         headers: Optional[Dict[str, Any]] = None,
         redirect_uri: Optional[str] = None,
     ) -> Optional[OpenID]:
-        """Get FastAPI (Starlette) Request object and process login.
-        This handler should be used for your /callback path.
+        """
+        Processes the login given a FastAPI (Starlette) Request object. This should be used for the /callback path.
 
-        Arguments:
-            request {Request} -- FastAPI request object (or Starlette)
-            params {Optional[Dict[str, Any]]} -- Optional additional query parameters to pass to the provider
+        Args:
+            request (Request): FastAPI or Starlette request object.
+            params (Optional[Dict[str, Any]]): Additional query parameters to pass to the provider.
+            headers (Optional[Dict[str, Any]]): Additional headers to pass to the provider.
+            redirect_uri (Optional[str]): Overrides the `redirect_uri` specified on this instance.
+
+        Raises:
+            SSOLoginError: If the 'code' parameter is not found in the callback request.
 
         Returns:
-            Optional[OpenID] -- OpenID if the login was successfull
+            Optional[OpenID]: User information in OpenID format if the login was successful.
         """
         headers = headers or {}
         code = request.query_params.get("code")
@@ -234,12 +300,22 @@ class SSOBase:
         additional_headers: Optional[Dict[str, Any]] = None,
         redirect_uri: Optional[str] = None,
     ) -> Optional[OpenID]:
-        """This method should be called from callback endpoint to verify the user and request user info endpoint.
-        This is low level, you should use {verify_and_process} instead.
+        """
+        Processes login from the callback endpoint to verify the user and request user info endpoint.
+        It's a lower-level method, typically, you should use `verify_and_process` instead.
 
-        Arguments:
-            params {Optional[Dict[str, Any]]} -- Optional additional query parameters to pass to the provider
-            additional_headers {Optional[Dict[str, Any]]} -- Optional additional headers to be added to all requests
+        Args:
+            code (str): The authorization code.
+            request (Request): FastAPI or Starlette request object.
+            params (Optional[Dict[str, Any]]): Additional query parameters to pass to the provider.
+            additional_headers (Optional[Dict[str, Any]]): Additional headers to be added to all requests.
+            redirect_uri (Optional[str]): Overrides the `redirect_uri` specified on this instance.
+
+        Raises:
+            ReusedOauthClientWarning: If the SSO object is reused, which is not safe and caused security issues.
+
+        Returns:
+            Optional[OpenID]: User information in OpenID format if the login was successful.
         """
         # pylint: disable=too-many-locals
         if self._oauth_client is not None:  # pragma: no cover
