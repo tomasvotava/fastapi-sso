@@ -1,0 +1,78 @@
+site_name: fastapi-sso
+site_url: https://tomasvotava.github.io/fastapi-sso/
+site_author: Tomas Votava <info@tomasvotava.eu>
+theme:
+  features:
+    - navigation.instant
+    # - navigation.sections
+    # - navigation.expand
+    - navigation.path
+    - toc.follow
+    - toc.integrate
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue grey
+      accent: red
+      toggle:
+        icon: material/brightness-7
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue grey
+      accent: yellow
+      toggle:
+        icon: material/brightness-4
+  font:
+    text: Roboto
+    code: Roboto Mono
+  language: en
+  icon:
+    logo: fontawesome/solid/users
+repo_url: https://github.com/tomasvotava/fastapi-sso
+extra:
+  consent:
+    title: Cookie consent
+    description: >-
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.
+    cookies:
+      github: GitHub
+      analytics: Google analytics
+  analytics:
+    provider: google
+    property: 407765678
+  social:
+    - icon: material/github
+      link: https://github.com/tomasvotava/fastapi-sso
+    - icon: simple/buymeacoffee
+      link: https://www.buymeacoffee.com/tomas.votava
+copyright: >
+  Copyright &copy; 2023 Tomas Votava –
+  <a href="#__consent">Change cookie settings</a>
+plugins:
+  - search
+  - social
+  - mkdocstrings
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      auto_title: true
+      linenums: true
+  - pymdownx.superfences
+  - markdown_include.include:
+      base_path: docs
+  - toc:
+      toc_depth: 2
+
+hooks:
+  - ./docs/generate_reference.py
+
+nav:
+  - index.md
+  - tutorials.md
+  - how-to-guides.md
+  - contributing.md

@@ -1,0 +1,7 @@
+{
+    "MD041": false,
+    "line-length": {
+        "line_length": 120
+    },
+    "no-inline-html": false
+}

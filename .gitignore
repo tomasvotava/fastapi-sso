@@ -1,6 +1,9 @@
 .vscode/
 main.py
 
+docs/reference/
+docs/examples.md
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
