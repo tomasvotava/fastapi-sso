@@ -3,6 +3,7 @@ main.py
 
 docs/reference/
 docs/examples.md
+public/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

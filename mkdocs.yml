@@ -1,6 +1,7 @@
 site_name: fastapi-sso
 site_url: https://tomasvotava.github.io/fastapi-sso/
 site_author: Tomas Votava <info@tomasvotava.eu>
+site_dir: ./public
 theme:
   features:
     - navigation.instant

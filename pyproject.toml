@@ -39,7 +39,7 @@ pre-commit = "pre-commit"
 test = "pytest"
 coverage = "coverage report"
 
-docs = "mkdocs build"
+docs = "mkdocs build --clean"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=23.7.0"

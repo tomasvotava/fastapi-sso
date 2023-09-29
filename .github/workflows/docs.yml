@@ -1,0 +1,44 @@
+name: publish docs
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      POETRY_VIRTUALENVS_CREATE: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install poetry
+        run: curl -sSL https://install.python-poetry.org | python -
+      - name: Install dependencies
+        run: ~/.local/bin/poetry install
+      - name: Build docs
+        run: ~/.local/bin/poetry run poe docs
+      - name: Upload docs as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: github-pages
+          path: ./public
+
+  deploy:
+    permissions:
+      pages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to Github pages
+        id: deployment
+        uses: actions/deploy-pages@v2
