@@ -364,4 +364,4 @@ class SSOBase:
             response = await session.get(uri, headers=headers)
             content = response.json()
 
-        return await self.openid_from_response(content, session)
+            return await self.openid_from_response(content, session)
