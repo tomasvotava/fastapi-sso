@@ -24,10 +24,14 @@ class GithubSSO(SSOBase):
         }
 
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
+
         # if the email is empty then it means that the user has set it has private
         # so the email must be retrieved using emails_endopoint.
         # This endpoint return the list of all the email addresses.
         if response["email"] is None:
+            if session is None:
+                raise SSOLoginError(401, "Failed to process login via GitHub")
+ 
             uri, headers, _ = self.oauth_client.add_token(self.emails_endpoint)
             email_response = await session.get(uri, headers=headers)
             emails = email_response.json()
