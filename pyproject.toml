@@ -43,7 +43,7 @@ docs = "mkdocs build --clean"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=23.7.0"
-pylint = "^2"
+pylint = ">=2,<4"
 uvicorn = ">=0.23.1"
 mypy = "^1"
 pytest = "^7"
