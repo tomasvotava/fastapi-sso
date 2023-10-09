@@ -83,5 +83,12 @@ hooks:
 nav:
   - index.md
   - tutorials.md
-  - how-to-guides.md
+  - How-to Guides:
+      - how-to-guides/00-installation.md
+      - how-to-guides/additional-query-params.md
+      - how-to-guides/additional-scopes.md
+      - how-to-guides/http-development.md
+      - how-to-guides/redirect-uri-request-time.md
+      - how-to-guides/state-return-url.md
+      - how-to-guides/use-with-fastapi-security.md
   - contributing.md
