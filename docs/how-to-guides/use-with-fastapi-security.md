@@ -36,7 +36,8 @@ import datetime  # to calculate expiration of the JWT
 from fastapi import FastAPI, Depends, HTTPException, Security, Request
 from fastapi.responses import RedirectResponse
 from fastapi.security import APIKeyCookie  # this is the part that puts the lock icon to the docs
-from fastapi_sso import OpenID, GoogleSSO  # pip install fastapi-sso
+from fastapi_sso.sso.google import GoogleSSO  # pip install fastapi-sso
+from fastapi_sso.sso.base import OpenID
 
 from jose import jwt  # pip install python-jose[cryptography]
 
