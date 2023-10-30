@@ -1,6 +1,10 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
+    groups:
+      all:
+        patterns:
+          - "*"
     directory: "/"
     schedule:
       interval: "weekly"
