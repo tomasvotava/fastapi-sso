@@ -55,7 +55,7 @@ pytest-asyncio = "^0.21.1"
 pytest-xdist = "^3"
 pre-commit = "^3"
 mkdocs-material = { extras = ["imaging"], version = "^9.3.2" }
-mkdocstrings = { extras = ["python"], version = "^0.23.0" }
+mkdocstrings = { extras = ["python"], version = ">=0.23,<0.25" }
 markdown-include = "^0.8.1"
 
 [tool.black]
