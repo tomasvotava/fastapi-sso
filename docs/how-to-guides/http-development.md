@@ -6,6 +6,8 @@ In case you need to test on `localhost` and do not want to
 use a self-signed certificate, make sure you set up redirect uri within your SSO provider to `http://localhost:{port}`
 and then add this to your environment:
 
+!!! info "Since `0.9.0` OAUTHLIB_INSECURE_TRANSPORT is set to `1` automatically if `allow_insecure_http` is `True` and this is not needed anymore."
+
 ```bash
 OAUTHLIB_INSECURE_TRANSPORT=1
 ```
