@@ -1,5 +1,6 @@
 # type: ignore
 
+import os
 import pytest
 from utils import Request
 
@@ -56,3 +57,10 @@ class TestSSOBase:
 
         with pytest.raises(SSOLoginError):
             await sso.verify_and_process(Request())
+
+    def test_autoset_insecure_transport_env_var(self):
+        assert not os.getenv(
+            "OAUTHLIB_INSECURE_TRANSPORT"
+        ), "OAUTHLIB_INSECURE_TRANSPORT should not be true before test"
+        SSOBase("client_id", "client_secret", allow_insecure_http=True)
+        assert os.getenv("OAUTHLIB_INSECURE_TRANSPORT"), "OAUTHLIB_INSECURE_TRANSPORT should be truthy after test"
