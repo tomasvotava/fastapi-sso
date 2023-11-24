@@ -1,0 +1,19 @@
+comment:
+  layout: "header, diff, flags, files"
+  behavior: default
+  require_changes: no
+
+coverage:
+  status:
+    patch:
+      default:
+        target: auto
+        threshold: null
+        if_not_found: success
+        only_pulls: true
+    project:
+      default:
+        target: auto
+        threshold: null
+        if_not_found: success
+        only_pulls: true
