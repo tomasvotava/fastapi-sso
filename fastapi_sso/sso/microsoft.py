@@ -14,7 +14,7 @@ class MicrosoftSSO(SSOBase):
     """Class providing login using Microsoft OAuth"""
 
     provider = "microsoft"
-    scope = ["openid", "User.Read"]
+    scope = ["openid", "User.Read", "email"]
     version = "v1.0"
     tenant: str = "common"
 
@@ -47,7 +47,7 @@ class MicrosoftSSO(SSOBase):
 
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         return OpenID(
-            email=response["mail"],
+            email=response.get("mail"),
             display_name=response["displayName"],
             provider=self.provider,
             id=response.get("id"),
