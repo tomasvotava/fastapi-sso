@@ -1,6 +1,8 @@
 """Microsoft SSO Oauth Helper class"""
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Union
+
+import pydantic
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -20,7 +22,7 @@ class MicrosoftSSO(SSOBase):
         self,
         client_id: str,
         client_secret: str,
-        redirect_uri: Optional[str] = None,
+        redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = None,
         allow_insecure_http: bool = False,
         use_state: bool = False,  # TODO: Remove use_state argument
         scope: Optional[List[str]] = None,
