@@ -6,7 +6,6 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi_sso.sso.naver import NaverSSO
 
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 CLIENT_ID = os.environ["CLIENT_ID"]
 CLIENT_SECRET = os.environ["CLIENT_SECRET"]
 

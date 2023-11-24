@@ -1,15 +1,13 @@
 """This is an example usage of fastapi-sso.
 """
 
-import os
-from typing import Any, Dict
+from typing import Any, Dict, Union
+from httpx import AsyncClient
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from starlette.requests import Request
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID
 from fastapi_sso.sso.generic import create_provider
-
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 app = FastAPI()
 
@@ -26,7 +24,7 @@ app = FastAPI()
 # and then python examples/generic.py
 
 
-def convert_openid(response: Dict[str, Any]) -> OpenID:
+def convert_openid(response: Dict[str, Any], _client: Union[AsyncClient, None]) -> OpenID:
     """Convert user information returned by OIDC"""
     print(response)
     return OpenID(display_name=response["sub"])

@@ -6,7 +6,6 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi_sso.sso.microsoft import MicrosoftSSO
 
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 CLIENT_ID = os.environ["CLIENT_ID"]
 CLIENT_SECRET = os.environ["CLIENT_SECRET"]
 TENANT = os.environ["TENANT"]
@@ -17,7 +16,7 @@ sso = MicrosoftSSO(
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
     tenant=TENANT,
-    redirect_uri="http://localhost:5000/auth/callback",
+    redirect_uri="http://localhost:8080/auth/callback",
     allow_insecure_http=True,
 )
 
@@ -37,4 +36,4 @@ async def auth_callback(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app="examples.microsoft:app", host="127.0.0.1", port=5000)
+    uvicorn.run(app="examples.microsoft:app", host="127.0.0.1", port=8080)

@@ -3,6 +3,7 @@
 # pylint: disable=too-few-public-methods
 
 import json
+import os
 import sys
 import warnings
 from types import TracebackType
@@ -77,6 +78,9 @@ class SSOBase:
         self.redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = redirect_uri
         self.allow_insecure_http: bool = allow_insecure_http
         self._oauth_client: Optional[WebApplicationClient] = None
+
+        if self.allow_insecure_http:
+            os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
         # TODO: Remove use_state argument and attribute
         if use_state:
