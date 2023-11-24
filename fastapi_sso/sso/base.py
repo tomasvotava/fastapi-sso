@@ -366,7 +366,8 @@ class SSOBase:
             self.oauth_client.parse_request_body_response(json.dumps(content))
 
             uri, headers, _ = self.oauth_client.add_token(await self.userinfo_endpoint)
-            response = await session.get(uri, headers=headers)
+            session.headers.update(headers)
+            response = await session.get(uri)
             content = response.json()
 
-        return await self.openid_from_response(content, session)
+            return await self.openid_from_response(content, session)
