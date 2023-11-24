@@ -35,10 +35,13 @@ class AnythingDict:
 
 def make_fake_async_client(returns_post: Response, returns_get: Response):
     class FakeAsyncClient:
+        headers = {}
+
         async def __aenter__(self):
             return self
 
         async def __aexit__(self, *args):
+            self.headers = {}
             return None
 
         async def get(self, *args, **kwargs) -> Response:

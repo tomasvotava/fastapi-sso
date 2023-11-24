@@ -14,6 +14,7 @@ class GithubSSO(SSOBase):
     provider = "github"
     scope = ["user:email"]
     additional_headers = {"accept": "application/json"}
+    emails_endpoint = "https://api.github.com/user/emails"
 
     async def get_discovery_document(self) -> DiscoveryDocument:
         return {
@@ -22,9 +23,23 @@ class GithubSSO(SSOBase):
             "userinfo_endpoint": "https://api.github.com/user",
         }
 
+    async def _get_primary_email(self, session: Optional["httpx.AsyncClient"] = None) -> Optional[str]:
+        """Attempt to get primary email from Github for a current user.
+        The session received must be authenticated."""
+        if not session:
+            return None
+        response = await session.get(self.emails_endpoint)
+        if response.status_code != 200:
+            return None
+        emails = response.json()
+        for email in emails:
+            if email["primary"]:
+                return email["email"]
+        return None
+
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         return OpenID(
-            email=response["email"],
+            email=response.get("email") or (await self._get_primary_email(session)),
             provider=self.provider,
             id=str(response["id"]),
             display_name=response["login"],
