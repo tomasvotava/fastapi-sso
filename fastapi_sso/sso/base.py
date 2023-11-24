@@ -6,7 +6,7 @@ import json
 import sys
 import warnings
 from types import TracebackType
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 import httpx
 import pydantic
@@ -58,7 +58,7 @@ class SSOBase:
     provider: str = NotImplemented
     client_id: str = NotImplemented
     client_secret: str = NotImplemented
-    redirect_uri: Optional[str] = NotImplemented
+    redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = NotImplemented
     scope: List[str] = NotImplemented
     additional_headers: Optional[Dict[str, Any]] = None
 
@@ -66,17 +66,18 @@ class SSOBase:
         self,
         client_id: str,
         client_secret: str,
-        redirect_uri: Optional[str] = None,
+        redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = None,
         allow_insecure_http: bool = False,
         use_state: bool = False,
         scope: Optional[List[str]] = None,
     ):
         # pylint: disable=too-many-arguments
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.redirect_uri = redirect_uri
-        self.allow_insecure_http = allow_insecure_http
+        self.client_id: str = client_id
+        self.client_secret: str = client_secret
+        self.redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = redirect_uri
+        self.allow_insecure_http: bool = allow_insecure_http
         self._oauth_client: Optional[WebApplicationClient] = None
+
         # TODO: Remove use_state argument and attribute
         if use_state:
             warnings.warn(
@@ -197,7 +198,7 @@ class SSOBase:
     async def get_login_url(
         self,
         *,
-        redirect_uri: Optional[str] = None,
+        redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = None,
         params: Optional[Dict[str, Any]] = None,
         state: Optional[str] = None,
     ) -> str:
@@ -332,13 +333,13 @@ class SSOBase:
         additional_headers = additional_headers or {}
         additional_headers.update(self.additional_headers or {})
         url = request.url
-        scheme = url.scheme
-        if not self.allow_insecure_http and scheme != "https":
+
+        if not self.allow_insecure_http and url.scheme != "https":
             current_url = str(url).replace("http://", "https://")
-            scheme = "https"
         else:
             current_url = str(url)
-        current_path = f"{scheme}://{url.netloc}{url.path}"
+
+        current_path = f"{url.scheme}://{url.netloc}{url.path}"
 
         token_url, headers, body = self.oauth_client.prepare_token_request(
             await self.token_endpoint,
