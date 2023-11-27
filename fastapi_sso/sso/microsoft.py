@@ -48,7 +48,7 @@ class MicrosoftSSO(SSOBase):
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         return OpenID(
             email=response.get("mail"),
-            display_name=response["displayName"],
+            display_name=response.get("displayName"),
             provider=self.provider,
             id=response.get("id"),
             first_name=response.get("givenName"),
