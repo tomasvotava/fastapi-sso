@@ -49,7 +49,7 @@ I tend to process Pull Requests faster when properly caffeinated 😉.
 - Spotify
 - Fitbit
 - Github (credits to [Brandl](https://github.com/Brandl) for hint using `accept` header)
-- generic (see [docs](https://tomasvotava.github.io/fastapi-sso/sso/generic.html))
+- generic (see [docs](https://tomasvotava.github.io/fastapi-sso/reference/sso.generic/))
 
 ### Contributed
 
