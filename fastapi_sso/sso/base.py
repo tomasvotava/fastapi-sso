@@ -44,7 +44,7 @@ class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
     """Class (schema) to represent information got from sso provider in a common form."""
 
     id: Optional[str] = None
-    email: Optional[Union[pydantic.EmailStr, str]] = None
+    email: Optional[pydantic.EmailStr] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     display_name: Optional[str] = None
