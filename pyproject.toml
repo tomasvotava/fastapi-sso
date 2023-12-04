@@ -52,7 +52,7 @@ pytest-cov = "^4"
 tox = "^4"
 poethepoet = ">=0.21.1,<0.25.0"
 isort = "^5"
-pytest-asyncio = "^0.21.1"
+pytest-asyncio = ">=0.21.1,<0.24.0"
 pytest-xdist = "^3"
 pre-commit = "^3"
 mkdocs-material = { extras = ["imaging"], version = "^9.3.2" }
