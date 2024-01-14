@@ -12,4 +12,5 @@ from .sso.google import GoogleSSO
 from .sso.kakao import KakaoSSO
 from .sso.microsoft import MicrosoftSSO
 from .sso.naver import NaverSSO
+from .sso.notion import NotionSSO
 from .sso.spotify import SpotifySSO
