@@ -2,8 +2,7 @@
 
 from typing import TYPE_CHECKING, Optional
 
-from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
-from fastapi_sso.sso.base import SSOLoginError
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, SSOLoginError
 
 if TYPE_CHECKING:
     import httpx
