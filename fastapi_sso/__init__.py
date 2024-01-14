@@ -13,3 +13,4 @@ from .sso.kakao import KakaoSSO
 from .sso.microsoft import MicrosoftSSO
 from .sso.naver import NaverSSO
 from .sso.spotify import SpotifySSO
+from .sso.notion import NotionSSO
