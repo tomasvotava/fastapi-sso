@@ -336,6 +336,7 @@ class SSOBase:
         params = params or {}
         additional_headers = additional_headers or {}
         additional_headers.update(self.additional_headers or {})
+
         url = request.url
 
         if not self.allow_insecure_http and url.scheme != "https":
@@ -366,6 +367,7 @@ class SSOBase:
             self.oauth_client.parse_request_body_response(json.dumps(content))
 
             uri, headers, _ = self.oauth_client.add_token(await self.userinfo_endpoint)
+            headers.update(additional_headers)
             session.headers.update(headers)
             response = await session.get(uri)
             content = response.json()
