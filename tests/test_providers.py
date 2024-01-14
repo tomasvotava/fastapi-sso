@@ -19,6 +19,7 @@ from fastapi_sso.sso.kakao import KakaoSSO
 from fastapi_sso.sso.microsoft import MicrosoftSSO
 from fastapi_sso.sso.naver import NaverSSO
 from fastapi_sso.sso.spotify import SpotifySSO
+from fastapi_sso.sso.notion import NotionSSO
 
 GenericProvider = create_provider(
     name="generic",
@@ -41,6 +42,7 @@ tested_providers = (
     NaverSSO,
     SpotifySSO,
     GenericProvider,
+    NotionSSO,
 )
 
 # Run all tests for each of the listed providers
