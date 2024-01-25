@@ -345,6 +345,9 @@ class SSOBase:
             current_url = str(url)
 
         current_path = f"{url.scheme}://{url.netloc}{url.path}"
+        if self.provider == "linkedin":
+            # linkedin needs 'client_secret' parameter
+            params["client_secret"] = self.client_secret
 
         token_url, headers, body = self.oauth_client.prepare_token_request(
             await self.token_endpoint,
