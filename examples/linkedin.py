@@ -11,7 +11,7 @@ CLIENT_SECRET = os.environ["CLIENT_SECRET"]
 
 app = FastAPI()
 
-sso = LinkedinSSO(
+sso = LinkedInSSO(
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
     redirect_uri="http://localhost:5000/auth/callback",
