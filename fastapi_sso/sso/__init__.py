@@ -1,3 +1,7 @@
+"""This package includes all the concrete SSO implementations.
+All of them must inherit from SSOBase class.
+"""
+
 from .facebook import FacebookSSO
 from .fitbit import FitbitSSO
 from .github import GithubSSO

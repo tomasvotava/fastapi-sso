@@ -20,16 +20,16 @@ class GoogleSSO(SSOBase):
 
         if not response.get("email_verified"):
             raise SSOLoginError(401, f"User {response.get('email')} is not verified with Google")
-        else:
-            return OpenID(
-                email=response.get("email", ""),
-                provider=self.provider,
-                id=response.get("sub"),
-                first_name=response.get("given_name"),
-                last_name=response.get("family_name"),
-                display_name=response.get("name"),
-                picture=response.get("picture"),
-            )
+
+        return OpenID(
+            email=response.get("email", ""),
+            provider=self.provider,
+            id=response.get("sub"),
+            first_name=response.get("given_name"),
+            last_name=response.get("family_name"),
+            display_name=response.get("name"),
+            picture=response.get("picture"),
+        )
 
     async def get_discovery_document(self) -> DiscoveryDocument:
         """Get document containing handy urls"""
