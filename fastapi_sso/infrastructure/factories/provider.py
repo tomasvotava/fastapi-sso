@@ -1,8 +1,6 @@
 """A generic OAuth client that can be used to quickly create support for any OAuth provider with close to no code.
 """
 
-__all__ = ("create_provider",)
-
 import logging
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 

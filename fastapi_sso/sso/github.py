@@ -1,9 +1,6 @@
 """Github SSO Oauth Helper class."""
 
 
-__all__ = ("GithubSSO",)
-
-
 from typing import Optional
 
 import httpx

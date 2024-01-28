@@ -1,8 +1,6 @@
 """Spotify SSO Login Helper."""
 
 
-__all__ = ("SpotifySSO",)
-
 from typing import Optional
 
 import httpx

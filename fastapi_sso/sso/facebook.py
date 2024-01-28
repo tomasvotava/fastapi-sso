@@ -1,9 +1,6 @@
 """Facebook SSO Login Helper."""
 
 
-__all__ = ("FacebookSSO",)
-
-
 from typing import Optional
 
 import httpx

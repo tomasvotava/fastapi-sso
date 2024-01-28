@@ -1,8 +1,6 @@
 """Gitlab SSO Oauth Helper class."""
 
 
-__all__ = ("GitlabSSO",)
-
 from typing import Optional
 
 import httpx

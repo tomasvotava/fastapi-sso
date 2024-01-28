@@ -1,9 +1,6 @@
 """Microsoft SSO Oauth Helper class."""
 
 
-__all__ = ("MicrosoftSSO",)
-
-
 from typing import List, Optional, Union
 
 import httpx

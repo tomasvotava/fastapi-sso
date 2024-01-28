@@ -1,8 +1,6 @@
 """Google SSO Login Helper."""
 
 
-__all__ = ("GoogleSSO",)
-
 from typing import Optional
 
 import httpx
