@@ -1,10 +1,11 @@
-"""Microsoft Login Example
-"""
+"""Microsoft Login Example."""
 
 import os
+
 import uvicorn
 from fastapi import FastAPI, Request
-from fastapi_sso.sso.microsoft import MicrosoftSSO
+
+from fastapi_sso import MicrosoftSSO
 
 CLIENT_ID = os.environ["CLIENT_ID"]
 CLIENT_SECRET = os.environ["CLIENT_SECRET"]

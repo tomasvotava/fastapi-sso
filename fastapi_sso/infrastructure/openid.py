@@ -2,6 +2,16 @@
 """
 # pylint: disable=too-few-public-methods
 
+__all__ = (
+    "OpenID",
+    "SSOBase",
+    "SSOLoginError",
+    "DiscoveryDocument",
+    "ReusedOauthClientWarning",
+    "UnsetStateWarning",
+)
+
+
 import json
 import os
 import sys
@@ -360,6 +370,7 @@ class SSOBase:
         headers.update(additional_headers)
 
         auth = httpx.BasicAuth(self.client_id, self.client_secret)
+
         async with httpx.AsyncClient() as session:
             response = await session.post(token_url, headers=headers, content=body, auth=auth)
             content = response.json()

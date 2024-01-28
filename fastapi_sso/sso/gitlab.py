@@ -1,11 +1,13 @@
-"""Gitlab SSO Oauth Helper class"""
+"""Gitlab SSO Oauth Helper class."""
 
-from typing import TYPE_CHECKING, Optional
 
-from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
+__all__ = ("GitlabSSO",)
 
-if TYPE_CHECKING:
-    import httpx
+from typing import Optional
+
+import httpx
+
+from fastapi_sso.infrastructure import DiscoveryDocument, OpenID, SSOBase
 
 
 class GitlabSSO(SSOBase):

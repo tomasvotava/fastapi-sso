@@ -1,10 +1,11 @@
-"""Google Login Example
-"""
+"""Google Login Example."""
 
 import os
+
 import uvicorn
 from fastapi import FastAPI, Request
-from fastapi_sso.sso.google import GoogleSSO
+
+from fastapi_sso import GoogleSSO
 
 CLIENT_ID = os.environ["CLIENT_ID"]
 CLIENT_SECRET = os.environ["CLIENT_SECRET"]

@@ -1,10 +1,12 @@
-"""Github Login Example
-"""
+"""Github Login Example."""
+
 
 import os
+
 import uvicorn
 from fastapi import FastAPI, Request
-from fastapi_sso.sso.github import GithubSSO
+
+from fastapi_sso import GithubSSO
 
 CLIENT_ID = os.environ["CLIENT_ID"]
 CLIENT_SECRET = os.environ["CLIENT_SECRET"]

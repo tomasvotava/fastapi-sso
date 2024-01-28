@@ -1,14 +1,14 @@
-"""A generic OAuth client that can be used to quickly create support for any OAuth provider
-with close to no code
+"""A generic OAuth client that can be used to quickly create support for any OAuth provider with close to no code.
 """
 
+__all__ = ("create_provider",)
+
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
-from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
+import httpx
 
-if TYPE_CHECKING:
-    import httpx
+from ..openid import DiscoveryDocument, OpenID, SSOBase
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ def create_provider(
 
     Example:
         ```python
-        from fastapi_sso.sso.generic import create_provider
+        from fastapi_sso.infrastructure import factories
 
         discovery = {
             "authorization_endpoint": "http://localhost:9090/auth",
@@ -41,13 +41,14 @@ def create_provider(
             "userinfo_endpoint": "http://localhost:9090/me",
         }
 
-        SSOProvider = create_provider(name="oidc", discovery_document=discovery)
+        SSOProvider = factories.create_provider(name="oidc", discovery_document=discovery)
+
         sso = SSOProvider(
             client_id="test",
             client_secret="secret",
             redirect_uri="http://localhost:8080/callback",
             allow_insecure_http=True
-            )
+        )
         ```
 
     """

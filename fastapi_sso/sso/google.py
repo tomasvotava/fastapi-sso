@@ -1,11 +1,13 @@
-"""Google SSO Login Helper
-"""
+"""Google SSO Login Helper."""
+
+
+__all__ = ("GoogleSSO",)
 
 from typing import Optional
 
 import httpx
 
-from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, SSOLoginError
+from fastapi_sso.infrastructure import DiscoveryDocument, OpenID, SSOBase, SSOLoginError
 
 
 class GoogleSSO(SSOBase):
@@ -15,9 +17,12 @@ class GoogleSSO(SSOBase):
     provider = "google"
     scope = ["openid", "email", "profile"]
 
-    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
+    async def openid_from_response(self, response: dict, session: Optional[httpx.AsyncClient] = None) -> OpenID:
         """Return OpenID from user information provided by Google"""
-        if response.get("email_verified"):
+
+        if not response.get("email_verified"):
+            raise SSOLoginError(401, f"User {response.get('email')} is not verified with Google")
+        else:
             return OpenID(
                 email=response.get("email", ""),
                 provider=self.provider,
@@ -27,10 +32,10 @@ class GoogleSSO(SSOBase):
                 display_name=response.get("name"),
                 picture=response.get("picture"),
             )
-        raise SSOLoginError(401, f"User {response.get('email')} is not verified with Google")
 
     async def get_discovery_document(self) -> DiscoveryDocument:
         """Get document containing handy urls"""
+
         async with httpx.AsyncClient() as session:
             response = await session.get(self.discovery_url)
             content = response.json()

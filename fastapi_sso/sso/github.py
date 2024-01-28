@@ -1,11 +1,14 @@
-"""Github SSO Oauth Helper class"""
+"""Github SSO Oauth Helper class."""
 
-from typing import TYPE_CHECKING, Optional
 
-from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
+__all__ = ("GithubSSO",)
 
-if TYPE_CHECKING:
-    import httpx
+
+from typing import Optional
+
+import httpx
+
+from fastapi_sso.infrastructure import DiscoveryDocument, OpenID, SSOBase
 
 
 class GithubSSO(SSOBase):
@@ -26,15 +29,21 @@ class GithubSSO(SSOBase):
     async def _get_primary_email(self, session: Optional["httpx.AsyncClient"] = None) -> Optional[str]:
         """Attempt to get primary email from Github for a current user.
         The session received must be authenticated."""
+
         if not session:
             return None
+
         response = await session.get(self.emails_endpoint)
+
         if response.status_code != 200:
             return None
+
         emails = response.json()
+
         for email in emails:
             if email["primary"]:
                 return email["email"]
+
         return None
 
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
