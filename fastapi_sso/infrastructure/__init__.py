@@ -2,10 +2,6 @@
 that could be used across the project.
 """
 
-
-from . import factories
-from .openid import DiscoveryDocument, OpenID, ReusedOauthClientWarning, SSOBase, SSOLoginError, UnsetStateWarning
-
 __all__ = (
     "factories",
     "OpenID",
@@ -15,3 +11,6 @@ __all__ = (
     "ReusedOauthClientWarning",
     "UnsetStateWarning",
 )
+
+from . import factories
+from .openid import DiscoveryDocument, OpenID, ReusedOauthClientWarning, SSOBase, SSOLoginError, UnsetStateWarning

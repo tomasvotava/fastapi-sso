@@ -1,9 +1,6 @@
 """Fitbit OAuth Login Helper."""
 
 
-__all__ = ("FitbitSSO",)
-
-
 from typing import Optional
 
 import httpx
