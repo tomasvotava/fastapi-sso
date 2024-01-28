@@ -2,9 +2,11 @@
 """
 
 import os
+
 import uvicorn
 from fastapi import FastAPI, Request
-from fastapi_sso.sso.notion import NotionSSO
+
+from fastapi_sso import NotionSSO
 
 CLIENT_ID = os.environ["CLIENT_ID"]
 CLIENT_SECRET = os.environ["CLIENT_SECRET"]

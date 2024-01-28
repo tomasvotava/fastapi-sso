@@ -1,12 +1,11 @@
-"""Facebook SSO Login Helper
-"""
+"""Facebook SSO Login Helper."""
 
-from typing import TYPE_CHECKING, Optional
 
-from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
+from typing import Optional
 
-if TYPE_CHECKING:
-    import httpx
+import httpx
+
+from fastapi_sso.infrastructure import DiscoveryDocument, OpenID, SSOBase
 
 
 class FacebookSSO(SSOBase):
@@ -18,6 +17,7 @@ class FacebookSSO(SSOBase):
 
     async def get_discovery_document(self) -> DiscoveryDocument:
         """Get document containing handy urls"""
+
         return {
             "authorization_endpoint": "https://www.facebook.com/v9.0/dialog/oauth",
             "token_endpoint": f"{self.base_url}/oauth/access_token",
@@ -26,6 +26,7 @@ class FacebookSSO(SSOBase):
 
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         """Return OpenID from user information provided by Facebook"""
+
         return OpenID(
             email=response.get("email", ""),
             first_name=response.get("first_name"),

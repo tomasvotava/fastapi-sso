@@ -1,17 +1,15 @@
-"""Spotify SSO Login Helper
-"""
+"""Spotify SSO Login Helper."""
 
 
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
-from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
+import httpx
 
-if TYPE_CHECKING:
-    import httpx
+from fastapi_sso.infrastructure import DiscoveryDocument, OpenID, SSOBase
 
 
 class SpotifySSO(SSOBase):
-    """Class providing login via Spotify OAuth"""
+    """Class providing login via Spotify OAuth."""
 
     provider = "spotify"
     scope = ["user-read-private", "user-read-email"]
@@ -24,12 +22,14 @@ class SpotifySSO(SSOBase):
             "userinfo_endpoint": "https://api.spotify.com/v1/me",
         }
 
-    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
-        """Return OpenID from user information provided by Spotify"""
-        if response.get("images", []):
-            picture = response["images"][0]["url"]
+    async def openid_from_response(self, response: dict, session: Optional[httpx.AsyncClient] = None) -> OpenID:
+        """Return OpenID from user information provided by Spotify."""
+
+        if response.get("images") and len(response["images"]) > 0:
+            picture: Optional[str] = response["images"][0]["url"]
         else:
             picture = None
+
         return OpenID(
             email=response.get("email", ""),
             display_name=response.get("display_name"),

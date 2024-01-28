@@ -1,12 +1,11 @@
-"""Fitbit OAuth Login Helper
-"""
+"""Fitbit OAuth Login Helper."""
 
-from typing import TYPE_CHECKING, Optional
 
-from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, SSOLoginError
+from typing import Optional
 
-if TYPE_CHECKING:
-    import httpx
+import httpx
+
+from fastapi_sso.infrastructure import DiscoveryDocument, OpenID, SSOBase, SSOLoginError
 
 
 class FitbitSSO(SSOBase):
@@ -17,9 +16,10 @@ class FitbitSSO(SSOBase):
 
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         """Return OpenID from user information provided by Google"""
-        info = response.get("user")
-        if not info:
+
+        if not (info := response.get("user")):
             raise SSOLoginError(401, "Failed to process login via Fitbit")
+
         return OpenID(
             id=info["encodedId"],
             first_name=info["fullName"],
@@ -30,6 +30,7 @@ class FitbitSSO(SSOBase):
 
     async def get_discovery_document(self) -> DiscoveryDocument:
         """Get document containing handy urls"""
+
         return {
             "authorization_endpoint": "https://www.fitbit.com/oauth2/authorize?response_type=code",
             "token_endpoint": "https://api.fitbit.com/oauth2/token",

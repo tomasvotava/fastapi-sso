@@ -2,12 +2,13 @@
 """
 
 from typing import Any, Dict, Union
-from httpx import AsyncClient
+
 import uvicorn
 from fastapi import FastAPI, HTTPException
+from httpx import AsyncClient
 from starlette.requests import Request
-from fastapi_sso.sso.base import DiscoveryDocument, OpenID
-from fastapi_sso.sso.generic import create_provider
+
+from fastapi_sso.infrastructure import DiscoveryDocument, OpenID, factories
 
 app = FastAPI()
 
@@ -36,7 +37,9 @@ discovery_document: DiscoveryDocument = {
     "userinfo_endpoint": "http://localhost:9090/me",
 }
 
-GenericSSO = create_provider(name="oidc", discovery_document=discovery_document, response_convertor=convert_openid)
+GenericSSO = factories.create_provider(
+    name="oidc", discovery_document=discovery_document, response_convertor=convert_openid
+)
 
 sso = GenericSSO(
     client_id="test", client_secret="secret", redirect_uri="http://localhost:8080/callback", allow_insecure_http=True

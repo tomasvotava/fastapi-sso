@@ -1,7 +1,6 @@
-from fastapi_sso.sso.base import OpenID
-from fastapi_sso.sso.generic import create_provider
+from fastapi_sso.infrastructure import DiscoveryDocument, OpenID, factories
 
-DISCOVERY = {
+DISCOVERY: DiscoveryDocument = {
     "authorization_endpoint": "http://localhost:9090/auth",
     "token_endpoint": "http://localhost:9090/token",
     "userinfo_endpoint": "http://localhost:9090/me",
@@ -10,26 +9,26 @@ DISCOVERY = {
 
 class TestGenericProvider:
     async def test_discovery_document_static(self):
-        Provider = create_provider(discovery_document=DISCOVERY)
+        Provider = factories.create_provider(discovery_document=DISCOVERY)
         sso = Provider("client_id", "client_secret")
         document = await sso.get_discovery_document()
         assert document == DISCOVERY
 
     async def test_discovery_document_callable(self):
-        Provider = create_provider(discovery_document=lambda _: DISCOVERY)
+        Provider = factories.create_provider(discovery_document=lambda _: DISCOVERY)
         sso = Provider("client_id", "client_secret")
         document = await sso.get_discovery_document()
         assert document == DISCOVERY
 
     async def test_empty_response_convertor(self):
-        Provider = create_provider(discovery_document=DISCOVERY)
+        Provider = factories.create_provider(discovery_document=DISCOVERY)
         sso = Provider("client_id", "client_secret")
         openid = await sso.openid_from_response({})
         assert openid.provider == Provider.provider
         assert openid.id is None
 
     async def test_response_convertor(self):
-        Provider = create_provider(
+        Provider = factories.create_provider(
             discovery_document=DISCOVERY,
             response_convertor=lambda response, _: OpenID(
                 id=response["id"], email=response["email"], display_name=response["display_name"]
