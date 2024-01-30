@@ -296,6 +296,10 @@ class SSOBase:
     ) -> None:
         return None
 
+    @property
+    def _extra_query_params(self) -> Dict:
+        return {}
+
     async def process_login(
         self,
         code: str,
@@ -334,6 +338,7 @@ class SSOBase:
                 ReusedOauthClientWarning,
             )
         params = params or {}
+        params.update(self._extra_query_params)
         additional_headers = additional_headers or {}
         additional_headers.update(self.additional_headers or {})
 
@@ -345,9 +350,6 @@ class SSOBase:
             current_url = str(url)
 
         current_path = f"{url.scheme}://{url.netloc}{url.path}"
-        if self.provider == "linkedin":
-            # linkedin needs 'client_secret' parameter
-            params["client_secret"] = self.client_secret
 
         token_url, headers, body = self.oauth_client.prepare_token_request(
             await self.token_endpoint,

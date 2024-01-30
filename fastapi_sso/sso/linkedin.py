@@ -1,6 +1,6 @@
 """LinkedIn SSO Oauth Helper class"""
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -15,6 +15,10 @@ class LinkedInSSO(SSOBase):
     scope = ["openid", "profile", "email"]
     additional_headers = {"accept": "application/json"}
 
+    @property
+    def _extra_query_params(self) -> Dict:
+        return {"client_secret": self.client_secret}
+
     async def get_discovery_document(self) -> DiscoveryDocument:
         return {
             "authorization_endpoint": "https://www.linkedin.com/oauth/v2/authorization",
@@ -23,16 +27,6 @@ class LinkedInSSO(SSOBase):
         }
 
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
-        """Response format
-        sub	Subject Identifier	Text
-        name	Full name	Text
-        given_name	Member's first name	Text
-        family_name	Member's last name	Text
-        picture	Member's profile picture URL	Text
-        locale	Member's locale	dict {'country': str, 'language': str}
-        email	Member's primary e-mail address.	Text
-        email_verified	Indicator that Member's primary email has been verified	Boolean
-        """
         return OpenID(
             email=response.get("email"),
             provider=self.provider,
