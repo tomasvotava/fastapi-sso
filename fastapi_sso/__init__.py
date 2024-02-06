@@ -10,6 +10,7 @@ from .sso.github import GithubSSO
 from .sso.gitlab import GitlabSSO
 from .sso.google import GoogleSSO
 from .sso.kakao import KakaoSSO
+from .sso.line import LineSSO
 from .sso.microsoft import MicrosoftSSO
 from .sso.naver import NaverSSO
 from .sso.notion import NotionSSO
