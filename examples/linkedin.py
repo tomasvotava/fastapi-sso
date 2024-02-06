@@ -35,4 +35,4 @@ async def auth_callback(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app="examples.gitlab:app", host="127.0.0.1", port=5000)
+    uvicorn.run(app="examples.linkedin:app", host="127.0.0.1", port=5000)
