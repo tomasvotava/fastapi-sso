@@ -1,7 +1,6 @@
 """Spotify SSO Login Helper
 """
 
-
 from typing import TYPE_CHECKING, Optional
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
