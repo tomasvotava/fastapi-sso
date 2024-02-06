@@ -28,8 +28,8 @@ class LineSSO(SSOBase):
         """Return OpenID from user information provided by Line"""
         return OpenID(
             email=response.get("email"),
-            first_name="",
-            last_name="",
+            first_name=None,
+            last_name=None,
             display_name=response.get("name"),
             provider=self.provider,
             id=response.get("sub"),
