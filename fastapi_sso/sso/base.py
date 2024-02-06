@@ -1,5 +1,6 @@
 """SSO login base dependency
 """
+
 # pylint: disable=too-few-public-methods
 
 import json
