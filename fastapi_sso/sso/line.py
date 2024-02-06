@@ -1,3 +1,6 @@
+"""Line SSO Login Helper
+"""
+
 from typing import TYPE_CHECKING, Optional
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
@@ -16,7 +19,7 @@ class LineSSO(SSOBase):
     async def get_discovery_document(self) -> DiscoveryDocument:
         """Get document containing handy urls"""
         return {
-            "authorization_endpoint": f"https://access.line.me/oauth2/v2.1/authorize",
+            "authorization_endpoint": "https://access.line.me/oauth2/v2.1/authorize",
             "token_endpoint": f"{self.base_url}/token",
             "userinfo_endpoint": f"{self.base_url}/userinfo",
         }
