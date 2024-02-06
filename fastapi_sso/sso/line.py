@@ -1,6 +1,6 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Optional
 
-from fastapi_sso.sso.base import DiscoveryDocument, OpenID, ReusedOauthClientWarning, SSOBase
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 if TYPE_CHECKING:
     import httpx
