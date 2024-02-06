@@ -297,6 +297,10 @@ class SSOBase:
     ) -> None:
         return None
 
+    @property
+    def _extra_query_params(self) -> Dict:
+        return {}
+
     async def process_login(
         self,
         code: str,
@@ -335,6 +339,7 @@ class SSOBase:
                 ReusedOauthClientWarning,
             )
         params = params or {}
+        params.update(self._extra_query_params)
         additional_headers = additional_headers or {}
         additional_headers.update(self.additional_headers or {})
 
