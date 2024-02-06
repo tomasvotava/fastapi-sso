@@ -1,8 +1,4 @@
-import warnings
 from typing import TYPE_CHECKING, Any, Dict, Optional
-
-import httpx
-from starlette.requests import Request
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, ReusedOauthClientWarning, SSOBase
 
