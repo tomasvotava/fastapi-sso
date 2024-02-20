@@ -94,6 +94,7 @@ class SSOBase:
             )
         self.scope = scope or self.scope
         self._refresh_token: Optional[str] = None
+        self._id_token: Optional[str] = None
         self._state: Optional[str] = None
 
     @property
@@ -153,6 +154,16 @@ class SSOBase:
             Optional[str]: The refresh token if available.
         """
         return self._refresh_token or self.oauth_client.refresh_token
+
+    @property
+    def id_token(self) -> Optional[str]:
+        """
+        Retrieves the id token if returned from provider.
+
+        Returns:
+            Optional[str]: The id token if available.
+        """
+        return self._id_token
 
     async def openid_from_response(self, response: dict, session: Optional[httpx.AsyncClient] = None) -> OpenID:
         """
@@ -287,6 +298,7 @@ class SSOBase:
     def __enter__(self) -> "SSOBase":
         self._oauth_client = None
         self._refresh_token = None
+        self._id_token = None
         return self
 
     def __exit__(
@@ -331,6 +343,7 @@ class SSOBase:
         if self._oauth_client is not None:  # pragma: no cover
             self._oauth_client = None
             self._refresh_token = None
+            self._id_token = None
             warnings.warn(
                 (
                     "Reusing the SSO object is not safe and caused a security issue in previous versions."
@@ -370,6 +383,7 @@ class SSOBase:
             response = await session.post(token_url, headers=headers, content=body, auth=auth)
             content = response.json()
             self._refresh_token = content.get("refresh_token")
+            self._id_token = content.get("id_token")
             self.oauth_client.parse_request_body_response(json.dumps(content))
 
             uri, headers, _ = self.oauth_client.add_token(await self.userinfo_endpoint)

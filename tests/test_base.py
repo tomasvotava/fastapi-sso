@@ -18,6 +18,7 @@ class TestSSOBase:
         assert sso._state is None
         assert sso.access_token is None
         assert sso.refresh_token is None
+        assert sso.id_token is None
 
     async def test_unset_usage(self):
         sso = SSOBase("client_id", "client_secret")
