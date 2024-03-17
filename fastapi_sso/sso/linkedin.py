@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, Optional
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 if TYPE_CHECKING:
-    import httpx
+    import httpx  # pragma: no cover
 
 
 class LinkedInSSO(SSOBase):

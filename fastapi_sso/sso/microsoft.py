@@ -7,7 +7,7 @@ import pydantic
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 if TYPE_CHECKING:
-    import httpx
+    import httpx  # pragma: no cover
 
 
 class MicrosoftSSO(SSOBase):

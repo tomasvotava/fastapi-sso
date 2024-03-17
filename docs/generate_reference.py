@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import mkdocs.config.defaults
+    import mkdocs.config.defaults  # pragma: no cover
 
 
 SKIPPED_MODULES = ("fastapi_sso.sso", "fastapi_sso")
