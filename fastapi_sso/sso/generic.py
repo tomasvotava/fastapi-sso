@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Uni
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 if TYPE_CHECKING:
-    import httpx
+    import httpx  # pragma: no cover
 
 logger = logging.getLogger(__name__)
 
