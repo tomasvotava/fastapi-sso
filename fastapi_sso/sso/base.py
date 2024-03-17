@@ -17,6 +17,9 @@ from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
+from fastapi_sso.pkce import get_pkce_challenge_pair
+from fastapi_sso.state import generate_random_state
+
 if sys.version_info >= (3, 8):
     from typing import TypedDict
 else:
@@ -63,6 +66,10 @@ class SSOBase:
     redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = NotImplemented
     scope: List[str] = NotImplemented
     additional_headers: Optional[Dict[str, Any]] = None
+    uses_pkce: bool = False
+    requires_state: bool = False
+
+    _pkce_challenge_length: int = 96
 
     def __init__(
         self,
@@ -79,6 +86,7 @@ class SSOBase:
         self.redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = redirect_uri
         self.allow_insecure_http: bool = allow_insecure_http
         self._oauth_client: Optional[WebApplicationClient] = None
+        self._generated_state: Optional[str] = None
 
         if self.allow_insecure_http:
             os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -96,6 +104,9 @@ class SSOBase:
         self._refresh_token: Optional[str] = None
         self._id_token: Optional[str] = None
         self._state: Optional[str] = None
+        self._pkce_code_challenge: Optional[str] = None
+        self._pkce_code_verifier: Optional[str] = None
+        self._pkce_challenge_method = "S256"
 
     @property
     def state(self) -> Optional[str]:
@@ -236,8 +247,26 @@ class SSOBase:
         redirect_uri = redirect_uri or self.redirect_uri
         if redirect_uri is None:
             raise ValueError("redirect_uri must be provided, either at construction or request time")
+        if self.uses_pkce and not all((self._pkce_code_verifier, self._pkce_code_challenge)):
+            warnings.warn(
+                f"{self.__class__.__name__!r} uses PKCE and no code was generated yet. "
+                "Use SSO class as a context manager to get rid of this warning and possible errors."
+            )
+        if self.requires_state and not state:
+            if self._generated_state is None:
+                warnings.warn(
+                    f"{self.__class__.__name__!r} requires state in the request but none was provided nor "
+                    "generated automatically. Use SSO as a context manager. The login process will most probably fail."
+                )
+            state = self._generated_state
         request_uri = self.oauth_client.prepare_request_uri(
-            await self.authorization_endpoint, redirect_uri=redirect_uri, state=state, scope=self.scope, **params
+            await self.authorization_endpoint,
+            redirect_uri=redirect_uri,
+            state=state,
+            scope=self.scope,
+            code_challenge=self._pkce_code_challenge,
+            code_challenge_method=self._pkce_challenge_method,
+            **params,
         )
         return request_uri
 
@@ -259,8 +288,12 @@ class SSOBase:
         Returns:
             RedirectResponse: A Starlette response directing to the login page of the OAuth SSO provider.
         """
+        if self.requires_state and not state:
+            state = self._generated_state
         login_uri = await self.get_login_url(redirect_uri=redirect_uri, params=params, state=state)
         response = RedirectResponse(login_uri, 303)
+        if self.uses_pkce:
+            response.set_cookie("pkce_code_verifier", str(self._pkce_code_verifier))
         return response
 
     async def verify_and_process(
@@ -291,14 +324,31 @@ class SSOBase:
         if code is None:
             raise SSOLoginError(400, "'code' parameter was not found in callback request")
         self._state = request.query_params.get("state")
+        pkce_code_verifier: Optional[str] = None
+        if self.uses_pkce:
+            pkce_code_verifier = request.cookies.get("pkce_code_verifier")
+            if pkce_code_verifier is None:
+                warnings.warn(
+                    "PKCE code verifier was not found in the request Cookie. This will probably lead to a login error."
+                )
         return await self.process_login(
-            code, request, params=params, additional_headers=headers, redirect_uri=redirect_uri
+            code,
+            request,
+            params=params,
+            additional_headers=headers,
+            redirect_uri=redirect_uri,
+            pkce_code_verifier=pkce_code_verifier,
         )
 
     def __enter__(self) -> "SSOBase":
         self._oauth_client = None
         self._refresh_token = None
         self._id_token = None
+        self._state = None
+        if self.requires_state:
+            self._generated_state = generate_random_state()
+        if self.uses_pkce:
+            self._pkce_code_verifier, self._pkce_code_challenge = get_pkce_challenge_pair(self._pkce_challenge_length)
         return self
 
     def __exit__(
@@ -321,6 +371,7 @@ class SSOBase:
         params: Optional[Dict[str, Any]] = None,
         additional_headers: Optional[Dict[str, Any]] = None,
         redirect_uri: Optional[str] = None,
+        pkce_code_verifier: Optional[str] = None,
     ) -> Optional[OpenID]:
         """
         Processes login from the callback endpoint to verify the user and request user info endpoint.
@@ -332,6 +383,7 @@ class SSOBase:
             params (Optional[Dict[str, Any]]): Additional query parameters to pass to the provider.
             additional_headers (Optional[Dict[str, Any]]): Additional headers to be added to all requests.
             redirect_uri (Optional[str]): Overrides the `redirect_uri` specified on this instance.
+            pkce_code_verifier (Optional[str]): A PKCE code verifier sent to the server to verify the login request.
 
         Raises:
             ReusedOauthClientWarning: If the SSO object is reused, which is not safe and caused security issues.
@@ -379,8 +431,12 @@ class SSOBase:
         headers.update(additional_headers)
 
         auth = httpx.BasicAuth(self.client_id, self.client_secret)
+
+        if pkce_code_verifier:
+            params.update({"code_verifier": pkce_code_verifier})
+
         async with httpx.AsyncClient() as session:
-            response = await session.post(token_url, headers=headers, content=body, auth=auth)
+            response = await session.post(token_url, headers=headers, content=body, auth=auth, params=params)
             content = response.json()
             self._refresh_token = content.get("refresh_token")
             self._id_token = content.get("id_token")
