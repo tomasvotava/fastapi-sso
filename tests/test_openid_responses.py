@@ -103,7 +103,7 @@ sso_mapping: Dict[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = {
     ("ProviderClass", "response", "openid"), [(key, value[0], value[1]) for key, value in sso_mapping.items()]
 )
 async def test_provider_openid_by_response(
-    ProviderClass: Type[SSOBase], response: dict[str, Any], openid: OpenID
+    ProviderClass: Type[SSOBase], response: Dict[str, Any], openid: OpenID
 ) -> None:
     sso = ProviderClass("client_id", "client_secret")
     with sso:
