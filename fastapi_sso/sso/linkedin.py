@@ -30,8 +30,8 @@ class LinkedInSSO(SSOBase):
         return OpenID(
             email=response.get("email"),
             provider=self.provider,
-            id=response["sub"],
-            first_name=response["given_name"],
-            last_name=response["family_name"],
-            picture=response["picture"],
+            id=response.get("sub"),
+            first_name=response.get("given_name"),
+            last_name=response.get("family_name"),
+            picture=response.get("picture"),
         )
