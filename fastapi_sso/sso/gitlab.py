@@ -26,7 +26,7 @@ class GitlabSSO(SSOBase):
         return OpenID(
             email=response["email"],
             provider=self.provider,
-            id=response["id"],
+            id=str(response["id"]),
             display_name=response["username"],
             picture=response["avatar_url"],
         )
