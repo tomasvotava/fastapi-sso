@@ -1,4 +1,4 @@
-"""Github Login Example
+"""Yandex Login Example
 """
 
 import os
