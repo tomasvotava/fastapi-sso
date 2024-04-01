@@ -1,6 +1,8 @@
 """Gitlab SSO Oauth Helper class"""
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, List, Optional, Union
+
+import pydantic
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -14,12 +16,33 @@ class GitlabSSO(SSOBase):
     provider = "gitlab"
     scope = ["read_user", "openid", "profile"]
     additional_headers = {"accept": "application/json"}
+    base_endpoint_url = "https://gitlab.com"
+
+    def __init__(
+        self,
+        client_id: str,
+        client_secret: str,
+        base_endpoint_url: Optional[Union[pydantic.AnyHttpUrl, str]] = None,
+        redirect_uri: Any | str | None = None,
+        allow_insecure_http: bool = False,
+        use_state: bool = False,  # TODO: Remove use_state argument
+        scope: List[str] | None = None,
+    ) -> None:
+        super().__init__(
+            client_id,
+            client_secret,
+            redirect_uri,
+            allow_insecure_http,
+            use_state,  # TODO: Remove use_state argument
+            scope,
+        )
+        self.base_endpoint_url = base_endpoint_url or self.base_endpoint_url
 
     async def get_discovery_document(self) -> DiscoveryDocument:
         return {
-            "authorization_endpoint": "https://gitlab.com/oauth/authorize",
-            "token_endpoint": "https://gitlab.com/oauth/token",
-            "userinfo_endpoint": "https://gitlab.com/api/v4/user",
+            "authorization_endpoint": f"{self.base_endpoint_url}/oauth/authorize",
+            "token_endpoint": f"{self.base_endpoint_url}/oauth/token",
+            "userinfo_endpoint": f"{self.base_endpoint_url}/api/v4/user",
         }
 
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
