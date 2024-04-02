@@ -23,6 +23,7 @@ from fastapi_sso.sso.spotify import SpotifySSO
 from fastapi_sso.sso.notion import NotionSSO
 from fastapi_sso.sso.linkedin import LinkedInSSO
 from fastapi_sso.sso.twitter import TwitterSSO
+from fastapi_sso.sso.yandex import YandexSSO
 
 GenericProvider = create_provider(
     name="generic",
@@ -49,6 +50,7 @@ tested_providers = (
     NotionSSO,
     LinkedInSSO,
     TwitterSSO,
+    YandexSSO,
 )
 
 # Run all tests for each of the listed providers

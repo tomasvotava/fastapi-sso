@@ -13,6 +13,7 @@ from fastapi_sso.sso.gitlab import GitlabSSO
 from fastapi_sso.sso.github import GithubSSO
 from fastapi_sso.sso.fitbit import FitbitSSO
 from fastapi_sso.sso.facebook import FacebookSSO
+from fastapi_sso.sso.yandex import YandexSSO
 
 sso_mapping: Dict[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = {
     TwitterSSO: (
@@ -94,6 +95,25 @@ sso_mapping: Dict[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = {
             id="test",
             provider="facebook",
             picture="https://myimage",
+        ),
+    ),
+    YandexSSO: (
+        {
+            "id": "test",
+            "display_name": "test",
+            "first_name": "Test",
+            "last_name": "User",
+            "default_email": "test@example.com",
+            "default_avatar_id": "123456",
+        },
+        OpenID(
+            email="test@example.com",
+            first_name="Test",
+            last_name="User",
+            display_name="test",
+            id="test",
+            provider="yandex",
+            picture="https://avatars.yandex.net/get-yapic/123456/islands-200",
         ),
     ),
 }
