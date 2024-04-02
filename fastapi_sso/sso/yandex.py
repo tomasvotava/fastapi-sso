@@ -1,9 +1,9 @@
 """Yandex SSO Login Helper
 """
 
-from typing import TYPE_CHECKING, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
-from fastapi_sso.sso.base import SSOBase, DiscoveryDocument, OpenID
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 if TYPE_CHECKING:
     import httpx  # pragma: no cover
