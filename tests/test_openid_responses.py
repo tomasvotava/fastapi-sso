@@ -15,7 +15,7 @@ from fastapi_sso.sso.fitbit import FitbitSSO
 from fastapi_sso.sso.facebook import FacebookSSO
 from fastapi_sso.sso.yandex import YandexSSO
 
-sso_test_cases: Tuple[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = (
+sso_test_cases: Tuple[Tuple[Type[SSOBase], Dict[str, Any], OpenID], ...] = (
     (
         TwitterSSO,
         {"data": {"id": "test", "username": "TestUser1234", "name": "Test User"}},
