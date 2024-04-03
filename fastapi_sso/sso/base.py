@@ -8,7 +8,7 @@ import os
 import sys
 import warnings
 from types import TracebackType
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Literal, Optional, Type, Union, overload
 
 import httpx
 import pydantic
@@ -296,6 +296,7 @@ class SSOBase:
             response.set_cookie("pkce_code_verifier", str(self._pkce_code_verifier))
         return response
 
+    @overload
     async def verify_and_process(
         self,
         request: Request,
@@ -303,7 +304,29 @@ class SSOBase:
         params: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, Any]] = None,
         redirect_uri: Optional[str] = None,
-    ) -> Optional[OpenID]:
+        convert_response: Literal[True] = True,
+    ) -> Optional[OpenID]: ...
+
+    @overload
+    async def verify_and_process(
+        self,
+        request: Request,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, Any]] = None,
+        redirect_uri: Optional[str] = None,
+        convert_response: Literal[False],
+    ) -> Optional[Dict[str, Any]]: ...
+
+    async def verify_and_process(
+        self,
+        request: Request,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, Any]] = None,
+        redirect_uri: Optional[str] = None,
+        convert_response: Union[Literal[True], Literal[False]] = True,
+    ) -> Union[Optional[OpenID], Optional[Dict[str, Any]]]:
         """
         Processes the login given a FastAPI (Starlette) Request object. This should be used for the /callback path.
 
@@ -312,12 +335,14 @@ class SSOBase:
             params (Optional[Dict[str, Any]]): Additional query parameters to pass to the provider.
             headers (Optional[Dict[str, Any]]): Additional headers to pass to the provider.
             redirect_uri (Optional[str]): Overrides the `redirect_uri` specified on this instance.
+            convert_response (bool): If True, userinfo response is converted to OpenID object.
 
         Raises:
             SSOLoginError: If the 'code' parameter is not found in the callback request.
 
         Returns:
-            Optional[OpenID]: User information in OpenID format if the login was successful.
+            Optional[OpenID]: User information as OpenID instance (if convert_response == True)
+            Optional[Dict[str, Any]]: The original JSON response from the API.
         """
         headers = headers or {}
         code = request.query_params.get("code")
@@ -338,6 +363,7 @@ class SSOBase:
             additional_headers=headers,
             redirect_uri=redirect_uri,
             pkce_code_verifier=pkce_code_verifier,
+            convert_response=convert_response,
         )
 
     def __enter__(self) -> "SSOBase":
@@ -363,6 +389,7 @@ class SSOBase:
     def _extra_query_params(self) -> Dict:
         return {}
 
+    @overload
     async def process_login(
         self,
         code: str,
@@ -372,7 +399,33 @@ class SSOBase:
         additional_headers: Optional[Dict[str, Any]] = None,
         redirect_uri: Optional[str] = None,
         pkce_code_verifier: Optional[str] = None,
-    ) -> Optional[OpenID]:
+        convert_response: Literal[True] = True,
+    ) -> Optional[OpenID]: ...
+
+    @overload
+    async def process_login(
+        self,
+        code: str,
+        request: Request,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        additional_headers: Optional[Dict[str, Any]] = None,
+        redirect_uri: Optional[str] = None,
+        pkce_code_verifier: Optional[str] = None,
+        convert_response: Literal[False],
+    ) -> Optional[Dict[str, Any]]: ...
+
+    async def process_login(
+        self,
+        code: str,
+        request: Request,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        additional_headers: Optional[Dict[str, Any]] = None,
+        redirect_uri: Optional[str] = None,
+        pkce_code_verifier: Optional[str] = None,
+        convert_response: Union[Literal[True], Literal[False]] = True,
+    ) -> Union[Optional[OpenID], Optional[dict[str, Any]]]:
         """
         Processes login from the callback endpoint to verify the user and request user info endpoint.
         It's a lower-level method, typically, you should use `verify_and_process` instead.
@@ -384,12 +437,14 @@ class SSOBase:
             additional_headers (Optional[Dict[str, Any]]): Additional headers to be added to all requests.
             redirect_uri (Optional[str]): Overrides the `redirect_uri` specified on this instance.
             pkce_code_verifier (Optional[str]): A PKCE code verifier sent to the server to verify the login request.
+            convert_response (bool): If True, userinfo response is converted to OpenID object.
 
         Raises:
             ReusedOauthClientWarning: If the SSO object is reused, which is not safe and caused security issues.
 
         Returns:
-            Optional[OpenID]: User information in OpenID format if the login was successful.
+            Optional[OpenID]: User information in OpenID format if the login was successful (convert_response == True).
+            Optional[Dict[str, Any]]: Original userinfo API endpoint response.
         """
         # pylint: disable=too-many-locals
         if self._oauth_client is not None:  # pragma: no cover
@@ -447,5 +502,6 @@ class SSOBase:
             session.headers.update(headers)
             response = await session.get(uri)
             content = response.json()
-
-            return await self.openid_from_response(content, session)
+            if convert_response:
+                return await self.openid_from_response(content, session)
+            return content
