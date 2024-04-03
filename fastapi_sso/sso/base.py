@@ -472,6 +472,9 @@ class SSOBase:
 
         current_path = f"{url.scheme}://{url.netloc}{url.path}"
 
+        if pkce_code_verifier:
+            params.update({"code_verifier": pkce_code_verifier})
+
         token_url, headers, body = self.oauth_client.prepare_token_request(
             await self.token_endpoint,
             authorization_response=current_url,
@@ -487,11 +490,8 @@ class SSOBase:
 
         auth = httpx.BasicAuth(self.client_id, self.client_secret)
 
-        if pkce_code_verifier:
-            params.update({"code_verifier": pkce_code_verifier})
-
         async with httpx.AsyncClient() as session:
-            response = await session.post(token_url, headers=headers, content=body, auth=auth, params=params)
+            response = await session.post(token_url, headers=headers, content=body, auth=auth)
             content = response.json()
             self._refresh_token = content.get("refresh_token")
             self._id_token = content.get("id_token")
