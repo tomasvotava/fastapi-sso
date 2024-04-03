@@ -425,7 +425,7 @@ class SSOBase:
         redirect_uri: Optional[str] = None,
         pkce_code_verifier: Optional[str] = None,
         convert_response: Union[Literal[True], Literal[False]] = True,
-    ) -> Union[Optional[OpenID], Optional[dict[str, Any]]]:
+    ) -> Union[Optional[OpenID], Optional[Dict[str, Any]]]:
         """
         Processes login from the callback endpoint to verify the user and request user info endpoint.
         It's a lower-level method, typically, you should use `verify_and_process` instead.
