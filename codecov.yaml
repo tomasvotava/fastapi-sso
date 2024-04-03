@@ -8,12 +8,12 @@ coverage:
     patch:
       default:
         target: auto
-        threshold: null
+        threshold: 1%
         if_not_found: success
         only_pulls: true
     project:
       default:
         target: auto
-        threshold: null
+        threshold: 1%
         if_not_found: success
         only_pulls: true
