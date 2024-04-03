@@ -60,6 +60,7 @@ I tend to process Pull Requests faster when properly caffeinated 😉.
 - Gitlab (by Alessandro Pischedda) - [Cereal84](https://github.com/Cereal84)
 - Line (by Jimmy Yeh) - [jimmyyyeh](https://github.com/jimmyyyeh)
 - LinkedIn (by Alessandro Pischedda) - [Cereal84](https://github.com/Cereal84)
+- Yandex (by Akim Faskhutdinov) – [akimrx](https://github.com/akimrx)
 
 See [Contributing](#contributing) for a guide on how to contribute your own login provider.
 

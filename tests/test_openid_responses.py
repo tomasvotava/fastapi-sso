@@ -13,6 +13,7 @@ from fastapi_sso.sso.gitlab import GitlabSSO
 from fastapi_sso.sso.github import GithubSSO
 from fastapi_sso.sso.fitbit import FitbitSSO
 from fastapi_sso.sso.facebook import FacebookSSO
+from fastapi_sso.sso.yandex import YandexSSO
 
 sso_test_cases: Tuple[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = (
     (
@@ -67,6 +68,7 @@ sso_test_cases: Tuple[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = (
     ),
     (KakaoSSO, {"properties": {"nickname": "Test User"}}, OpenID(provider="kakao", display_name="Test User")),
     (
+        # Gitlab Case 1: full name is empty
         GitlabSSO,
         {"email": "test@example.com", "id": "test", "username": "test_user", "avatar_url": "https://myimage"},
         OpenID(
@@ -74,6 +76,7 @@ sso_test_cases: Tuple[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = (
         ),
     ),
     (
+        # Gitlab Case 2: full name contains only first name
         GitlabSSO,
         {
             "email": "test@example.com",
@@ -93,6 +96,7 @@ sso_test_cases: Tuple[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = (
         ),
     ),
     (
+        # Gitlab Case 3: full name contains long last name
         GitlabSSO,
         {
             "email": "test@example.com",
@@ -112,6 +116,7 @@ sso_test_cases: Tuple[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = (
         ),
     ),
     (
+        # Gitlab Case 4: full name contains standard first and last names
         GitlabSSO,
         {
             "email": "test@example.com",
@@ -160,6 +165,26 @@ sso_test_cases: Tuple[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = (
             id="test",
             provider="facebook",
             picture="https://myimage",
+        ),
+    ),
+    (
+        YandexSSO,
+        {
+            "id": "test",
+            "display_name": "test",
+            "first_name": "Test",
+            "last_name": "User",
+            "default_email": "test@example.com",
+            "default_avatar_id": "123456",
+        },
+        OpenID(
+            email="test@example.com",
+            first_name="Test",
+            last_name="User",
+            display_name="test",
+            id="test",
+            provider="yandex",
+            picture="https://avatars.yandex.net/get-yapic/123456/islands-200",
         ),
     ),
 )
