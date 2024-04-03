@@ -50,7 +50,7 @@ class GitlabSSO(SSOBase):
 
     def _parse_name(self, full_name: Optional[str]) -> Tuple[Union[str, None], Union[str, None]]:
         """Parses the full name from Gitlab into the first and last name."""
-        if not full_name:
+        if not full_name or not isinstance(full_name, str):
             return None, None
 
         name_parts = full_name.split()

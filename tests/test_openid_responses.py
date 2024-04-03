@@ -136,6 +136,26 @@ sso_test_cases: Tuple[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = (
         ),
     ),
     (
+        # Gitlab Case 5: full name contains invalid type or data
+        GitlabSSO,
+        {
+            "email": "test@example.com",
+            "id": "test",
+            "username": "test_user",
+            "avatar_url": "https://myimage",
+            "name": {"invalid": 1},
+        },
+        OpenID(
+            email="test@example.com",
+            id="test",
+            display_name="test_user",
+            picture="https://myimage",
+            first_name=None,
+            last_name=None,
+            provider="gitlab",
+        ),
+    ),
+    (
         GithubSSO,
         {"email": "test@example.com", "id": "test", "login": "testuser", "avatar_url": "https://myimage"},
         OpenID(
