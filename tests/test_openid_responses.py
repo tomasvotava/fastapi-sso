@@ -14,19 +14,22 @@ from fastapi_sso.sso.github import GithubSSO
 from fastapi_sso.sso.fitbit import FitbitSSO
 from fastapi_sso.sso.facebook import FacebookSSO
 
-sso_mapping: Dict[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = {
-    TwitterSSO: (
+sso_test_cases: Tuple[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = (
+    (
+        TwitterSSO,
         {"data": {"id": "test", "username": "TestUser1234", "name": "Test User"}},
         OpenID(id="test", display_name="TestUser1234", first_name="Test", last_name="User", provider="twitter"),
     ),
-    SpotifySSO: (
+    (
+        SpotifySSO,
         {"email": "test@example.com", "display_name": "testuser", "id": "test", "images": [{"url": "https://myimage"}]},
         OpenID(
             id="test", provider="spotify", display_name="testuser", email="test@example.com", picture="https://myimage"
         ),
     ),
-    NaverSSO: ({"properties": {"nickname": "test"}}, OpenID(display_name="test", provider="naver")),
-    MicrosoftSSO: (
+    (NaverSSO, {"properties": {"nickname": "test"}}, OpenID(display_name="test", provider="naver")),
+    (
+        MicrosoftSSO,
         {"mail": "test@example.com", "displayName": "Test User", "id": "test", "givenName": "Test", "surname": "User"},
         OpenID(
             email="test@example.com",
@@ -37,7 +40,8 @@ sso_mapping: Dict[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = {
             last_name="User",
         ),
     ),
-    LinkedInSSO: (
+    (
+        LinkedInSSO,
         {
             "email": "test@example.com",
             "sub": "test",
@@ -54,30 +58,92 @@ sso_mapping: Dict[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = {
             picture="https://myimage",
         ),
     ),
-    LineSSO: (
+    (
+        LineSSO,
         {"email": "test@example.com", "name": "Test User", "sub": "test", "picture": "https://myimage"},
         OpenID(
             email="test@example.com", display_name="Test User", id="test", picture="https://myimage", provider="line"
         ),
     ),
-    KakaoSSO: ({"properties": {"nickname": "Test User"}}, OpenID(provider="kakao", display_name="Test User")),
-    GitlabSSO: (
+    (KakaoSSO, {"properties": {"nickname": "Test User"}}, OpenID(provider="kakao", display_name="Test User")),
+    (
+        GitlabSSO,
         {"email": "test@example.com", "id": "test", "username": "test_user", "avatar_url": "https://myimage"},
         OpenID(
             email="test@example.com", id="test", display_name="test_user", picture="https://myimage", provider="gitlab"
         ),
     ),
-    GithubSSO: (
+    (
+        GitlabSSO,
+        {
+            "email": "test@example.com",
+            "id": "test",
+            "username": "test_user",
+            "avatar_url": "https://myimage",
+            "name": "Test",
+        },
+        OpenID(
+            email="test@example.com",
+            id="test",
+            display_name="test_user",
+            picture="https://myimage",
+            first_name="Test",
+            last_name=None,
+            provider="gitlab",
+        ),
+    ),
+    (
+        GitlabSSO,
+        {
+            "email": "test@example.com",
+            "id": "test",
+            "username": "test_user",
+            "avatar_url": "https://myimage",
+            "name": "Test User Long Last Name",
+        },
+        OpenID(
+            email="test@example.com",
+            id="test",
+            display_name="test_user",
+            picture="https://myimage",
+            first_name="Test",
+            last_name="User Long Last Name",
+            provider="gitlab",
+        ),
+    ),
+    (
+        GitlabSSO,
+        {
+            "email": "test@example.com",
+            "id": "test",
+            "username": "test_user",
+            "avatar_url": "https://myimage",
+            "name": "Test User",
+        },
+        OpenID(
+            email="test@example.com",
+            id="test",
+            display_name="test_user",
+            picture="https://myimage",
+            first_name="Test",
+            last_name="User",
+            provider="gitlab",
+        ),
+    ),
+    (
+        GithubSSO,
         {"email": "test@example.com", "id": "test", "login": "testuser", "avatar_url": "https://myimage"},
         OpenID(
             email="test@example.com", id="test", display_name="testuser", picture="https://myimage", provider="github"
         ),
     ),
-    FitbitSSO: (
+    (
+        FitbitSSO,
         {"user": {"encodedId": "test", "fullName": "Test", "displayName": "Test User", "avatar": "https://myimage"}},
         OpenID(id="test", first_name="Test", display_name="Test User", provider="fitbit", picture="https://myimage"),
     ),
-    FacebookSSO: (
+    (
+        FacebookSSO,
         {
             "email": "test@example.com",
             "first_name": "Test",
@@ -96,12 +162,10 @@ sso_mapping: Dict[Type[SSOBase], Tuple[Dict[str, Any], OpenID]] = {
             picture="https://myimage",
         ),
     ),
-}
-
-
-@pytest.mark.parametrize(
-    ("ProviderClass", "response", "openid"), [(key, value[0], value[1]) for key, value in sso_mapping.items()]
 )
+
+
+@pytest.mark.parametrize(("ProviderClass", "response", "openid"), sso_test_cases)
 async def test_provider_openid_by_response(
     ProviderClass: Type[SSOBase], response: Dict[str, Any], openid: OpenID
 ) -> None:
