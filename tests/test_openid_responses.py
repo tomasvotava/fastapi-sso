@@ -30,8 +30,8 @@ sso_test_cases: Tuple[Tuple[Type[SSOBase], Dict[str, Any], OpenID], ...] = (
     ),
     (
         NaverSSO,
-        {"response": {"nickname": "test", "profile_image": "https://myimage", "id": "test"}},
-        OpenID(id="test", display_name="test", provider="naver", picture="https://myimage"),
+        {"response": {"nickname": "test", "profile_image": "https://myimage", "id": "test", "email": "test@example.com"}},
+        OpenID(id="test", email="test@example.com", display_name="test", provider="naver", picture="https://myimage"),
     ),
     (
         MicrosoftSSO,
