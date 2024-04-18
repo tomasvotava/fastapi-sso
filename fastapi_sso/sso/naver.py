@@ -25,7 +25,8 @@ class NaverSSO(SSOBase):
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         return OpenID(
             id=response["response"]["id"],
-            display_name=response["response"]["nickname"],
+            email=response["response"]["email"] or None,
+            display_name=response["response"]["nickname"] or None,
             picture=response["response"]["profile_image"] or None,
             provider=self.provider,
         )
