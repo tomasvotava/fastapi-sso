@@ -27,5 +27,5 @@ class NaverSSO(SSOBase):
             id=response["response"]["id"],
             display_name=response["response"]["nickname"],
             picture=response["response"]["profile_image"] or None,
-            provider=self.provider
+            provider=self.provider,
         )
