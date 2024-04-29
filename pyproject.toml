@@ -61,9 +61,9 @@ black = ">=23.7.0"
 isort = "^5"
 markdown-include = "^0.8.1"
 mkdocs-material = { extras = ["imaging"], version = "^9.3.2" }
-mkdocstrings = { extras = ["python"], version = ">=0.23,<0.25" }
+mkdocstrings = { extras = ["python"], version = ">=0.23,<0.26" }
 mypy = "^1"
-poethepoet = ">=0.21.1,<0.26.0"
+poethepoet = ">=0.21.1,<0.27.0"
 pre-commit = "^3"
 pylint = ">=2,<4"
 pytest = ">=7,<9"
