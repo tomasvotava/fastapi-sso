@@ -21,6 +21,21 @@ backend very easily.
 
 **Source Code**: [https://github.com/tomasvotava/fastapi-sso](https://github.com/tomasvotava/fastapi-sso/)
 
+## Demo site
+
+An awesome demo site was created and is maintained by even awesomer
+[Chris Karvouniaris (@chrisK824)](https://github.com/chrisK824). Chris has also posted multiple
+Medium articles about FastAPI and FastAPI SSO.
+
+Be sure to see his tutorials, follow him and show him some appreciation!
+
+Please see his [announcement](https://github.com/tomasvotava/fastapi-sso/discussions/150) with all the links.
+
+Quick links for the eager ones:
+
+- [Demo site](https://fastapi-sso-example.vercel.app/)
+- [Medium articles](https://medium.com/@christos.karvouniaris247)
+
 ## Security warning
 
 Please note that versions preceding `0.7.0` had a security vulnerability.
