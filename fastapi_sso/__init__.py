@@ -17,3 +17,5 @@ from .sso.naver import NaverSSO
 from .sso.notion import NotionSSO
 from .sso.spotify import SpotifySSO
 from .sso.twitter import TwitterSSO
+from .sso.bitbucket import BitbucketSSO
+from .sso.discord import DiscordSSO
