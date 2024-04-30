@@ -78,7 +78,7 @@ async def login():
 @app.get("/auth/logout")
 async def logout():
     """Forget the user's session."""
-    response = RedirectResponse(url="/prot")
+    response = RedirectResponse(url="/protected")
     response.delete_cookie(key="token")
     return response
 
