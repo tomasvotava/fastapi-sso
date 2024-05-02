@@ -1,6 +1,6 @@
-"""Gitlab SSO Oauth Helper class"""
+"""Gitlab SSO Oauth Helper class."""
 
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union
 from urllib.parse import urljoin
 
 import pydantic
@@ -12,11 +12,11 @@ if TYPE_CHECKING:
 
 
 class GitlabSSO(SSOBase):
-    """Class providing login via Gitlab SSO"""
+    """Class providing login via Gitlab SSO."""
 
     provider = "gitlab"
-    scope = ["read_user", "openid", "profile"]
-    additional_headers = {"accept": "application/json"}
+    scope: ClassVar = ["read_user", "openid", "profile"]
+    additional_headers: ClassVar = {"accept": "application/json"}
     base_endpoint_url = "https://gitlab.com"
 
     def __init__(
@@ -41,7 +41,6 @@ class GitlabSSO(SSOBase):
 
     async def get_discovery_document(self) -> DiscoveryDocument:
         """Override the discovery document method to return Yandex OAuth endpoints."""
-
         return {
             "authorization_endpoint": urljoin(self.base_endpoint_url, "/oauth/authorize"),
             "token_endpoint": urljoin(self.base_endpoint_url, "/oauth/token"),

@@ -25,8 +25,8 @@ jobs:
       - name: Install dependencies
         run: |
           POETRY_VIRTUALENVS_CREATE=false ~/.local/bin/poetry install
-      - name: Analysing the code with pylint
-        run: ~/.local/bin/poetry run poe pylint
+      - name: Analysing the code with ruff
+        run: ~/.local/bin/poetry run poe ruff
       - name: Static type-checking using mypy
         run: ~/.local/bin/poetry run poe mypy
       - name: Format checking using black

@@ -1,5 +1,5 @@
 """A generic OAuth client that can be used to quickly create support for any OAuth provider
-with close to no code
+with close to no code.
 """
 
 import logging
@@ -24,7 +24,6 @@ def create_provider(
     Returns a class.
 
     Args:
-
         name: Name of the provider
         default_scope: default list of scopes (can be overriden in constructor)
         discovery_document: a dictionary containing discovery document or a callable returning it
@@ -53,13 +52,13 @@ def create_provider(
     """
 
     class GenericSSOProvider(SSOBase):
-        """SSO Provider Template"""
+        """SSO Provider Template."""
 
         provider = name
         scope = default_scope or ["openid"]
 
         async def get_discovery_document(self) -> DiscoveryDocument:
-            """Get document containing handy urls"""
+            """Get document containing handy urls."""
             if callable(discovery_document):
                 return discovery_document(self)
             return discovery_document

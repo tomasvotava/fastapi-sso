@@ -1,6 +1,6 @@
-"""Kakao SSO Oauth Helper class"""
+"""Kakao SSO Oauth Helper class."""
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -9,10 +9,10 @@ if TYPE_CHECKING:
 
 
 class KakaoSSO(SSOBase):
-    """Class providing login using Kakao OAuth"""
+    """Class providing login using Kakao OAuth."""
 
     provider = "kakao"
-    scope = ["openid"]
+    scop: ClassVar = ["openid"]
     version = "v2"
 
     async def get_discovery_document(self) -> DiscoveryDocument:

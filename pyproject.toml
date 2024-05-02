@@ -37,10 +37,46 @@ addopts = [
 [tool.black]
 line-length = 120
 
+[tool.ruff]
+target-version = "py38"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    #"D",
+    "E",
+    "F",
+    "B",
+    "I",
+    "N",
+    "UP",
+    "S",
+    "A",
+    "DTZ",
+    "PT",
+    "SIM",
+    "PTH",
+    "PD",
+    "RUF",
+    "T20",
+]
+
+ignore = [
+    "B028", # allow warning without specifying `stacklevel`
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+known-first-party = ["fastapi_sso"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests*/**/*.py" = ["S101"] # Allow asserts in tests
+"**/__init__.py" = ["D104"] # Allow missing docstrings in __init__ files
 
 [tool.poe.tasks]
-pylint = "pylint --disable fixme --rcfile .pylintrc fastapi_sso"
-todos = "pylint --disable all --enable fixme --rcfile .pylintrc fastapi_sso"
+ruff = "ruff check fastapi_sso"
 black = "black fastapi_sso"
 isort = "isort --settings-path .isort.cfg fastapi_sso"
 mypy = "mypy --config-file mypy.ini fastapi_sso"
@@ -48,7 +84,7 @@ black-check = "black --check fastapi_sso"
 isort-check = "isort --settings-path .isort.cfg --check-only fastapi_sso"
 
 format = ["black", "isort"]
-lint = ["pylint", "mypy", "black-check", "isort-check"]
+lint = ["ruff", "mypy", "black-check", "isort-check"]
 pre-commit = "pre-commit"
 
 test = "pytest"
@@ -65,13 +101,13 @@ mkdocstrings = { extras = ["python"], version = ">=0.23,<0.26" }
 mypy = "^1"
 poethepoet = ">=0.21.1,<0.27.0"
 pre-commit = "^3"
-pylint = ">=2,<4"
 pytest = ">=7,<9"
 pytest-asyncio = ">=0.21.1,<0.24.0"
 pytest-cov = ">=4,<6"
 pytest-xdist = "^3"
 tox = "^4"
 uvicorn = ">=0.23.1"
+ruff = "^0.4.2"
 
 [tool.poetry.dependencies]
 fastapi = ">=0.80"

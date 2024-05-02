@@ -127,13 +127,13 @@ class TestProviders:
         sso = Provider("client_id", "client_secret")
         with sso:
             url, _ = await self.assert_get_login_url_and_redirect(sso, redirect_uri="http://localhost")
-            assert quote_plus(" ".join(sso.scope)) in url, "Login URL must have all scopes"
+            assert quote_plus(" ".join(sso._scope)) in url, "Login URL must have all scopes"
 
     async def test_login_url_scope_additional(self, Provider: Type[SSOBase]):
         sso = Provider("client_id", "client_secret", scope=["openid", "additional"])
         with sso:
             url, _ = await self.assert_get_login_url_and_redirect(sso, redirect_uri="http://localhost")
-            assert quote_plus(" ".join(sso.scope)) in url, "Login URL must have all scopes"
+            assert quote_plus(" ".join(sso._scope)) in url, "Login URL must have all scopes"
 
     async def test_process_login(self, Provider: Type[SSOBase], monkeypatch: pytest.MonkeyPatch):
         sso = Provider("client_id", "client_secret")
