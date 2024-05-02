@@ -1,6 +1,6 @@
-"""Naver SSO Oauth Helper class"""
+"""Naver SSO Oauth Helper class."""
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, ClassVar, List, Optional
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -9,11 +9,11 @@ if TYPE_CHECKING:
 
 
 class NaverSSO(SSOBase):
-    """Class providing login using Naver OAuth"""
+    """Class providing login using Naver OAuth."""
 
     provider = "naver"
-    scope: List[str] = []
-    additional_headers = {"accept": "application/json"}
+    scope: ClassVar[List[str]] = []
+    additional_headers: ClassVar = {"accept": "application/json"}
 
     async def get_discovery_document(self) -> DiscoveryDocument:
         return {

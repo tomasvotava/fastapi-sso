@@ -45,19 +45,19 @@ All done! ✨ 🍰 ✨
 
 ### Linting
 
-I use `pylint`. Detailed configuration is to be found in `.pylintrc` file.
+I use `ruff`. Detailed configuration is to be found in `pyproject.toml` file.
 
 Check your code by calling:
 
 ```console
-$ poe pylint
+$ poe ruff
 
---------------------------------------------------------------------
-Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
+Poe => ruff check fastapi_sso
+All checks passed!
 ```
 
-If the code isn't 10/10 and you feel you have a good reason for it not to be, you may use
-`pylint: disable=...` magic comments throughout the code, but please expect me to ask about it
+If your code doesn't pass and you feel you have a good reason for it not to be, you may use
+`noqa: ...` magic comments throughout the code, but please expect me to ask about it
 when you submit the PR.
 
 ### Typechecking
@@ -99,5 +99,5 @@ tox
 ## Documentation
 
 Please try to provide documentation for your code. I use `mkdocs` to generate the documentation.
-In most cases, it should be enough to use docstrings (`pylint` will complain if you don't) and to provide
+In most cases, it should be enough to use docstrings and to provide
 examples in the aforementioned `examples/` directory.

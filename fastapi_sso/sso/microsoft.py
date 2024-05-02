@@ -1,6 +1,6 @@
-"""Microsoft SSO Oauth Helper class"""
+"""Microsoft SSO Oauth Helper class."""
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Union
 
 import pydantic
 
@@ -11,10 +11,10 @@ if TYPE_CHECKING:
 
 
 class MicrosoftSSO(SSOBase):
-    """Class providing login using Microsoft OAuth"""
+    """Class providing login using Microsoft OAuth."""
 
     provider = "microsoft"
-    scope = ["openid", "User.Read", "email"]
+    scope: ClassVar = ["openid", "User.Read", "email"]
     version = "v1.0"
     tenant: str = "common"
 

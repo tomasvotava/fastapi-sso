@@ -1,17 +1,19 @@
 repos:
   - repo: local
     hooks:
-      - id: pylint
-        name: pylint
-        entry: poe pylint
+      - id: ruff
+        name: ruff
+        entry: poe ruff
         language: system
         types: [python]
+        pass_filenames: false
 
       - id: black
         name: black
         entry: poe black-check
         language: system
         types: [python]
+        pass_filenames: false
 
       - id: mypy
         name: mypy

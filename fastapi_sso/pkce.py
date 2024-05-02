@@ -1,4 +1,4 @@
-"""PKCE-related helper functions"""
+"""PKCE-related helper functions."""
 
 import base64
 import hashlib
@@ -7,7 +7,7 @@ from typing import Tuple
 
 
 def get_code_verifier(length: int = 96) -> str:
-    """Get code verifier for PKCE challenge"""
+    """Get code verifier for PKCE challenge."""
     length = max(43, min(length, 128))
     bytes_length = int(length * 3 / 4)
     return base64.urlsafe_b64encode(os.urandom(bytes_length)).decode("utf-8").replace("=", "")[:length]

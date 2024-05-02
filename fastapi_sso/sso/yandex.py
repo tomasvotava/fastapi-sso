@@ -1,7 +1,6 @@
-"""Yandex SSO Login Helper
-"""
+"""Yandex SSO Login Helper."""
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -13,12 +12,11 @@ class YandexSSO(SSOBase):
     """Class providing login using Yandex OAuth."""
 
     provider = "yandex"
-    scope = ["login:email", "login:info", "login:avatar"]
+    scope: ClassVar = ["login:email", "login:info", "login:avatar"]
     avatar_url = "https://avatars.yandex.net/get-yapic"
 
     async def get_discovery_document(self) -> DiscoveryDocument:
         """Override the discovery document method to return Yandex OAuth endpoints."""
-
         return {
             "authorization_endpoint": "https://oauth.yandex.ru/authorize",
             "token_endpoint": "https://oauth.yandex.ru/token",
@@ -27,7 +25,6 @@ class YandexSSO(SSOBase):
 
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         """Converts Yandex user info response to OpenID object."""
-
         picture = None
 
         if (avatar_id := response.get("default_avatar_id")) is not None:
