@@ -34,6 +34,7 @@ class BitbucketSSO(SSOBase):
         )
 
     async def get_useremail(self, session: Optional["httpx.AsyncClient"] = None) -> dict:
+        """Get user email"""
         if session is None:
             raise ValueError("Session is required to make HTTP requests")
 

@@ -1,10 +1,10 @@
 """Generate reference pages for the documentation."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Dict, Union, Any, TypedDict
+from typing import TYPE_CHECKING, List, Dict, Union, TypedDict
 
 if TYPE_CHECKING:
-    pass  # pragma: no cover
+    import mkdocs.config.defaults  # pragma: no cover
 
 SKIPPED_MODULES = ("fastapi_sso.sso", "fastapi_sso")
 
@@ -28,7 +28,8 @@ def generate_reference_pages(docs_dir: str, nav: Nav):
 
     for path in sorted(source_path.rglob("*.py")):
         module_path = path.relative_to(".").with_suffix("")
-        doc_path = str(path.relative_to(source_path).with_suffix(".md")).replace("/", ".")
+        doc_path = str(path.relative_to(
+            source_path).with_suffix(".md")).replace("/", ".")
         full_doc_path = reference_path / doc_path
         nav_path = (reference_path / doc_path).relative_to(docs_dir).as_posix()
 
@@ -66,7 +67,8 @@ def generate_example_pages(docs_dir: str, nav: Nav):
         file.write("# Examples\n\n")
         for path in sorted(source_path.rglob("*.py")):
             page_title = path.stem.replace("_", " ").title()
-            file.write(f"## {page_title}\n\n```python\n{path.read_text(encoding='utf-8')}\n```\n\n")
+            file.write(
+                f"## {page_title}\n\n```python\n{path.read_text(encoding='utf-8')}\n```\n\n")
 
     nav.append({"Examples": "examples.md"})
 
