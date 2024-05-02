@@ -40,7 +40,7 @@ class DiscordSSO(SSOBase):
         }
 
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
-        id = response.get("id")
+        user_id = response.get("id")
         avatar = response.get("avatar")
         picture = None
         if id and avatar:
@@ -50,7 +50,7 @@ class DiscordSSO(SSOBase):
             email=response.get("email"),
             display_name=response.get("global_name"),
             provider=self.provider,
-            id=id,
+            id=user_id,
             first_name=response.get("username"),
             picture=picture,
         )
