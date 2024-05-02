@@ -43,8 +43,8 @@ class DiscordSSO(SSOBase):
         user_id = response.get("id")
         avatar = response.get("avatar")
         picture = None
-        if id and avatar:
-            picture = f"https://cdn.discordapp.com/avatars/{id}/{avatar}.png"
+        if user_id and avatar:
+            picture = f"https://cdn.discordapp.com/avatars/{user_id}/{avatar}.png"
 
         return OpenID(
             email=response.get("email"),
