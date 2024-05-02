@@ -1,6 +1,6 @@
 """BitBucket SSO Oauth Helper class"""
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Union
 
 import pydantic
 
@@ -14,7 +14,7 @@ class BitbucketSSO(SSOBase):
     """Class providing login using BitBucket OAuth"""
 
     provider = "bitbucket"
-    scope = ["account", "email"]
+    scope: ClassVar = ["account", "email"]
     version = "2.0"
 
     def __init__(
