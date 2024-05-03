@@ -1,6 +1,6 @@
 """Discord SSO Oauth Helper class"""
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Union
 
 import pydantic
 
@@ -14,7 +14,7 @@ class DiscordSSO(SSOBase):
     """Class providing login using Discord OAuth"""
 
     provider = "discord"
-    scope = ["identify", "email", "openid"]
+    scope: ClassVar = ["identify", "email", "openid"]
 
     def __init__(
         self,

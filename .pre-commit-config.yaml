@@ -3,28 +3,32 @@ repos:
     hooks:
       - id: ruff
         name: ruff
-        entry: poe ruff
+        entry: poe ruff --fix
         language: system
-        types: [python]
+        types:
+          - python
         pass_filenames: false
 
       - id: black
         name: black
         entry: poe black-check
         language: system
-        types: [python]
+        types:
+          - python
         pass_filenames: false
 
       - id: mypy
         name: mypy
         entry: poe mypy
         language: system
-        types: [python]
+        types:
+          - python
         pass_filenames: false
 
       - id: isort
         name: isort
         entry: poe isort-check
         language: system
-        types: [python]
+        types:
+          - python
         pass_filenames: false
