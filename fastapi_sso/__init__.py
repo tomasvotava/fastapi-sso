@@ -1,4 +1,5 @@
-"""FastAPI plugin to enable SSO to most common providers
+"""FastAPI plugin to enable SSO to most common providers.
+
 (such as Facebook login, Google login and login via Microsoft Office 365 account)
 """
 
@@ -18,4 +19,26 @@ from .sso.notion import NotionSSO
 from .sso.spotify import SpotifySSO
 from .sso.twitter import TwitterSSO
 from .sso.bitbucket import BitbucketSSO
-from .sso.discord import DiscordSSO
+from .sso.import DiscordSSO
+
+__all__ = [
+    "OpenID",
+    "SSOBase",
+    "SSOLoginError",
+    "FacebookSSO",
+    "FitbitSSO",
+    "create_provider",
+    "GithubSSO",
+    "GitlabSSO",
+    "GoogleSSO",
+    "KakaoSSO",
+    "LineSSO",
+    "LinkedInSSO",
+    "MicrosoftSSO",
+    "NaverSSO",
+    "NotionSSO",
+    "SpotifySSO",
+    "TwitterSSO",
+    "BitbucketSSO",
+    "DiscordSSO"
+]

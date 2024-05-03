@@ -1,7 +1,6 @@
-"""Google SSO Login Helper
-"""
+"""Google SSO Login Helper."""
 
-from typing import Optional
+from typing import ClassVar, Optional
 
 import httpx
 
@@ -9,14 +8,14 @@ from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, SSOLoginErr
 
 
 class GoogleSSO(SSOBase):
-    """Class providing login via Google OAuth"""
+    """Class providing login via Google OAuth."""
 
     discovery_url = "https://accounts.google.com/.well-known/openid-configuration"
     provider = "google"
-    scope = ["openid", "email", "profile"]
+    scope: ClassVar = ["openid", "email", "profile"]
 
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
-        """Return OpenID from user information provided by Google"""
+        """Return OpenID from user information provided by Google."""
         if response.get("email_verified"):
             return OpenID(
                 email=response.get("email", ""),
@@ -30,7 +29,7 @@ class GoogleSSO(SSOBase):
         raise SSOLoginError(401, f"User {response.get('email')} is not verified with Google")
 
     async def get_discovery_document(self) -> DiscoveryDocument:
-        """Get document containing handy urls"""
+        """Get document containing handy urls."""
         async with httpx.AsyncClient() as session:
             response = await session.get(self.discovery_url)
             content = response.json()

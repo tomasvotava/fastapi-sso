@@ -1,6 +1,6 @@
-"""Notion SSO Oauth Helper class"""
+"""Notion SSO Oauth Helper class."""
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, SSOLoginError
 
@@ -9,11 +9,11 @@ if TYPE_CHECKING:
 
 
 class NotionSSO(SSOBase):
-    """Class providing login using Notion OAuth"""
+    """Class providing login using Notion OAuth."""
 
     provider = "notion"
-    scope = ["openid"]
-    additional_headers = {"Notion-Version": "2022-06-28"}
+    scope: ClassVar = ["openid"]
+    additional_headers: ClassVar = {"Notion-Version": "2022-06-28"}
 
     async def get_discovery_document(self) -> DiscoveryDocument:
         return {

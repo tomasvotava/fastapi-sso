@@ -1,6 +1,6 @@
-"""LinkedIn SSO Oauth Helper class"""
+"""LinkedIn SSO Oauth Helper class."""
 
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -9,11 +9,11 @@ if TYPE_CHECKING:
 
 
 class LinkedInSSO(SSOBase):
-    """Class providing login via LinkedIn SSO"""
+    """Class providing login via LinkedIn SSO."""
 
     provider = "linkedin"
-    scope = ["openid", "profile", "email"]
-    additional_headers = {"accept": "application/json"}
+    scope: ClassVar = ["openid", "profile", "email"]
+    additional_headers: ClassVar = {"accept": "application/json"}
 
     @property
     def _extra_query_params(self) -> Dict:

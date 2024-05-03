@@ -1,6 +1,6 @@
-"""Twitter (X) SSO Oauth Helper class"""
+"""Twitter (X) SSO Oauth Helper class."""
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -9,10 +9,10 @@ if TYPE_CHECKING:
 
 
 class TwitterSSO(SSOBase):
-    """Class providing login via Twitter SSO"""
+    """Class providing login via Twitter SSO."""
 
     provider = "twitter"
-    scope = ["users.read", "tweet.read"]
+    scope: ClassVar = ["users.read", "tweet.read"]
     uses_pkce = True
     requires_state = True
 

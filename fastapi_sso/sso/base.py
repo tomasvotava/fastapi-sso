@@ -1,14 +1,10 @@
-"""SSO login base dependency
-"""
-
-# pylint: disable=too-few-public-methods
+"""SSO login base dependency."""
 
 import json
 import os
-import sys
 import warnings
 from types import TracebackType
-from typing import Any, Dict, List, Literal, Optional, Type, Union, overload
+from typing import Any, ClassVar, Dict, List, Literal, Optional, Type, TypedDict, Union, overload
 
 import httpx
 import pydantic
@@ -20,31 +16,31 @@ from starlette.responses import RedirectResponse
 from fastapi_sso.pkce import get_pkce_challenge_pair
 from fastapi_sso.state import generate_random_state
 
-if sys.version_info >= (3, 8):
-    from typing import TypedDict
-else:
-    from typing_extensions import TypedDict  # pragma: no cover
 
-DiscoveryDocument = TypedDict(
-    "DiscoveryDocument", {"authorization_endpoint": str, "token_endpoint": str, "userinfo_endpoint": str}
-)
+class DiscoveryDocument(TypedDict):
+    """Discovery document."""
+
+    authorization_endpoint: str
+    token_endpoint: str
+    userinfo_endpoint: str
 
 
 class UnsetStateWarning(UserWarning):
-    """Warning about unset state parameter"""
+    """Warning about unset state parameter."""
 
 
 class ReusedOauthClientWarning(UserWarning):
-    """Warning about reused oauth client instance"""
+    """Warning about reused oauth client instance."""
 
 
 class SSOLoginError(HTTPException):
-    """Raised when any login-related error ocurrs
-    (such as when user is not verified or if there was an attempt for fake login)
+    """Raised when any login-related error ocurrs.
+
+    Such as when user is not verified or if there was an attempt for fake login.
     """
 
 
-class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
+class OpenID(pydantic.BaseModel):
     """Class (schema) to represent information got from sso provider in a common form."""
 
     id: Optional[str] = None
@@ -56,16 +52,15 @@ class OpenID(pydantic.BaseModel):  # pylint: disable=no-member
     provider: Optional[str] = None
 
 
-# pylint: disable=too-many-instance-attributes
 class SSOBase:
-    """Base class (mixin) for all SSO providers"""
+    """Base class for all SSO providers."""
 
     provider: str = NotImplemented
     client_id: str = NotImplemented
     client_secret: str = NotImplemented
     redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = NotImplemented
-    scope: List[str] = NotImplemented
-    additional_headers: Optional[Dict[str, Any]] = None
+    scope: ClassVar[List[str]] = []
+    additional_headers: ClassVar[Optional[Dict[str, Any]]] = None
     uses_pkce: bool = False
     requires_state: bool = False
 
@@ -80,7 +75,7 @@ class SSOBase:
         use_state: bool = False,
         scope: Optional[List[str]] = None,
     ):
-        # pylint: disable=too-many-arguments
+        """Base class (mixin) for all SSO providers."""
         self.client_id: str = client_id
         self.client_secret: str = client_secret
         self.redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = redirect_uri
@@ -100,7 +95,7 @@ class SSOBase:
                 ),
                 DeprecationWarning,
             )
-        self.scope = scope or self.scope
+        self._scope = scope or self.scope
         self._refresh_token: Optional[str] = None
         self._id_token: Optional[str] = None
         self._state: Optional[str] = None
@@ -110,8 +105,7 @@ class SSOBase:
 
     @property
     def state(self) -> Optional[str]:
-        """
-        Retrieves the state as it was returned from the server.
+        """Retrieves the state as it was returned from the server.
 
         Warning:
             This will emit a warning if the state is unset, implying either that
@@ -131,8 +125,7 @@ class SSOBase:
 
     @property
     def oauth_client(self) -> WebApplicationClient:
-        """
-        Retrieves the OAuth Client to aid in generating requests and parsing responses.
+        """Retrieves the OAuth Client to aid in generating requests and parsing responses.
 
         Raises:
             NotImplementedError: If the provider is not supported or `client_id` is not set.
@@ -148,8 +141,7 @@ class SSOBase:
 
     @property
     def access_token(self) -> Optional[str]:
-        """
-        Retrieves the access token from token endpoint.
+        """Retrieves the access token from token endpoint.
 
         Returns:
             Optional[str]: The access token if available.
@@ -158,8 +150,7 @@ class SSOBase:
 
     @property
     def refresh_token(self) -> Optional[str]:
-        """
-        Retrieves the refresh token if returned from provider.
+        """Retrieves the refresh token if returned from provider.
 
         Returns:
             Optional[str]: The refresh token if available.
@@ -168,8 +159,7 @@ class SSOBase:
 
     @property
     def id_token(self) -> Optional[str]:
-        """
-        Retrieves the id token if returned from provider.
+        """Retrieves the id token if returned from provider.
 
         Returns:
             Optional[str]: The id token if available.
@@ -177,8 +167,7 @@ class SSOBase:
         return self._id_token
 
     async def openid_from_response(self, response: dict, session: Optional[httpx.AsyncClient] = None) -> OpenID:
-        """
-        Converts a response from the provider's user info endpoint to an OpenID object.
+        """Converts a response from the provider's user info endpoint to an OpenID object.
 
         Args:
             response (dict): The response from the user info endpoint.
@@ -193,8 +182,7 @@ class SSOBase:
         raise NotImplementedError(f"Provider {self.provider} not supported")
 
     async def get_discovery_document(self) -> DiscoveryDocument:
-        """
-        Retrieves the discovery document containing useful URLs.
+        """Retrieves the discovery document containing useful URLs.
 
         Raises:
             NotImplementedError: If the provider is not supported.
@@ -206,19 +194,19 @@ class SSOBase:
 
     @property
     async def authorization_endpoint(self) -> Optional[str]:
-        """Return `authorization_endpoint` from discovery document"""
+        """Return `authorization_endpoint` from discovery document."""
         discovery = await self.get_discovery_document()
         return discovery.get("authorization_endpoint")
 
     @property
     async def token_endpoint(self) -> Optional[str]:
-        """Return `token_endpoint` from discovery document"""
+        """Return `token_endpoint` from discovery document."""
         discovery = await self.get_discovery_document()
         return discovery.get("token_endpoint")
 
     @property
     async def userinfo_endpoint(self) -> Optional[str]:
-        """Return `userinfo_endpoint` from discovery document"""
+        """Return `userinfo_endpoint` from discovery document."""
         discovery = await self.get_discovery_document()
         return discovery.get("userinfo_endpoint")
 
@@ -229,8 +217,7 @@ class SSOBase:
         params: Optional[Dict[str, Any]] = None,
         state: Optional[str] = None,
     ) -> str:
-        """
-        Generates and returns the prepared login URL.
+        """Generates and returns the prepared login URL.
 
         Args:
             redirect_uri (Optional[str]): Overrides the `redirect_uri` specified on this instance.
@@ -263,7 +250,7 @@ class SSOBase:
             await self.authorization_endpoint,
             redirect_uri=redirect_uri,
             state=state,
-            scope=self.scope,
+            scope=self._scope,
             code_challenge=self._pkce_code_challenge,
             code_challenge_method=self._pkce_challenge_method,
             **params,
@@ -277,8 +264,7 @@ class SSOBase:
         params: Optional[Dict[str, Any]] = None,
         state: Optional[str] = None,
     ) -> RedirectResponse:
-        """
-        Constructs and returns a redirect response to the login page of OAuth SSO provider.
+        """Constructs and returns a redirect response to the login page of OAuth SSO provider.
 
         Args:
             redirect_uri (Optional[str]): Overrides the `redirect_uri` specified on this instance.
@@ -327,8 +313,7 @@ class SSOBase:
         redirect_uri: Optional[str] = None,
         convert_response: Union[Literal[True], Literal[False]] = True,
     ) -> Union[Optional[OpenID], Optional[Dict[str, Any]]]:
-        """
-        Processes the login given a FastAPI (Starlette) Request object. This should be used for the /callback path.
+        """Processes the login given a FastAPI (Starlette) Request object. This should be used for the /callback path.
 
         Args:
             request (Request): FastAPI or Starlette request object.
@@ -426,8 +411,7 @@ class SSOBase:
         pkce_code_verifier: Optional[str] = None,
         convert_response: Union[Literal[True], Literal[False]] = True,
     ) -> Union[Optional[OpenID], Optional[Dict[str, Any]]]:
-        """
-        Processes login from the callback endpoint to verify the user and request user info endpoint.
+        """Processes login from the callback endpoint to verify the user and request user info endpoint.
         It's a lower-level method, typically, you should use `verify_and_process` instead.
 
         Args:
@@ -446,7 +430,6 @@ class SSOBase:
             Optional[OpenID]: User information in OpenID format if the login was successful (convert_response == True).
             Optional[Dict[str, Any]]: Original userinfo API endpoint response.
         """
-        # pylint: disable=too-many-locals
         if self._oauth_client is not None:  # pragma: no cover
             self._oauth_client = None
             self._refresh_token = None
