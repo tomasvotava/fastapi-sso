@@ -19,7 +19,7 @@ from .sso.notion import NotionSSO
 from .sso.spotify import SpotifySSO
 from .sso.twitter import TwitterSSO
 from .sso.bitbucket import BitbucketSSO
-from .sso.import DiscordSSO
+from .sso.discord import DiscordSSO
 
 __all__ = [
     "OpenID",
