@@ -26,7 +26,7 @@ class SpotifySSO(SSOBase):
         """Return OpenID from user information provided by Spotify."""
         picture = response["images"][0]["url"] if response.get("images", []) else None
         return OpenID(
-            email=response.get("email", ""),
+            email=response.get("email"),
             display_name=response.get("display_name"),
             provider=self.provider,
             id=response.get("id"),
