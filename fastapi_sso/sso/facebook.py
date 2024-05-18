@@ -12,7 +12,7 @@ class FacebookSSO(SSOBase):
     """Class providing login via Facebook OAuth."""
 
     provider = "facebook"
-    base_url = "https://graph.facebook.com/v9.0"
+    base_url = "https://graph.facebook.com/v19.0"
     scope: ClassVar = ["email"]
 
     async def get_discovery_document(self) -> DiscoveryDocument:
@@ -25,8 +25,9 @@ class FacebookSSO(SSOBase):
 
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         """Return OpenID from user information provided by Facebook."""
+
         return OpenID(
-            email=response.get("email", ""),
+            email=response.get("email"),
             first_name=response.get("first_name"),
             last_name=response.get("last_name"),
             display_name=response.get("name"),
