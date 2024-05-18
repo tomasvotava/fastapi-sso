@@ -1,6 +1,7 @@
 """SSO login base dependency."""
 
 import json
+import logging
 import os
 import warnings
 from types import TracebackType
@@ -15,6 +16,8 @@ from starlette.responses import RedirectResponse
 
 from fastapi_sso.pkce import get_pkce_challenge_pair
 from fastapi_sso.state import generate_random_state
+
+logger = logging.getLogger(__name__)
 
 
 class DiscoveryDocument(TypedDict):
@@ -84,6 +87,7 @@ class SSOBase:
         self._generated_state: Optional[str] = None
 
         if self.allow_insecure_http:
+            logger.debug("Initializing %s with allow_insecure_http=True", self.__class__.__name__)
             os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
         # TODO: Remove use_state argument and attribute
@@ -332,6 +336,12 @@ class SSOBase:
         headers = headers or {}
         code = request.query_params.get("code")
         if code is None:
+            logger.debug(
+                "Callback request:\n\tURI: %s\n\tHeaders: %s\n\tQuery params: %s",
+                request.url,
+                request.headers,
+                request.query_params,
+            )
             raise SSOLoginError(400, "'code' parameter was not found in callback request")
         self._state = request.query_params.get("state")
         pkce_code_verifier: Optional[str] = None
