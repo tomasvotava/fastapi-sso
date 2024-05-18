@@ -1,5 +1,4 @@
-"""Google Login Example
-"""
+"""Google Login Example"""
 
 import os
 import uvicorn
