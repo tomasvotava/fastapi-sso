@@ -24,6 +24,8 @@ from fastapi_sso.sso.notion import NotionSSO
 from fastapi_sso.sso.linkedin import LinkedInSSO
 from fastapi_sso.sso.twitter import TwitterSSO
 from fastapi_sso.sso.yandex import YandexSSO
+from fastapi_sso.sso.bitbucket import BitbucketSSO
+from fastapi_sso.sso.discord import DiscordSSO
 
 GenericProvider = create_provider(
     name="generic",
@@ -51,6 +53,8 @@ tested_providers = (
     LinkedInSSO,
     TwitterSSO,
     YandexSSO,
+    BitbucketSSO,
+    DiscordSSO,
 )
 
 # Run all tests for each of the listed providers
