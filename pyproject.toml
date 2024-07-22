@@ -99,7 +99,7 @@ markdown-include = "^0.8.1"
 mkdocs-material = { extras = ["imaging"], version = "^9.3.2" }
 mkdocstrings = { extras = ["python"], version = ">=0.23,<0.26" }
 mypy = "^1"
-poethepoet = ">=0.21.1,<0.27.0"
+poethepoet = ">=0.21.1,<0.28.0"
 pre-commit = "^3"
 pytest = ">=7,<9"
 pytest-asyncio = ">=0.21.1,<0.24.0"
@@ -107,7 +107,7 @@ pytest-cov = ">=4,<6"
 pytest-xdist = "^3"
 tox = "^4"
 uvicorn = ">=0.23.1"
-ruff = "^0.4.2"
+ruff = ">=0.4.2,<0.6.0"
 
 [tool.poetry.dependencies]
 fastapi = ">=0.80"
