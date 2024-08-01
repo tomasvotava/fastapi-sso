@@ -1,17 +1,17 @@
-"""Line Login Example
+"""BitBucket Login Example
 """
 
 import os
 import uvicorn
 from fastapi import FastAPI, Request
-from fastapi_sso.sso.line import LineSSO
+from fastapi_sso.sso.bitbucket import BitbucketSSO
 
 CLIENT_ID = os.environ["CLIENT_ID"]
 CLIENT_SECRET = os.environ["CLIENT_SECRET"]
 
 app = FastAPI()
 
-sso = LineSSO(
+sso = BitbucketSSO(
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
     redirect_uri="http://localhost:5000/auth/callback",
@@ -23,7 +23,7 @@ sso = LineSSO(
 async def auth_init():
     """Initialize auth and redirect"""
     with sso:
-        return await sso.get_login_redirect(state="randomstate")
+        return await sso.get_login_redirect()
 
 
 @app.get("/auth/callback")
@@ -35,4 +35,4 @@ async def auth_callback(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app="examples.line:app", host="127.0.0.1", port=5000)
+    uvicorn.run(app="examples.bitbucket:app", host="127.0.0.1", port=5000)
