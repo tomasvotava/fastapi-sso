@@ -53,6 +53,9 @@ class OpenID(pydantic.BaseModel):
     display_name: Optional[str] = None
     picture: Optional[str] = None
     provider: Optional[str] = None
+        
+    class Config:
+        extra = "allow"
 
 
 class SSOBase:
