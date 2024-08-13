@@ -15,12 +15,12 @@ google_sso = GoogleSSO("client-id", "client-secret")
 
 # E.g. https://example.com/auth/login?return_url=https://example.com/welcome
 async def google_login(return_url: str):
-    with google_sso:
+    async with google_sso:
         # Send return_url to Google as a state so that Google knows to return it back to us
         return await google_sso.get_login_redirect(redirect_uri=request.url_for("google_callback"), state=return_url)
 
 async def google_callback(request: Request):
-    with google_sso:
+    async with google_sso:
         user = await google_sso.verify_and_process(request)
         # google_sso.state now holds your return_url (https://example.com/welcome)
         return RedirectResponse(google_sso.state)

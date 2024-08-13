@@ -1,11 +1,13 @@
 """SSO login base dependency."""
 
+import asyncio
 import json
 import logging
 import os
+import sys
 import warnings
 from types import TracebackType
-from typing import Any, ClassVar, Dict, List, Literal, Optional, Type, TypedDict, Union, overload
+from typing import Any, ClassVar, Dict, List, Literal, Optional, Type, TypedDict, TypeVar, Union, overload
 
 import httpx
 import pydantic
@@ -17,7 +19,18 @@ from starlette.responses import RedirectResponse
 from fastapi_sso.pkce import get_pkce_challenge_pair
 from fastapi_sso.state import generate_random_state
 
+if sys.version_info < (3, 10):
+    from typing import Callable  # pragma: no cover
+
+    from typing_extensions import ParamSpec  # pragma: no cover
+else:
+    from collections.abc import Callable
+    from typing import ParamSpec
+
 logger = logging.getLogger(__name__)
+
+T = TypeVar("T")
+P = ParamSpec("P")
 
 
 class DiscoveryDocument(TypedDict):
@@ -55,6 +68,26 @@ class OpenID(pydantic.BaseModel):
     provider: Optional[str] = None
 
 
+class SecurityWarning(UserWarning):
+    """Raised when insecure usage is detected"""
+
+
+def requires_async_context(func: Callable[P, T]) -> Callable[P, T]:
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+        if not args or not isinstance(args[0], SSOBase):
+            return func(*args, **kwargs)
+        if not args[0]._in_stack:
+            warnings.warn(
+                "Please make sure you are using SSO provider in an async context (using 'async with provider:'). "
+                "See https://github.com/tomasvotava/fastapi-sso/issues/186 for more information.",
+                category=SecurityWarning,
+                stacklevel=1,
+            )
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 class SSOBase:
     """Base class for all SSO providers."""
 
@@ -83,6 +116,8 @@ class SSOBase:
         self.client_secret: str = client_secret
         self.redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = redirect_uri
         self.allow_insecure_http: bool = allow_insecure_http
+        self._login_lock = asyncio.Lock()
+        self._in_stack = False
         self._oauth_client: Optional[WebApplicationClient] = None
         self._generated_state: Optional[str] = None
 
@@ -128,6 +163,7 @@ class SSOBase:
         return self._state
 
     @property
+    @requires_async_context
     def oauth_client(self) -> WebApplicationClient:
         """Retrieves the OAuth Client to aid in generating requests and parsing responses.
 
@@ -144,6 +180,7 @@ class SSOBase:
         return self._oauth_client
 
     @property
+    @requires_async_context
     def access_token(self) -> Optional[str]:
         """Retrieves the access token from token endpoint.
 
@@ -153,6 +190,7 @@ class SSOBase:
         return self.oauth_client.access_token
 
     @property
+    @requires_async_context
     def refresh_token(self) -> Optional[str]:
         """Retrieves the refresh token if returned from provider.
 
@@ -162,6 +200,7 @@ class SSOBase:
         return self._refresh_token or self.oauth_client.refresh_token
 
     @property
+    @requires_async_context
     def id_token(self) -> Optional[str]:
         """Retrieves the id token if returned from provider.
 
@@ -308,6 +347,7 @@ class SSOBase:
         convert_response: Literal[False],
     ) -> Optional[Dict[str, Any]]: ...
 
+    @requires_async_context
     async def verify_and_process(
         self,
         request: Request,
@@ -362,6 +402,12 @@ class SSOBase:
         )
 
     def __enter__(self) -> "SSOBase":
+        warnings.warn(
+            "SSO Providers are supposed to be used in async context, please change 'with provider' to "
+            "'async with provider'. See https://github.com/tomasvotava/fastapi-sso/issues/186 for more information.",
+            DeprecationWarning,
+            stacklevel=1,
+        )
         self._oauth_client = None
         self._refresh_token = None
         self._id_token = None
@@ -371,6 +417,28 @@ class SSOBase:
         if self.uses_pkce:
             self._pkce_code_verifier, self._pkce_code_challenge = get_pkce_challenge_pair(self._pkce_challenge_length)
         return self
+
+    async def __aenter__(self) -> "SSOBase":
+        await self._login_lock.acquire()
+        self._in_stack = True
+        self._oauth_client = None
+        self._refresh_token = None
+        self._id_token = None
+        self._state = None
+        if self.requires_state:
+            self._generated_state = generate_random_state()
+        if self.uses_pkce:
+            self._pkce_code_verifier, self._pkce_code_challenge = get_pkce_challenge_pair(self._pkce_challenge_length)
+        return self
+
+    async def __aexit__(
+        self,
+        _exc_type: Optional[Type[BaseException]],
+        _exc_val: Optional[BaseException],
+        _exc_tb: Optional[TracebackType],
+    ) -> None:
+        self._in_stack = False
+        self._login_lock.release()
 
     def __exit__(
         self,
@@ -410,6 +478,7 @@ class SSOBase:
         convert_response: Literal[False],
     ) -> Optional[Dict[str, Any]]: ...
 
+    @requires_async_context
     async def process_login(
         self,
         code: str,

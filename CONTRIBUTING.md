@@ -90,12 +90,6 @@ Run the tests by calling:
 poe test
 ```
 
-Or using `tox`:
-
-```console
-tox
-```
-
 ## Documentation
 
 Please try to provide documentation for your code. I use `mkdocs` to generate the documentation.
