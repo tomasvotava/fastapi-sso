@@ -107,7 +107,7 @@ pytest-cov = ">=4,<6"
 pytest-xdist = "^3"
 tox = "^4"
 uvicorn = ">=0.23.1"
-ruff = ">=0.4.2,<0.6.0"
+ruff = ">=0.4.2,<0.7.0"
 
 [tool.poetry.dependencies]
 fastapi = ">=0.80"
