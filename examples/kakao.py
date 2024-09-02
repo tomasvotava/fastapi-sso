@@ -1,5 +1,4 @@
-"""Kakao Login Example
-"""
+"""Kakao Login Example"""
 
 import os
 import uvicorn
@@ -22,14 +21,14 @@ sso = KakaoSSO(
 @app.get("/auth/login")
 async def auth_init():
     """Initialize auth and redirect"""
-    with sso:
+    async with sso:
         return await sso.get_login_redirect()
 
 
 @app.get("/auth/callback")
 async def auth_callback(request: Request):
     """Verify login"""
-    with sso:
+    async with sso:
         return await sso.verify_and_process(request, params={"client_secret": CLIENT_SECRET})
 
 

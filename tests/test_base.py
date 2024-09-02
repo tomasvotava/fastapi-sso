@@ -1,10 +1,11 @@
 # type: ignore
 
 import os
+
 import pytest
 from utils import Request
 
-from fastapi_sso.sso.base import SSOBase, SSOLoginError, UnsetStateWarning
+from fastapi_sso.sso.base import SecurityWarning, SSOBase, SSOLoginError, UnsetStateWarning
 
 
 class TestSSOBase:
@@ -13,12 +14,13 @@ class TestSSOBase:
         assert sso.client_id == "client_id"
         assert sso.client_secret == "client_secret"
         assert sso._oauth_client is None
-        assert sso.oauth_client is not None
         assert sso._refresh_token is None
         assert sso._state is None
-        assert sso.access_token is None
-        assert sso.refresh_token is None
-        assert sso.id_token is None
+        with pytest.warns(SecurityWarning, match="Please make sure you are using SSO provider in an async context"):
+            assert sso.oauth_client is not None
+            assert sso.access_token is None
+            assert sso.refresh_token is None
+            assert sso.id_token is None
 
     async def test_unset_usage(self):
         sso = SSOBase("client_id", "client_secret")
@@ -46,17 +48,23 @@ class TestSSOBase:
 
         request = Request()
         request.query_params["code"] = "code"
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(NotImplementedError), pytest.warns(
+            SecurityWarning, match="Please make sure you are using SSO provider in an async context"
+        ):
             await sso.verify_and_process(request)
 
         sso.client_id = NotImplemented
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(NotImplementedError), pytest.warns(
+            SecurityWarning, match="Please make sure you are using SSO provider in an async context"
+        ):
             sso.oauth_client
 
     async def test_login_error(self):
         sso = SSOBase("client_id", "client_secret")
 
-        with pytest.raises(SSOLoginError):
+        with pytest.raises(SSOLoginError), pytest.warns(
+            SecurityWarning, match="Please make sure you are using SSO provider in an async context"
+        ):
             await sso.verify_and_process(Request())
 
     def test_autoset_insecure_transport_env_var(self):

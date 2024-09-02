@@ -1,4 +1,5 @@
 import pytest
+
 from fastapi_sso import NotionSSO, OpenID, SSOLoginError
 
 

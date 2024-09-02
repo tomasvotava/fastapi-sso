@@ -1,3 +1,8 @@
+# We need requirements.txt for tox, but it may not be updated properly, so let's keep it all in pyproject.toml
+requirements.txt
+
+.python-version
+
 .vscode/
 main.py
 

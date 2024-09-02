@@ -71,7 +71,7 @@ async def protected_endpoint(user: OpenID = Depends(get_logged_user)):
 @app.get("/auth/login")
 async def login():
     """Redirect the user to the Google login page."""
-    with sso:
+    async with sso:
         return await sso.get_login_redirect()
 
 
@@ -86,7 +86,7 @@ async def logout():
 @app.get("/auth/callback")
 async def login_callback(request: Request):
     """Process login and redirect the user to the protected endpoint."""
-    with sso:
+    async with sso:
         openid = await sso.verify_and_process(request)
         if not openid:
             raise HTTPException(status_code=401, detail="Authentication failed")
