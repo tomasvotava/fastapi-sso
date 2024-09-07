@@ -151,8 +151,8 @@ class TestProviders:
         async def fake_openid_from_response(_, __):
             return OpenID(id="test", email="email@example.com", display_name="Test")
 
-        async with sso:
-            monkeypatch.setattr("httpx.AsyncClient", FakeAsyncClient)
+        with sso:
+            monkeypatch.setattr(sso, "get_async_client", FakeAsyncClient)
             monkeypatch.setattr(sso, "openid_from_response", fake_openid_from_response)
             request = Request(url="https://localhost?code=code&state=unique")
             await sso.process_login("code", request)
