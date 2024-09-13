@@ -24,6 +24,7 @@ from fastapi_sso.sso.notion import NotionSSO
 from fastapi_sso.sso.linkedin import LinkedInSSO
 from fastapi_sso.sso.twitter import TwitterSSO
 from fastapi_sso.sso.yandex import YandexSSO
+from fastapi_sso.sso.seznam import SeznamSSO
 
 GenericProvider = create_provider(
     name="generic",
@@ -51,6 +52,7 @@ tested_providers = (
     LinkedInSSO,
     TwitterSSO,
     YandexSSO,
+    SeznamSSO,
 )
 
 # Run all tests for each of the listed providers
