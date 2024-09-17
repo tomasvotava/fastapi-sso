@@ -1,12 +1,8 @@
 """Seznam SSO Login Helper."""
 
-from typing import ClassVar
-from typing import Optional
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar, Optional
 
-from fastapi_sso.sso.base import DiscoveryDocument
-from fastapi_sso.sso.base import OpenID
-from fastapi_sso.sso.base import SSOBase
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 if TYPE_CHECKING:
     import httpx  # pragma: no cover
