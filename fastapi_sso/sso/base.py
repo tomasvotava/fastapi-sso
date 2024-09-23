@@ -5,7 +5,7 @@ import logging
 import os
 import warnings
 from types import TracebackType
-from typing import Any, ClassVar, Dict, List, Literal, Optional, Type, TypedDict, Union, overload
+from typing import Any, Callable, ClassVar, Dict, List, Literal, Optional, Type, TypedDict, Union, overload
 
 import httpx
 import pydantic
@@ -77,12 +77,14 @@ class SSOBase:
         allow_insecure_http: bool = False,
         use_state: bool = False,
         scope: Optional[List[str]] = None,
+        get_async_client: Optional[Callable[[], httpx.AsyncClient]] = None,
     ):
         """Base class (mixin) for all SSO providers."""
         self.client_id: str = client_id
         self.client_secret: str = client_secret
         self.redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = redirect_uri
         self.allow_insecure_http: bool = allow_insecure_http
+        self.get_async_client: Callable[[], httpx.AsyncClient] = get_async_client or httpx.AsyncClient
         self._oauth_client: Optional[WebApplicationClient] = None
         self._generated_state: Optional[str] = None
 
@@ -291,10 +293,10 @@ class SSOBase:
         self,
         request: Request,
         *,
-        params: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, Any]] = None,
-        redirect_uri: Optional[str] = None,
-        convert_response: Literal[True] = True,
+        params: Optional[Dict[str, Any]],
+        headers: Optional[Dict[str, Any]],
+        redirect_uri: Optional[str],
+        convert_response: Literal[True],
     ) -> Optional[OpenID]: ...
 
     @overload
@@ -302,9 +304,9 @@ class SSOBase:
         self,
         request: Request,
         *,
-        params: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, Any]] = None,
-        redirect_uri: Optional[str] = None,
+        params: Optional[Dict[str, Any]],
+        headers: Optional[Dict[str, Any]],
+        redirect_uri: Optional[str],
         convert_response: Literal[False],
     ) -> Optional[Dict[str, Any]]: ...
 
@@ -315,7 +317,7 @@ class SSOBase:
         params: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, Any]] = None,
         redirect_uri: Optional[str] = None,
-        convert_response: Union[Literal[True], Literal[False]] = True,
+        convert_response: bool = True,
     ) -> Union[Optional[OpenID], Optional[Dict[str, Any]]]:
         """Processes the login given a FastAPI (Starlette) Request object. This should be used for the /callback path.
 
@@ -334,7 +336,7 @@ class SSOBase:
             Optional[Dict[str, Any]]: The original JSON response from the API.
         """
         headers = headers or {}
-        code = request.query_params.get("code")
+        code: Optional[str] = request.query_params.get("code")
         if code is None:
             logger.debug(
                 "Callback request:\n\tURI: %s\n\tHeaders: %s\n\tQuery params: %s",
@@ -390,11 +392,11 @@ class SSOBase:
         code: str,
         request: Request,
         *,
-        params: Optional[Dict[str, Any]] = None,
-        additional_headers: Optional[Dict[str, Any]] = None,
-        redirect_uri: Optional[str] = None,
-        pkce_code_verifier: Optional[str] = None,
-        convert_response: Literal[True] = True,
+        params: Optional[Dict[str, Any]],
+        additional_headers: Optional[Dict[str, Any]],
+        redirect_uri: Optional[str],
+        pkce_code_verifier: Optional[str],
+        convert_response: Literal[True],
     ) -> Optional[OpenID]: ...
 
     @overload
@@ -403,12 +405,25 @@ class SSOBase:
         code: str,
         request: Request,
         *,
-        params: Optional[Dict[str, Any]] = None,
-        additional_headers: Optional[Dict[str, Any]] = None,
-        redirect_uri: Optional[str] = None,
-        pkce_code_verifier: Optional[str] = None,
+        params: Optional[Dict[str, Any]],
+        additional_headers: Optional[Dict[str, Any]],
+        redirect_uri: Optional[str],
+        pkce_code_verifier: Optional[str],
         convert_response: Literal[False],
     ) -> Optional[Dict[str, Any]]: ...
+
+    @overload
+    async def process_login(
+        self,
+        code: str,
+        request: Request,
+        *,
+        params: Optional[Dict[str, Any]],
+        additional_headers: Optional[Dict[str, Any]],
+        redirect_uri: Optional[str],
+        pkce_code_verifier: Optional[str],
+        convert_response: bool,
+    ) -> Union[Optional[OpenID], Optional[Dict[str, Any]]]: ...
 
     async def process_login(
         self,
@@ -419,7 +434,7 @@ class SSOBase:
         additional_headers: Optional[Dict[str, Any]] = None,
         redirect_uri: Optional[str] = None,
         pkce_code_verifier: Optional[str] = None,
-        convert_response: Union[Literal[True], Literal[False]] = True,
+        convert_response: bool = True,
     ) -> Union[Optional[OpenID], Optional[Dict[str, Any]]]:
         """Processes login from the callback endpoint to verify the user and request user info endpoint.
         It's a lower-level method, typically, you should use `verify_and_process` instead.
@@ -483,7 +498,7 @@ class SSOBase:
 
         auth = httpx.BasicAuth(self.client_id, self.client_secret)
 
-        async with httpx.AsyncClient() as session:
+        async with self.get_async_client() as session:
             response = await session.post(token_url, headers=headers, content=body, auth=auth)
             content = response.json()
             self._refresh_token = content.get("refresh_token")
