@@ -116,6 +116,8 @@ I tend to process Pull Requests faster when properly caffeinated 😉.
 - LinkedIn (by Alessandro Pischedda) - [Cereal84](https://github.com/Cereal84)
 - Yandex (by Akim Faskhutdinov) – [akimrx](https://github.com/akimrx)
 - Seznam (by Tomas Koutek) - [TomasKoutek](https://github.com/TomasKoutek)
+- Discord (by Kaelian Baudelet) - [afi-dev](https://github.com/afi-dev)
+- Bitbucket (by Kaelian Baudelet) - [afi-dev](https://github.com/afi-dev)
 
 See [Contributing](#contributing) for a guide on how to contribute your own login provider.
 
