@@ -1,6 +1,5 @@
 # type: ignore
 
-
 from typing import Type
 from urllib.parse import quote_plus
 
@@ -8,7 +7,7 @@ import pytest
 from fastapi.responses import RedirectResponse
 from utils import AnythingDict, Request, Response, make_fake_async_client
 
-from fastapi_sso.sso.base import OpenID, SSOBase
+from fastapi_sso.sso.base import OpenID, SecurityWarning, SSOBase
 from fastapi_sso.sso.facebook import FacebookSSO
 from fastapi_sso.sso.fitbit import FitbitSSO
 from fastapi_sso.sso.generic import create_provider
@@ -17,15 +16,17 @@ from fastapi_sso.sso.gitlab import GitlabSSO
 from fastapi_sso.sso.google import GoogleSSO
 from fastapi_sso.sso.kakao import KakaoSSO
 from fastapi_sso.sso.line import LineSSO
+from fastapi_sso.sso.linkedin import LinkedInSSO
 from fastapi_sso.sso.microsoft import MicrosoftSSO
 from fastapi_sso.sso.naver import NaverSSO
-from fastapi_sso.sso.spotify import SpotifySSO
 from fastapi_sso.sso.notion import NotionSSO
-from fastapi_sso.sso.linkedin import LinkedInSSO
+from fastapi_sso.sso.spotify import SpotifySSO
 from fastapi_sso.sso.twitter import TwitterSSO
 from fastapi_sso.sso.yandex import YandexSSO
 from fastapi_sso.sso.bitbucket import BitbucketSSO
 from fastapi_sso.sso.discord import DiscordSSO
+from fastapi_sso.sso.seznam import SeznamSSO
+
 
 GenericProvider = create_provider(
     name="generic",
@@ -55,6 +56,7 @@ tested_providers = (
     YandexSSO,
     BitbucketSSO,
     DiscordSSO,
+    SeznamSSO,
 )
 
 # Run all tests for each of the listed providers
@@ -75,7 +77,7 @@ class TestProviders:
     @pytest.mark.parametrize("item", ("authorization_endpoint", "token_endpoint", "userinfo_endpoint"))
     async def test_discovery_document(self, Provider: Type[SSOBase], item: str):
         sso = Provider("client_id", "client_secret")
-        with sso:
+        async with sso:
             document = await sso.get_discovery_document()
             assert item in document, f"Discovery document for provider {sso.provider} must have {item}"
             assert (
@@ -84,7 +86,7 @@ class TestProviders:
 
     async def test_login_url_request_time(self, Provider: Type[SSOBase]):
         sso = Provider("client_id", "client_secret")
-        with sso:
+        async with sso:
             url = await sso.get_login_url(redirect_uri="http://localhost")
             assert url.startswith(
                 await sso.authorization_endpoint
@@ -96,7 +98,8 @@ class TestProviders:
 
     async def test_login_url_construction_time(self, Provider: Type[SSOBase]):
         sso = Provider("client_id", "client_secret", redirect_uri="http://localhost")
-        with sso:
+
+        async with sso:
             url = await sso.get_login_url()
             assert url.startswith(
                 await sso.authorization_endpoint
@@ -104,7 +107,7 @@ class TestProviders:
             assert "redirect_uri=http%3A%2F%2Flocalhost" in url, "Login URL must have redirect_uri query parameter"
 
     async def assert_get_login_url_and_redirect(self, sso: SSOBase, **kwargs):
-        with sso:
+        async with sso:
             url = await sso.get_login_url(**kwargs)
             redirect = await sso.get_login_redirect(**kwargs)
             assert isinstance(url, str), "Login URL must be a string"
@@ -114,30 +117,25 @@ class TestProviders:
 
     async def test_login_url_additional_params(self, Provider: Type[SSOBase]):
         sso = Provider("client_id", "client_secret", redirect_uri="http://localhost")
-        with sso:
-            url, _ = await self.assert_get_login_url_and_redirect(
-                sso, params={"access_type": "offline", "param": "value"}
-            )
-            assert "access_type=offline" in url, "Login URL must have additional query parameters"
-            assert "param=value" in url, "Login URL must have additional query parameters"
+
+        url, _ = await self.assert_get_login_url_and_redirect(sso, params={"access_type": "offline", "param": "value"})
+        assert "access_type=offline" in url, "Login URL must have additional query parameters"
+        assert "param=value" in url, "Login URL must have additional query parameters"
 
     async def test_login_url_state_at_request_time(self, Provider: Type[SSOBase]):
         sso = Provider("client_id", "client_secret")
-        with sso:
-            url, _ = await self.assert_get_login_url_and_redirect(sso, redirect_uri="http://localhost", state="unique")
-            assert "state=unique" in url, "Login URL must have state query parameter"
+        url, _ = await self.assert_get_login_url_and_redirect(sso, redirect_uri="http://localhost", state="unique")
+        assert "state=unique" in url, "Login URL must have state query parameter"
 
     async def test_login_url_scope_default(self, Provider: Type[SSOBase]):
         sso = Provider("client_id", "client_secret")
-        with sso:
-            url, _ = await self.assert_get_login_url_and_redirect(sso, redirect_uri="http://localhost")
-            assert quote_plus(" ".join(sso._scope)) in url, "Login URL must have all scopes"
+        url, _ = await self.assert_get_login_url_and_redirect(sso, redirect_uri="http://localhost")
+        assert quote_plus(" ".join(sso._scope)) in url, "Login URL must have all scopes"
 
     async def test_login_url_scope_additional(self, Provider: Type[SSOBase]):
         sso = Provider("client_id", "client_secret", scope=["openid", "additional"])
-        with sso:
-            url, _ = await self.assert_get_login_url_and_redirect(sso, redirect_uri="http://localhost")
-            assert quote_plus(" ".join(sso._scope)) in url, "Login URL must have all scopes"
+        url, _ = await self.assert_get_login_url_and_redirect(sso, redirect_uri="http://localhost")
+        assert quote_plus(" ".join(sso._scope)) in url, "Login URL must have all scopes"
 
     async def test_process_login(self, Provider: Type[SSOBase], monkeypatch: pytest.MonkeyPatch):
         sso = Provider("client_id", "client_secret")
@@ -154,19 +152,20 @@ class TestProviders:
         async def fake_openid_from_response(_, __):
             return OpenID(id="test", email="email@example.com", display_name="Test")
 
-        with sso:
+        async with sso:
             monkeypatch.setattr("httpx.AsyncClient", FakeAsyncClient)
             monkeypatch.setattr(sso, "openid_from_response", fake_openid_from_response)
             request = Request(url="https://localhost?code=code&state=unique")
             await sso.process_login("code", request)
 
-    def test_context_manager_behavior(self, Provider: Type[SSOBase]):
+    async def test_context_manager_behavior(self, Provider: Type[SSOBase]):
         sso = Provider("client_id", "client_secret")
         assert sso._oauth_client is None, "OAuth client must be after initialization"
         assert sso._refresh_token is None, "Refresh token must be None after initialization"
-        sso.oauth_client
+        with pytest.warns(SecurityWarning, match="Please make sure you are using SSO provider in an async context"):
+            sso.oauth_client
         sso._refresh_token = "test"
         assert sso._oauth_client is not None, "OAuth client must be initialized after first access"
-        with sso:
+        async with sso:
             assert sso._oauth_client is None, "OAuth client must be None within the context manager"
             assert sso._refresh_token is None, "Refresh token must be None within the context manager"

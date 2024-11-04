@@ -5,6 +5,7 @@ class Request:
     def __init__(self, url="http://localhost", query_params=None):
         self.url = URL(url)
         self.query_params = query_params or {}
+        self.headers = {}
 
 
 class Response:

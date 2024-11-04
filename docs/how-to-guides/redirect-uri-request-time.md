@@ -11,7 +11,7 @@ google_sso = GoogleSSO("my-client-id", "my-client-secret")
 @app.get("/google/login")
 async def google_login(request: Request):
     """Dynamically generate login url and return redirect"""
-    with google_sso:
+    async with google_sso:
         return await google_sso.get_login_redirect(redirect_uri=request.url_for("google_callback"))
 
 @app.get("/google/callback")

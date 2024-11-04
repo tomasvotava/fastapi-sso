@@ -36,14 +36,53 @@ Quick links for the eager ones:
 - [Demo site](https://fastapi-sso-example.vercel.app/)
 - [Medium articles](https://medium.com/@christos.karvouniaris247)
 
-## Security warning
+## Security Notice
 
-Please note that versions preceding `0.7.0` had a security vulnerability.
-The SSO instance could share state between requests, which could lead to security issues.
-**Please update to `0.7.0` or newer**.
+### Version `0.16.0` Update: Race Condition Bug Fix & Context Manager Change
 
-Also, the preferred way of using the SSO instances is to use `with` statement, which will ensure the state is cleared.
-See example below.
+A race condition bug in the login flow that could, in rare cases, allow one user
+to assume the identity of another due to concurrent login requests was recently discovered
+by [@parikls](https://github.com/parikls).
+This issue was reported in [#186](https://github.com/tomasvotava/fastapi-sso/issues/186) and has been resolved
+in version `0.16.0`.
+
+**Details of the Fix:**
+
+The bug was mitigated by introducing an async lock mechanism that ensures only one user can attempt the login
+process at any given time. This prevents race conditions that could lead to unintended user identity crossover.
+
+**Important Change:**
+
+To fully support this fix, **users must now use the SSO instance within an `async with`
+context manager**. This adjustment is necessary for proper handling of asynchronous operations.
+
+The synchronous `with` context manager is now deprecated and will produce a warning.
+It will be removed in future versions to ensure best practices for async handling.
+
+**Impact:**
+
+This bug could potentially affect deployments with high concurrency or scenarios where multiple users initiate
+login requests simultaneously. To prevent potential issues and deprecation warnings, **update to
+version `0.16.0` or later and modify your code to use the async with context**.
+
+Code Example Update:
+
+```python
+# Before (deprecated)
+with sso:
+    openid = await sso.verify_and_process(request)
+
+# After (recommended)
+async with sso:
+    openid = await sso.verify_and_process(request)
+```
+
+Thanks to both [@parikls](https://github.com/parikls) and the community for helping me identify and improve the
+security of `fastapi-sso`. If you encounter any issues or potential vulnerabilities, please report them
+immediately so they can be addressed.
+
+For more details, refer to Issue [#186](https://github.com/tomasvotava/fastapi-sso/issues/186)
+and PR [#189](https://github.com/tomasvotava/fastapi-sso/pull/189).
 
 ## Support this project
 
@@ -76,6 +115,7 @@ I tend to process Pull Requests faster when properly caffeinated 😉.
 - Line (by Jimmy Yeh) - [jimmyyyeh](https://github.com/jimmyyyeh)
 - LinkedIn (by Alessandro Pischedda) - [Cereal84](https://github.com/Cereal84)
 - Yandex (by Akim Faskhutdinov) – [akimrx](https://github.com/akimrx)
+- Seznam (by Tomas Koutek) - [TomasKoutek](https://github.com/TomasKoutek)
 
 See [Contributing](#contributing) for a guide on how to contribute your own login provider.
 

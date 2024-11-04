@@ -18,7 +18,7 @@ class GoogleSSO(SSOBase):
         """Return OpenID from user information provided by Google."""
         if response.get("email_verified"):
             return OpenID(
-                email=response.get("email", ""),
+                email=response.get("email"),
                 provider=self.provider,
                 id=response.get("sub"),
                 first_name=response.get("given_name"),
