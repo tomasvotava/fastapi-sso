@@ -8,6 +8,8 @@ from fastapi.responses import RedirectResponse
 from utils import AnythingDict, Request, Response, make_fake_async_client
 
 from fastapi_sso.sso.base import OpenID, SecurityWarning, SSOBase
+from fastapi_sso.sso.bitbucket import BitbucketSSO
+from fastapi_sso.sso.discord import DiscordSSO
 from fastapi_sso.sso.facebook import FacebookSSO
 from fastapi_sso.sso.fitbit import FitbitSSO
 from fastapi_sso.sso.generic import create_provider
@@ -20,12 +22,10 @@ from fastapi_sso.sso.linkedin import LinkedInSSO
 from fastapi_sso.sso.microsoft import MicrosoftSSO
 from fastapi_sso.sso.naver import NaverSSO
 from fastapi_sso.sso.notion import NotionSSO
+from fastapi_sso.sso.seznam import SeznamSSO
 from fastapi_sso.sso.spotify import SpotifySSO
 from fastapi_sso.sso.twitter import TwitterSSO
 from fastapi_sso.sso.yandex import YandexSSO
-from fastapi_sso.sso.seznam import SeznamSSO
-from fastapi_sso.sso.bitbucket import BitbucketSSO
-from fastapi_sso.sso.discord import DiscordSSO
 
 GenericProvider = create_provider(
     name="generic",
