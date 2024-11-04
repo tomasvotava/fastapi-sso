@@ -4,6 +4,8 @@
 """
 
 from .sso.base import OpenID, SSOBase, SSOLoginError
+from .sso.bitbucket import BitbucketSSO
+from .sso.discord import DiscordSSO
 from .sso.facebook import FacebookSSO
 from .sso.fitbit import FitbitSSO
 from .sso.generic import create_provider
@@ -37,4 +39,6 @@ __all__ = [
     "NotionSSO",
     "SpotifySSO",
     "TwitterSSO",
+    "BitbucketSSO",
+    "DiscordSSO",
 ]

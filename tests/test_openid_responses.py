@@ -3,6 +3,7 @@ from typing import Any, Dict, Tuple, Type
 import pytest
 
 from fastapi_sso.sso.base import OpenID, SSOBase
+from fastapi_sso.sso.discord import DiscordSSO
 from fastapi_sso.sso.facebook import FacebookSSO
 from fastapi_sso.sso.fitbit import FitbitSSO
 from fastapi_sso.sso.github import GithubSSO
@@ -217,6 +218,24 @@ sso_test_cases: Tuple[Tuple[Type[SSOBase], Dict[str, Any], OpenID], ...] = (
             id="test",
             provider="yandex",
             picture="https://avatars.yandex.net/get-yapic/123456/islands-200",
+        ),
+    ),
+    (
+        DiscordSSO,
+        {
+            "id": "test",
+            "avatar": "avatar",
+            "email": "test@example.com",
+            "global_name": "Test User",
+            "username": "testuser",
+        },
+        OpenID(
+            email="test@example.com",
+            first_name="testuser",
+            id="test",
+            picture="https://cdn.discordapp.com/avatars/test/avatar.png",
+            provider="discord",
+            display_name="Test User",
         ),
     ),
 )
