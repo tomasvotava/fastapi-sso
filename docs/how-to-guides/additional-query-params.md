@@ -11,7 +11,7 @@ E.g. sometimes you want to specify `access_type=offline` or `prompt=consent` in 
 
 @app.get("/google/login")
 async def google_login(request: Request):
-    with google_sso:
+    async with google_sso:
         return await google_sso.get_login_redirect(
             redirect_uri=request.url_for("google_callback"),
             params={"prompt": "consent", "access_type": "offline"}
@@ -19,7 +19,7 @@ async def google_login(request: Request):
 
 @app.get("/google/callback")
 async def google_callback(request: Request):
-    with google_sso:
+    async with google_sso:
         user = await google_sso.verify_and_process(request)
     # you may now use google_sso.refresh_token to refresh the access token
 ```
