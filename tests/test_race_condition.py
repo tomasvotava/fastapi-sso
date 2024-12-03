@@ -54,29 +54,26 @@ async def test__race_condition():
             await asyncio.sleep(0)
             return Response(token="")
 
-    with patch("fastapi_sso.sso.base.httpx") as httpx:
-        httpx.AsyncClient = AsyncClient
+    first_response = Response(token="first_token")  # noqa: S106
+    second_response = Response(token="second_token")  # noqa: S106
+    AsyncClient.post_responses = [second_response, first_response]  # reversed order because of `pop`
+    provider.get_async_client = AsyncClient
 
-        first_response = Response(token="first_token")  # noqa: S106
-        second_response = Response(token="second_token")  # noqa: S106
+    async def process_login():
+        # this coro will be executed concurrently.
+        # completely not caring about the params
+        request = Mock()
+        request.url = URL("https://url.com?state=state&code=code")
+        async with provider:
+            await provider.process_login(
+                code="code", request=request, params=dict(state="state"), convert_response=False
+            )
+            return provider.access_token
 
-        AsyncClient.post_responses = [second_response, first_response]  # reversed order because of `pop`
+    # process login concurrently twice
+    tasks = [process_login(), process_login()]
+    results = await asyncio.gather(*tasks)
 
-        async def process_login():
-            # this coro will be executed concurrently.
-            # completely not caring about the params
-            request = Mock()
-            request.url = URL("https://url.com?state=state&code=code")
-            async with provider:
-                await provider.process_login(
-                    code="code", request=request, params=dict(state="state"), convert_response=False
-                )
-                return provider.access_token
-
-        # process login concurrently twice
-        tasks = [process_login(), process_login()]
-        results = await asyncio.gather(*tasks)
-
-        # we would want to get the first and second tokens,
-        # but we see that the first request actually obtained the second token as well
-        assert results == [first_response.token, second_response.token]
+    # we would want to get the first and second tokens,
+    # but we see that the first request actually obtained the second token as well
+    assert results == [first_response.token, second_response.token]
