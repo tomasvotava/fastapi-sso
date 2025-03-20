@@ -2,12 +2,12 @@
 
 from urllib.parse import quote_plus
 
+import jwt
 import pytest
 from fastapi.responses import RedirectResponse
-import jwt
 from utils import AnythingDict, Request, Response, make_fake_async_client
 
-from fastapi_sso.sso.base import OpenID, SSOLoginError, SecurityWarning, SSOBase
+from fastapi_sso.sso.base import OpenID, SecurityWarning, SSOBase, SSOLoginError
 from fastapi_sso.sso.bitbucket import BitbucketSSO
 from fastapi_sso.sso.discord import DiscordSSO
 from fastapi_sso.sso.facebook import FacebookSSO
