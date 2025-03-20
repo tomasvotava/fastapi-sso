@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from fastapi_sso import BitbucketSSO, NotionSSO, OpenID, SSOLoginError
+from fastapi_sso.sso.linkedin import LinkedInSSO
 
 
 async def test_notion_openid_response():

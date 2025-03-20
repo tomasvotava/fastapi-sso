@@ -45,6 +45,8 @@ class TestSSOBase:
             await sso.openid_from_response({})
         with pytest.raises(NotImplementedError):
             await sso.get_discovery_document()
+        with pytest.raises(NotImplementedError):
+            await sso.openid_from_token({})
 
         request = Request()
         request.query_params["code"] = "code"

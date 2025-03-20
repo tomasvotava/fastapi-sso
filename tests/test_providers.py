@@ -7,7 +7,7 @@ from fastapi.responses import RedirectResponse
 import jwt
 from utils import AnythingDict, Request, Response, make_fake_async_client
 
-from fastapi_sso.sso.base import OpenID, SecurityWarning, SSOBase
+from fastapi_sso.sso.base import OpenID, SSOLoginError, SecurityWarning, SSOBase
 from fastapi_sso.sso.bitbucket import BitbucketSSO
 from fastapi_sso.sso.discord import DiscordSSO
 from fastapi_sso.sso.facebook import FacebookSSO
@@ -140,27 +140,44 @@ class TestProviders:
 
     async def test_process_login(self, Provider: type[SSOBase], monkeypatch: pytest.MonkeyPatch):
         sso = Provider("client_id", "client_secret")
-        FakeAsyncClient = make_fake_async_client(
-            returns_post=Response(url="https://localhost", json_content={"access_token": "token", "id_token": fake_id_token}),
-            returns_get=Response(
-                url="https://localhost",
-                json_content=AnythingDict(
-                    {"token_endpoint": "https://localhost", "userinfo_endpoint": "https://localhost"}
-                ),
+        get_response = Response(
+            url="https://localhost",
+            json_content=AnythingDict(
+                {"token_endpoint": "https://localhost", "userinfo_endpoint": "https://localhost"}
             ),
+        )
+
+        FakeAsyncClient = make_fake_async_client(
+            returns_post=Response(url="https://localhost", json_content={"access_token": "token"}),
+            returns_get=get_response,
         )
 
         async def fake_openid_from_response(_, __):
             return OpenID(id="test", email="email@example.com", display_name="Test")
-    
-        async def fake_openid_from_id_token(_,__):
-            return OpenID(id="idtoken", email="user@idtoken.com",display_name="ID Token")
+
+        async def fake_openid_from_id_token(_, __):
+            return OpenID(id="idtoken", email="user@idtoken.com", display_name="ID Token")
 
         async with sso:
             monkeypatch.setattr("httpx.AsyncClient", FakeAsyncClient)
             monkeypatch.setattr(sso, "openid_from_response", fake_openid_from_response)
             monkeypatch.setattr(sso, "openid_from_token", fake_openid_from_id_token)
             request = Request(url="https://localhost?code=code&state=unique")
+            if sso.use_id_token_for_user_info:
+                with pytest.raises(SSOLoginError, match="Provider .* did not return id token"):
+                    await sso.process_login("code", request)
+            else:
+                await sso.process_login("code", request)
+
+        if sso.use_id_token_for_user_info:
+            monkeypatch.setattr("jwt.decode", lambda _, options: {})
+            FakeAsyncClient = make_fake_async_client(
+                returns_post=Response(
+                    url="https://localhost", json_content={"access_token": "token", "id_token": "fake id token"}
+                ),
+                returns_get=get_response,
+            )
+            monkeypatch.setattr("httpx.AsyncClient", FakeAsyncClient)
             await sso.process_login("code", request)
 
     async def test_context_manager_behavior(self, Provider: type[SSOBase]):
