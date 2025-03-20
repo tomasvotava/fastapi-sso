@@ -13,7 +13,7 @@ app = FastAPI()
 sso = LinkedInSSO(
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
-    redirect_uri="http://localhost:5000/auth/callback",
+    redirect_uri="http://localhost:5050/auth/callback",
     allow_insecure_http=True,
 )
 
@@ -34,4 +34,4 @@ async def auth_callback(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app="examples.linkedin:app", host="127.0.0.1", port=5000)
+    uvicorn.run(app="examples.linkedin:app", host="127.0.0.1", port=5050)

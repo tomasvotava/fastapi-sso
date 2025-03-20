@@ -7,9 +7,10 @@ import os
 import sys
 import warnings
 from types import TracebackType
-from typing import Any, ClassVar, Dict, List, Literal, Optional, Type, TypedDict, TypeVar, Union, overload
+from typing import Any, ClassVar, Literal, Optional, TypedDict, TypeVar, Union, overload
 
 import httpx
+import jwt
 import pydantic
 from oauthlib.oauth2 import WebApplicationClient
 from starlette.exceptions import HTTPException
@@ -31,6 +32,10 @@ logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 P = ParamSpec("P")
+
+
+def _decode_id_token(id_token: str, verify: bool = False) -> dict:
+    return jwt.decode(id_token, options={"verify_signature": verify})
 
 
 class DiscoveryDocument(TypedDict):
@@ -95,10 +100,11 @@ class SSOBase:
     client_id: str = NotImplemented
     client_secret: str = NotImplemented
     redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = NotImplemented
-    scope: ClassVar[List[str]] = []
-    additional_headers: ClassVar[Optional[Dict[str, Any]]] = None
+    scope: ClassVar[list[str]] = []
+    additional_headers: ClassVar[Optional[dict[str, Any]]] = None
     uses_pkce: bool = False
     requires_state: bool = False
+    use_id_token_for_user_info: ClassVar[bool] = False
 
     _pkce_challenge_length: int = 96
 
@@ -109,7 +115,7 @@ class SSOBase:
         redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = None,
         allow_insecure_http: bool = False,
         use_state: bool = False,
-        scope: Optional[List[str]] = None,
+        scope: Optional[list[str]] = None,
     ):
         """Base class (mixin) for all SSO providers."""
         self.client_id: str = client_id
@@ -224,6 +230,18 @@ class SSOBase:
         """
         raise NotImplementedError(f"Provider {self.provider} not supported")
 
+    async def openid_from_token(self, id_token: dict, session: Optional[httpx.AsyncClient] = None) -> OpenID:
+        """Converts an ID token from the provider's token endpoint to an OpenID object.
+
+        Args:
+            id_token (dict): The id token data retrieved from the token endpoint.
+            session: (Optional[httpx.AsyncClient]): The HTTPX AsyncClient session.
+
+        Returns:
+            OpenID: The user information in a standardized format.
+        """
+        raise NotImplementedError(f"Provider {self.provider} not supported")
+
     async def get_discovery_document(self) -> DiscoveryDocument:
         """Retrieves the discovery document containing useful URLs.
 
@@ -257,14 +275,14 @@ class SSOBase:
         self,
         *,
         redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = None,
-        params: Optional[Dict[str, Any]] = None,
+        params: Optional[dict[str, Any]] = None,
         state: Optional[str] = None,
     ) -> str:
         """Generates and returns the prepared login URL.
 
         Args:
             redirect_uri (Optional[str]): Overrides the `redirect_uri` specified on this instance.
-            params (Optional[Dict[str, Any]]): Additional query parameters to add to the login request.
+            params (Optional[dict[str, Any]]): Additional query parameters to add to the login request.
             state (Optional[str]): The state parameter for the OAuth 2.0 authorization request.
 
         Raises:
@@ -304,14 +322,14 @@ class SSOBase:
         self,
         *,
         redirect_uri: Optional[str] = None,
-        params: Optional[Dict[str, Any]] = None,
+        params: Optional[dict[str, Any]] = None,
         state: Optional[str] = None,
     ) -> RedirectResponse:
         """Constructs and returns a redirect response to the login page of OAuth SSO provider.
 
         Args:
             redirect_uri (Optional[str]): Overrides the `redirect_uri` specified on this instance.
-            params (Optional[Dict[str, Any]]): Additional query parameters to add to the login request.
+            params (Optional[dict[str, Any]]): Additional query parameters to add to the login request.
             state (Optional[str]): The state parameter for the OAuth 2.0 authorization request.
 
         Returns:
@@ -330,8 +348,8 @@ class SSOBase:
         self,
         request: Request,
         *,
-        params: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, Any]] = None,
+        params: Optional[dict[str, Any]] = None,
+        headers: Optional[dict[str, Any]] = None,
         redirect_uri: Optional[str] = None,
         convert_response: Literal[True] = True,
     ) -> Optional[OpenID]: ...
@@ -341,28 +359,28 @@ class SSOBase:
         self,
         request: Request,
         *,
-        params: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, Any]] = None,
+        params: Optional[dict[str, Any]] = None,
+        headers: Optional[dict[str, Any]] = None,
         redirect_uri: Optional[str] = None,
         convert_response: Literal[False],
-    ) -> Optional[Dict[str, Any]]: ...
+    ) -> Optional[dict[str, Any]]: ...
 
     @requires_async_context
     async def verify_and_process(
         self,
         request: Request,
         *,
-        params: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, Any]] = None,
+        params: Optional[dict[str, Any]] = None,
+        headers: Optional[dict[str, Any]] = None,
         redirect_uri: Optional[str] = None,
         convert_response: Union[Literal[True], Literal[False]] = True,
-    ) -> Union[Optional[OpenID], Optional[Dict[str, Any]]]:
+    ) -> Union[Optional[OpenID], Optional[dict[str, Any]]]:
         """Processes the login given a FastAPI (Starlette) Request object. This should be used for the /callback path.
 
         Args:
             request (Request): FastAPI or Starlette request object.
-            params (Optional[Dict[str, Any]]): Additional query parameters to pass to the provider.
-            headers (Optional[Dict[str, Any]]): Additional headers to pass to the provider.
+            params (Optional[dict[str, Any]]): Additional query parameters to pass to the provider.
+            headers (Optional[dict[str, Any]]): Additional headers to pass to the provider.
             redirect_uri (Optional[str]): Overrides the `redirect_uri` specified on this instance.
             convert_response (bool): If True, userinfo response is converted to OpenID object.
 
@@ -371,7 +389,7 @@ class SSOBase:
 
         Returns:
             Optional[OpenID]: User information as OpenID instance (if convert_response == True)
-            Optional[Dict[str, Any]]: The original JSON response from the API.
+            Optional[dict[str, Any]]: The original JSON response from the API.
         """
         headers = headers or {}
         code = request.query_params.get("code")
@@ -433,7 +451,7 @@ class SSOBase:
 
     async def __aexit__(
         self,
-        _exc_type: Optional[Type[BaseException]],
+        _exc_type: Optional[type[BaseException]],
         _exc_val: Optional[BaseException],
         _exc_tb: Optional[TracebackType],
     ) -> None:
@@ -442,14 +460,14 @@ class SSOBase:
 
     def __exit__(
         self,
-        _exc_type: Optional[Type[BaseException]],
+        _exc_type: Optional[type[BaseException]],
         _exc_val: Optional[BaseException],
         _exc_tb: Optional[TracebackType],
     ) -> None:
         return None
 
     @property
-    def _extra_query_params(self) -> Dict:
+    def _extra_query_params(self) -> dict:
         return {}
 
     @overload
@@ -458,8 +476,8 @@ class SSOBase:
         code: str,
         request: Request,
         *,
-        params: Optional[Dict[str, Any]] = None,
-        additional_headers: Optional[Dict[str, Any]] = None,
+        params: Optional[dict[str, Any]] = None,
+        additional_headers: Optional[dict[str, Any]] = None,
         redirect_uri: Optional[str] = None,
         pkce_code_verifier: Optional[str] = None,
         convert_response: Literal[True] = True,
@@ -471,12 +489,12 @@ class SSOBase:
         code: str,
         request: Request,
         *,
-        params: Optional[Dict[str, Any]] = None,
-        additional_headers: Optional[Dict[str, Any]] = None,
+        params: Optional[dict[str, Any]] = None,
+        additional_headers: Optional[dict[str, Any]] = None,
         redirect_uri: Optional[str] = None,
         pkce_code_verifier: Optional[str] = None,
         convert_response: Literal[False],
-    ) -> Optional[Dict[str, Any]]: ...
+    ) -> Optional[dict[str, Any]]: ...
 
     @requires_async_context
     async def process_login(
@@ -484,20 +502,20 @@ class SSOBase:
         code: str,
         request: Request,
         *,
-        params: Optional[Dict[str, Any]] = None,
-        additional_headers: Optional[Dict[str, Any]] = None,
+        params: Optional[dict[str, Any]] = None,
+        additional_headers: Optional[dict[str, Any]] = None,
         redirect_uri: Optional[str] = None,
         pkce_code_verifier: Optional[str] = None,
         convert_response: Union[Literal[True], Literal[False]] = True,
-    ) -> Union[Optional[OpenID], Optional[Dict[str, Any]]]:
+    ) -> Union[Optional[OpenID], Optional[dict[str, Any]]]:
         """Processes login from the callback endpoint to verify the user and request user info endpoint.
         It's a lower-level method, typically, you should use `verify_and_process` instead.
 
         Args:
             code (str): The authorization code.
             request (Request): FastAPI or Starlette request object.
-            params (Optional[Dict[str, Any]]): Additional query parameters to pass to the provider.
-            additional_headers (Optional[Dict[str, Any]]): Additional headers to be added to all requests.
+            params (Optional[dict[str, Any]]): Additional query parameters to pass to the provider.
+            additional_headers (Optional[dict[str, Any]]): Additional headers to be added to all requests.
             redirect_uri (Optional[str]): Overrides the `redirect_uri` specified on this instance.
             pkce_code_verifier (Optional[str]): A PKCE code verifier sent to the server to verify the login request.
             convert_response (bool): If True, userinfo response is converted to OpenID object.
@@ -507,7 +525,7 @@ class SSOBase:
 
         Returns:
             Optional[OpenID]: User information in OpenID format if the login was successful (convert_response == True).
-            Optional[Dict[str, Any]]: Original userinfo API endpoint response.
+            Optional[dict[str, Any]]: Original userinfo API endpoint response.
         """
         if self._oauth_client is not None:  # pragma: no cover
             self._oauth_client = None
@@ -565,5 +583,9 @@ class SSOBase:
             response = await session.get(uri)
             content = response.json()
             if convert_response:
+                if self.use_id_token_for_user_info:
+                    if not self._id_token:
+                        raise SSOLoginError(401, f"Provider {self.provider!r} did not return id token.")
+                    return await self.openid_from_token(_decode_id_token(self._id_token), session)
                 return await self.openid_from_response(content, session)
             return content

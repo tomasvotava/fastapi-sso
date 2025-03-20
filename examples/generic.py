@@ -1,6 +1,6 @@
 """This is an example usage of fastapi-sso."""
 
-from typing import Any, Dict, Union
+from typing import Any, Union
 from httpx import AsyncClient
 import uvicorn
 from fastapi import FastAPI, HTTPException
@@ -23,7 +23,7 @@ app = FastAPI()
 # and then python examples/generic.py
 
 
-def convert_openid(response: Dict[str, Any], _client: Union[AsyncClient, None]) -> OpenID:
+def convert_openid(response: dict[str, Any], _client: Union[AsyncClient, None]) -> OpenID:
     """Convert user information returned by OIDC"""
     print(response)
     return OpenID(display_name=response["sub"])

@@ -1,13 +1,13 @@
 # type: ignore
 
-from typing import Type
 from urllib.parse import quote_plus
 
+import jwt
 import pytest
 from fastapi.responses import RedirectResponse
 from utils import AnythingDict, Request, Response, make_fake_async_client
 
-from fastapi_sso.sso.base import OpenID, SecurityWarning, SSOBase
+from fastapi_sso.sso.base import OpenID, SecurityWarning, SSOBase, SSOLoginError
 from fastapi_sso.sso.bitbucket import BitbucketSSO
 from fastapi_sso.sso.discord import DiscordSSO
 from fastapi_sso.sso.facebook import FacebookSSO
@@ -26,6 +26,8 @@ from fastapi_sso.sso.seznam import SeznamSSO
 from fastapi_sso.sso.spotify import SpotifySSO
 from fastapi_sso.sso.twitter import TwitterSSO
 from fastapi_sso.sso.yandex import YandexSSO
+
+fake_id_token = jwt.encode({"email": "user@idtoken.com"}, key="test", algorithm="HS256")
 
 GenericProvider = create_provider(
     name="generic",
@@ -74,7 +76,7 @@ def mock_google_dicscovery_document(monkeypatch: pytest.MonkeyPatch):
 
 class TestProviders:
     @pytest.mark.parametrize("item", ("authorization_endpoint", "token_endpoint", "userinfo_endpoint"))
-    async def test_discovery_document(self, Provider: Type[SSOBase], item: str):
+    async def test_discovery_document(self, Provider: type[SSOBase], item: str):
         sso = Provider("client_id", "client_secret")
         async with sso:
             document = await sso.get_discovery_document()
@@ -83,7 +85,7 @@ class TestProviders:
                 await getattr(sso, item) == document[item]
             ), f"Discovery document for provider {sso.provider} must have {item}"
 
-    async def test_login_url_request_time(self, Provider: Type[SSOBase]):
+    async def test_login_url_request_time(self, Provider: type[SSOBase]):
         sso = Provider("client_id", "client_secret")
         async with sso:
             url = await sso.get_login_url(redirect_uri="http://localhost")
@@ -95,7 +97,7 @@ class TestProviders:
             with pytest.raises(ValueError):
                 await sso.get_login_url()
 
-    async def test_login_url_construction_time(self, Provider: Type[SSOBase]):
+    async def test_login_url_construction_time(self, Provider: type[SSOBase]):
         sso = Provider("client_id", "client_secret", redirect_uri="http://localhost")
 
         async with sso:
@@ -114,50 +116,71 @@ class TestProviders:
             assert redirect.headers["location"] == url, "Login redirect must have the same URL as login URL"
             return url, redirect
 
-    async def test_login_url_additional_params(self, Provider: Type[SSOBase]):
+    async def test_login_url_additional_params(self, Provider: type[SSOBase]):
         sso = Provider("client_id", "client_secret", redirect_uri="http://localhost")
 
         url, _ = await self.assert_get_login_url_and_redirect(sso, params={"access_type": "offline", "param": "value"})
         assert "access_type=offline" in url, "Login URL must have additional query parameters"
         assert "param=value" in url, "Login URL must have additional query parameters"
 
-    async def test_login_url_state_at_request_time(self, Provider: Type[SSOBase]):
+    async def test_login_url_state_at_request_time(self, Provider: type[SSOBase]):
         sso = Provider("client_id", "client_secret")
         url, _ = await self.assert_get_login_url_and_redirect(sso, redirect_uri="http://localhost", state="unique")
         assert "state=unique" in url, "Login URL must have state query parameter"
 
-    async def test_login_url_scope_default(self, Provider: Type[SSOBase]):
+    async def test_login_url_scope_default(self, Provider: type[SSOBase]):
         sso = Provider("client_id", "client_secret")
         url, _ = await self.assert_get_login_url_and_redirect(sso, redirect_uri="http://localhost")
         assert quote_plus(" ".join(sso._scope)) in url, "Login URL must have all scopes"
 
-    async def test_login_url_scope_additional(self, Provider: Type[SSOBase]):
+    async def test_login_url_scope_additional(self, Provider: type[SSOBase]):
         sso = Provider("client_id", "client_secret", scope=["openid", "additional"])
         url, _ = await self.assert_get_login_url_and_redirect(sso, redirect_uri="http://localhost")
         assert quote_plus(" ".join(sso._scope)) in url, "Login URL must have all scopes"
 
-    async def test_process_login(self, Provider: Type[SSOBase], monkeypatch: pytest.MonkeyPatch):
+    async def test_process_login(self, Provider: type[SSOBase], monkeypatch: pytest.MonkeyPatch):
         sso = Provider("client_id", "client_secret")
+        get_response = Response(
+            url="https://localhost",
+            json_content=AnythingDict(
+                {"token_endpoint": "https://localhost", "userinfo_endpoint": "https://localhost"}
+            ),
+        )
+
         FakeAsyncClient = make_fake_async_client(
             returns_post=Response(url="https://localhost", json_content={"access_token": "token"}),
-            returns_get=Response(
-                url="https://localhost",
-                json_content=AnythingDict(
-                    {"token_endpoint": "https://localhost", "userinfo_endpoint": "https://localhost"}
-                ),
-            ),
+            returns_get=get_response,
         )
 
         async def fake_openid_from_response(_, __):
             return OpenID(id="test", email="email@example.com", display_name="Test")
 
+        async def fake_openid_from_id_token(_, __):
+            return OpenID(id="idtoken", email="user@idtoken.com", display_name="ID Token")
+
         async with sso:
             monkeypatch.setattr("httpx.AsyncClient", FakeAsyncClient)
             monkeypatch.setattr(sso, "openid_from_response", fake_openid_from_response)
+            monkeypatch.setattr(sso, "openid_from_token", fake_openid_from_id_token)
             request = Request(url="https://localhost?code=code&state=unique")
+            if sso.use_id_token_for_user_info:
+                with pytest.raises(SSOLoginError, match="Provider .* did not return id token"):
+                    await sso.process_login("code", request)
+            else:
+                await sso.process_login("code", request)
+
+        if sso.use_id_token_for_user_info:
+            monkeypatch.setattr("jwt.decode", lambda _, options: {})
+            FakeAsyncClient = make_fake_async_client(
+                returns_post=Response(
+                    url="https://localhost", json_content={"access_token": "token", "id_token": "fake id token"}
+                ),
+                returns_get=get_response,
+            )
+            monkeypatch.setattr("httpx.AsyncClient", FakeAsyncClient)
             await sso.process_login("code", request)
 
-    async def test_context_manager_behavior(self, Provider: Type[SSOBase]):
+    async def test_context_manager_behavior(self, Provider: type[SSOBase]):
         sso = Provider("client_id", "client_secret")
         assert sso._oauth_client is None, "OAuth client must be after initialization"
         assert sso._refresh_token is None, "Refresh token must be None after initialization"
