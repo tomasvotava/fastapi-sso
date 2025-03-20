@@ -23,15 +23,17 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install pipx
+        run: python -m pip install pipx && python -m pipx ensurepath
       - name: Install poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python -
+        run: pipx install poetry && poetry --version
       - name: Install dependencies
-        run: ~/.local/bin/poetry install
+        run: |
+          POETRY_VIRTUALENVS_CREATE=false poetry install
       - name: pytest
-        run: ~/.local/bin/poetry run poe test --junitxml=pytest-results-${{ matrix.python-version }}.xml
+        run: poetry run poe test --junitxml=pytest-results-${{ matrix.python-version }}.xml
       - name: coverage
-        run: ~/.local/bin/poetry run poe coverage
+        run: poetry run poe coverage
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
