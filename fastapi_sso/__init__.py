@@ -22,12 +22,10 @@ from .sso.spotify import SpotifySSO
 from .sso.twitter import TwitterSSO
 
 __all__ = [
-    "OpenID",
-    "SSOBase",
-    "SSOLoginError",
+    "BitbucketSSO",
+    "DiscordSSO",
     "FacebookSSO",
     "FitbitSSO",
-    "create_provider",
     "GithubSSO",
     "GitlabSSO",
     "GoogleSSO",
@@ -37,8 +35,10 @@ __all__ = [
     "MicrosoftSSO",
     "NaverSSO",
     "NotionSSO",
+    "OpenID",
+    "SSOBase",
+    "SSOLoginError",
     "SpotifySSO",
     "TwitterSSO",
-    "BitbucketSSO",
-    "DiscordSSO",
+    "create_provider",
 ]
