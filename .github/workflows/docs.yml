@@ -23,13 +23,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.12
+      - name: Install pipx
+        run: python -m pip install pipx && python -m pipx ensurepath
       - name: Install poetry
-        run: curl -sSL https://install.python-poetry.org | python -
+        run: pipx install poetry && poetry --version
       - name: Install dependencies
-        run: ~/.local/bin/poetry install
+        run: poetry install
       - name: Build docs
-        run: ~/.local/bin/poetry run poe docs
+        run: poetry run poe docs
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v3
