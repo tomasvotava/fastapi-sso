@@ -3,7 +3,7 @@ with close to no code.
 """
 
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 def create_provider(
     *,
     name: str = "generic",
-    default_scope: Optional[List[str]] = None,
+    default_scope: Optional[list[str]] = None,
     discovery_document: Union[DiscoveryDocument, Callable[[SSOBase], DiscoveryDocument]],
-    response_convertor: Optional[Callable[[Dict[str, Any], Optional["httpx.AsyncClient"]], OpenID]] = None
-) -> Type[SSOBase]:
+    response_convertor: Optional[Callable[[dict[str, Any], Optional["httpx.AsyncClient"]], OpenID]] = None
+) -> type[SSOBase]:
     """A factory to create a generic OAuth client usable with almost any OAuth provider.
     Returns a class.
 

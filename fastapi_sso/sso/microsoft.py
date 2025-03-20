@@ -1,6 +1,6 @@
 """Microsoft SSO Oauth Helper class."""
 
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
 import pydantic
 
@@ -25,7 +25,7 @@ class MicrosoftSSO(SSOBase):
         redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = None,
         allow_insecure_http: bool = False,
         use_state: bool = False,  # TODO: Remove use_state argument
-        scope: Optional[List[str]] = None,
+        scope: Optional[list[str]] = None,
         tenant: Optional[str] = None,
     ):
         super().__init__(

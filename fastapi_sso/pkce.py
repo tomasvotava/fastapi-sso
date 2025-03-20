@@ -3,7 +3,6 @@
 import base64
 import hashlib
 import os
-from typing import Tuple
 
 
 def get_code_verifier(length: int = 96) -> str:
@@ -13,7 +12,7 @@ def get_code_verifier(length: int = 96) -> str:
     return base64.urlsafe_b64encode(os.urandom(bytes_length)).decode("utf-8").replace("=", "")[:length]
 
 
-def get_pkce_challenge_pair(verifier_length: int = 96) -> Tuple[str, str]:
+def get_pkce_challenge_pair(verifier_length: int = 96) -> tuple[str, str]:
     """Get tuple of (verifier, challenge) for PKCE challenge."""
     code_verifier = get_code_verifier(verifier_length)
     code_challenge = (

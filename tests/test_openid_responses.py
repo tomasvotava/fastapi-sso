@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple, Type
+from typing import Any
 
 import pytest
 
@@ -17,7 +17,7 @@ from fastapi_sso.sso.spotify import SpotifySSO
 from fastapi_sso.sso.twitter import TwitterSSO
 from fastapi_sso.sso.yandex import YandexSSO
 
-sso_test_cases: Tuple[Tuple[Type[SSOBase], Dict[str, Any], OpenID], ...] = (
+sso_test_cases: tuple[tuple[type[SSOBase], dict[str, Any], OpenID], ...] = (
     (
         TwitterSSO,
         {"data": {"id": "test", "username": "TestUser1234", "name": "Test User"}},
@@ -243,7 +243,7 @@ sso_test_cases: Tuple[Tuple[Type[SSOBase], Dict[str, Any], OpenID], ...] = (
 
 @pytest.mark.parametrize(("ProviderClass", "response", "openid"), sso_test_cases)
 async def test_provider_openid_by_response(
-    ProviderClass: Type[SSOBase], response: Dict[str, Any], openid: OpenID
+    ProviderClass: type[SSOBase], response: dict[str, Any], openid: OpenID
 ) -> None:
     sso = ProviderClass("client_id", "client_secret")
     async with sso:

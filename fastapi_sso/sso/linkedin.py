@@ -1,6 +1,6 @@
 """LinkedIn SSO Oauth Helper class."""
 
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -14,9 +14,10 @@ class LinkedInSSO(SSOBase):
     provider = "linkedin"
     scope: ClassVar = ["openid", "profile", "email"]
     additional_headers: ClassVar = {"accept": "application/json"}
+    use_id_token_for_user_info: ClassVar = True
 
     @property
-    def _extra_query_params(self) -> Dict:
+    def _extra_query_params(self) -> dict:
         return {"client_secret": self.client_secret}
 
     async def get_discovery_document(self) -> DiscoveryDocument:
@@ -25,6 +26,9 @@ class LinkedInSSO(SSOBase):
             "token_endpoint": "https://www.linkedin.com/oauth/v2/accessToken",
             "userinfo_endpoint": "https://api.linkedin.com/v2/userinfo",
         }
+
+    async def openid_from_token(self, id_token: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
+        return await self.openid_from_response(id_token, session)
 
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         return OpenID(
