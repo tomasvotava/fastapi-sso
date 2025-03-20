@@ -31,7 +31,9 @@ async def auth_init():
 async def auth_callback(request: Request):
     """Verify login"""
     with sso:
-        user = await sso.verify_and_process(request, params={"client_secret": CLIENT_SECRET})  # <- "client_secret" parameter is needed!
+        user = await sso.verify_and_process(
+            request, params={"client_secret": CLIENT_SECRET}
+        )  # <- "client_secret" parameter is needed!
     return user
 
 
