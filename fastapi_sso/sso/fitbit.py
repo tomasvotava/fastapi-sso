@@ -1,6 +1,6 @@
 """Fitbit OAuth Login Helper."""
 
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, SSOLoginError
 
@@ -14,7 +14,7 @@ class FitbitSSO(SSOBase):
     provider = "fitbit"
     scope: ClassVar = ["profile"]
 
-    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
+    async def openid_from_response(self, response: dict, session: "httpx.AsyncClient" | None = None) -> OpenID:
         """Return OpenID from user information provided by Google."""
         info = response.get("user")
         if not info:

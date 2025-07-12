@@ -1,6 +1,6 @@
 """Twitter (X) SSO Oauth Helper class."""
 
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar, Any
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -23,7 +23,7 @@ class TwitterSSO(SSOBase):
             "userinfo_endpoint": "https://api.twitter.com/2/users/me",
         }
 
-    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
+    async def openid_from_response(self, response: dict[str, Any], session: "httpx.AsyncClient" | None = None) -> OpenID:
         first_name, *last_name_parts = response["data"].get("name", "").split(" ")
         last_name = " ".join(last_name_parts) if last_name_parts else None
         return OpenID(

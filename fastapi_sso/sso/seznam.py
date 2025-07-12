@@ -1,6 +1,6 @@
 """Seznam SSO Login Helper."""
 
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar, Any
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -26,7 +26,7 @@ class SeznamSSO(SSOBase):
             "userinfo_endpoint": f"{self.base_url}/user",
         }
 
-    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
+    async def openid_from_response(self, response: dict[str, Any], session: "httpx.AsyncClient" | None = None) -> OpenID:
         """Return OpenID from user information provided by Seznam."""
         return OpenID(
             email=response.get("email"),

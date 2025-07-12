@@ -1,6 +1,6 @@
 """Discord SSO Oauth Helper class"""
 
-from typing import TYPE_CHECKING, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, ClassVar
 
 import pydantic
 
@@ -20,9 +20,9 @@ class DiscordSSO(SSOBase):
         self,
         client_id: str,
         client_secret: str,
-        redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = None,
+        redirect_uri: pydantic.AnyHttpUrl |str | None = None,
         allow_insecure_http: bool = False,
-        scope: Optional[list[str]] = None,
+        scope: list[str] | None= None,
     ):
         super().__init__(
             client_id=client_id,
@@ -39,7 +39,7 @@ class DiscordSSO(SSOBase):
             "userinfo_endpoint": "https://discord.com/api/users/@me",
         }
 
-    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
+    async def openid_from_response(self, response: dict, session: "httpx.AsyncClient" | None = None) -> OpenID:
         user_id = response.get("id")
         avatar = response.get("avatar")
         picture = None

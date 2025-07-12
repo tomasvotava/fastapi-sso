@@ -3,7 +3,7 @@ with close to no code.
 """
 
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 def create_provider(
     *,
     name: str = "generic",
-    default_scope: Optional[list[str]] = None,
-    discovery_document: Union[DiscoveryDocument, Callable[[SSOBase], DiscoveryDocument]],
-    response_convertor: Optional[Callable[[dict[str, Any], Optional["httpx.AsyncClient"]], OpenID]] = None
+    default_scope: list[str] | None = None,
+    discovery_document: DiscoveryDocument | Callable[[SSOBase], DiscoveryDocument],
+    response_convertor: Callable[[dict[str, Any], "httpx.AsyncClient" | None], OpenID] | None = None
 ) -> type[SSOBase]:
     """A factory to create a generic OAuth client usable with almost any OAuth provider.
     Returns a class.
@@ -63,7 +63,7 @@ def create_provider(
                 return discovery_document(self)
             return discovery_document
 
-        async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
+        async def openid_from_response(self, response: dict[str, Any], session: "httpx.AsyncClient" | None = None) -> OpenID:
             if not response_convertor:
                 logger.warning("No response convertor was provided, returned OpenID will always be empty")
                 return OpenID(

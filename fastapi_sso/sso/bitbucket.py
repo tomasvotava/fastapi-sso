@@ -1,6 +1,6 @@
 """BitBucket SSO Oauth Helper class"""
 
-from typing import TYPE_CHECKING, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Any
 
 import pydantic
 
@@ -21,9 +21,9 @@ class BitbucketSSO(SSOBase):
         self,
         client_id: str,
         client_secret: str,
-        redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = None,
+        redirect_uri: pydantic.AnyHttpUrl | str | None = None,
         allow_insecure_http: bool = False,
-        scope: Optional[list[str]] = None,
+        scope: list[str] | None = None,
     ):
         super().__init__(
             client_id=client_id,
@@ -33,7 +33,7 @@ class BitbucketSSO(SSOBase):
             scope=scope,
         )
 
-    async def get_useremail(self, session: Optional["httpx.AsyncClient"] = None) -> dict:
+    async def get_useremail(self, session: "httpx.AsyncClient" | None = None) -> dict[str, Any]:
         """Get user email"""
         if session is None:
             raise ValueError("Session is required to make HTTP requests")
@@ -48,7 +48,7 @@ class BitbucketSSO(SSOBase):
             "userinfo_endpoint": f"https://api.bitbucket.org/{self.version}/user",
         }
 
-    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
+    async def openid_from_response(self, response: dict, session: "httpx.AsyncClient" | None = None) -> OpenID:
         email = await self.get_useremail(session=session)
         return OpenID(
             email=email["values"][0]["email"],

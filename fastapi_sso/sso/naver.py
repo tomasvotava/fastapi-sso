@@ -1,6 +1,6 @@
 """Naver SSO Oauth Helper class."""
 
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar, Any
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -22,7 +22,7 @@ class NaverSSO(SSOBase):
             "userinfo_endpoint": "https://openapi.naver.com/v1/nid/me",
         }
 
-    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
+    async def openid_from_response(self, response: dict[str, Any], session: "httpx.AsyncClient" | None = None) -> OpenID:
         return OpenID(
             id=response["response"]["id"],
             email=response["response"].get("email"),

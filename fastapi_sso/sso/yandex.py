@@ -1,6 +1,6 @@
 """Yandex SSO Login Helper."""
 
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar, Any
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -23,7 +23,7 @@ class YandexSSO(SSOBase):
             "userinfo_endpoint": "https://login.yandex.ru/info",
         }
 
-    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
+    async def openid_from_response(self, response: dict[str, Any], session: "httpx.AsyncClient" | None = None) -> OpenID:
         """Converts Yandex user info response to OpenID object."""
         picture = None
 

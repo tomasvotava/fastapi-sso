@@ -1,6 +1,6 @@
 """Google SSO Login Helper."""
 
-from typing import ClassVar, Optional
+from typing import ClassVar, Any
 
 import httpx
 
@@ -14,7 +14,7 @@ class GoogleSSO(SSOBase):
     provider = "google"
     scope: ClassVar = ["openid", "email", "profile"]
 
-    async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
+    async def openid_from_response(self, response: dict[str, Any], session: "httpx.AsyncClient" | None = None) -> OpenID:
         """Return OpenID from user information provided by Google."""
         if response.get("email_verified"):
             return OpenID(
