@@ -71,7 +71,7 @@ class OpenID(pydantic.BaseModel):
     display_name: Optional[str] = None
     picture: Optional[str] = None
     provider: Optional[str] = None
-
+    roles: Optional[list[str]] = None
 
 class SecurityWarning(UserWarning):
     """Raised when insecure usage is detected"""
