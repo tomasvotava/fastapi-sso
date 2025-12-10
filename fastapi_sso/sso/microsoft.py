@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
 import pydantic
 
-from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, _decode_id_token
 
 if TYPE_CHECKING:
     import httpx  # pragma: no cover
@@ -45,7 +45,13 @@ class MicrosoftSSO(SSOBase):
             "userinfo_endpoint": f"https://graph.microsoft.com/{self.version}/me",
         }
 
+    async def get_user_roles(self) -> list[str]:
+        """Get user roles from Microsoft ID token."""
+        token_info = _decode_id_token(self._id_token)
+        return token_info.get("roles")
+
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
+        token_info = _decode_id_token(self._id_token)
         return OpenID(
             email=response.get("mail"),
             display_name=response.get("displayName"),
@@ -53,4 +59,5 @@ class MicrosoftSSO(SSOBase):
             id=response.get("id"),
             first_name=response.get("givenName"),
             last_name=response.get("surname"),
+            roles=token_info.get("roles"),
         )
