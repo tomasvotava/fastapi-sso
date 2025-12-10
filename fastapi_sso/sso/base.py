@@ -341,6 +341,8 @@ class SSOBase:
         response = RedirectResponse(login_uri, 303)
         if self.uses_pkce:
             response.set_cookie("pkce_code_verifier", str(self._pkce_code_verifier))
+        if state is not None:
+            response.set_cookie("sso_state", state)
         return response
 
     @overload
@@ -402,6 +404,14 @@ class SSOBase:
             )
             raise SSOLoginError(400, "'code' parameter was not found in callback request")
         self._state = request.query_params.get("state")
+        if self._state is None and self.requires_state:
+            raise SSOLoginError(400, "'state' parameter was not found in callback request")
+        if self._state is not None:
+            sso_state = request.cookies.get("sso_state")
+            if sso_state is None and self.requires_state:
+                raise SSOLoginError(401, "State cookie not found")
+            if sso_state is not None and sso_state != self._state:
+                raise SSOLoginError(401, "Invalid state")
         pkce_code_verifier: Optional[str] = None
         if self.uses_pkce:
             pkce_code_verifier = request.cookies.get("pkce_code_verifier")
