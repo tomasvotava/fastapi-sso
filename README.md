@@ -46,6 +46,16 @@ by [@parikls](https://github.com/parikls).
 This issue was reported in [#186](https://github.com/tomasvotava/fastapi-sso/issues/186) and has been resolved
 in version `0.16.0`.
 
+### Version `0.19.0` Update: OAuth `state` Validation Fix
+
+A critical OAuth login CSRF vulnerability caused by missing `state` validation was
+reported by [@davidbors-snyk](https://github.com/davidbors-snyk) (Snyk Security Labs)
+in [#266](https://github.com/tomasvotava/fastapi-sso/issues/266) and has been resolved
+in version `0.19.0`.
+
+Starting with `fastapi-sso==1.0.0`, OAuth `state` will be backed by a pluggable server-side store
+(in-memory by default, with support for external stores such as `Redis`).
+
 **Details of the Fix:**
 
 The bug was mitigated by introducing an async lock mechanism that ensures only one user can attempt the login
