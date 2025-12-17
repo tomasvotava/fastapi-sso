@@ -38,14 +38,6 @@ Quick links for the eager ones:
 
 ## Security Notice
 
-### Version `0.16.0` Update: Race Condition Bug Fix & Context Manager Change
-
-A race condition bug in the login flow that could, in rare cases, allow one user
-to assume the identity of another due to concurrent login requests was recently discovered
-by [@parikls](https://github.com/parikls).
-This issue was reported in [#186](https://github.com/tomasvotava/fastapi-sso/issues/186) and has been resolved
-in version `0.16.0`.
-
 ### Version `0.19.0` Update: OAuth `state` Validation Fix
 
 A critical OAuth login CSRF vulnerability caused by missing `state` validation was
@@ -55,6 +47,14 @@ in version `0.19.0`.
 
 Starting with `fastapi-sso==1.0.0`, OAuth `state` will be backed by a pluggable server-side store
 (in-memory by default, with support for external stores such as `Redis`).
+
+### Version `0.16.0` Update: Race Condition Bug Fix & Context Manager Change
+
+A race condition bug in the login flow that could, in rare cases, allow one user
+to assume the identity of another due to concurrent login requests was recently discovered
+by [@parikls](https://github.com/parikls).
+This issue was reported in [#186](https://github.com/tomasvotava/fastapi-sso/issues/186) and has been resolved
+in version `0.16.0`.
 
 **Details of the Fix:**
 
