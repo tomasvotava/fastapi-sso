@@ -18,6 +18,7 @@ from .sso.linkedin import LinkedInSSO
 from .sso.microsoft import MicrosoftSSO
 from .sso.naver import NaverSSO
 from .sso.notion import NotionSSO
+from .sso.soundcloud import SoundcloudSSO
 from .sso.spotify import SpotifySSO
 from .sso.twitter import TwitterSSO
 
@@ -38,6 +39,7 @@ __all__ = [
     "OpenID",
     "SSOBase",
     "SSOLoginError",
+    "SoundcloudSSO",
     "SpotifySSO",
     "TwitterSSO",
     "create_provider",

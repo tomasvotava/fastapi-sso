@@ -23,6 +23,7 @@ from fastapi_sso.sso.microsoft import MicrosoftSSO
 from fastapi_sso.sso.naver import NaverSSO
 from fastapi_sso.sso.notion import NotionSSO
 from fastapi_sso.sso.seznam import SeznamSSO
+from fastapi_sso.sso.soundcloud import SoundcloudSSO
 from fastapi_sso.sso.spotify import SpotifySSO
 from fastapi_sso.sso.twitter import TwitterSSO
 from fastapi_sso.sso.yandex import YandexSSO
@@ -49,6 +50,7 @@ tested_providers = (
     LineSSO,
     MicrosoftSSO,
     NaverSSO,
+    SoundcloudSSO,
     SpotifySSO,
     GenericProvider,
     NotionSSO,
