@@ -14,6 +14,10 @@ class SoundcloudSSO(SSOBase):
     provider = "soundcloud"
     scope: ClassVar = ["openid"]
 
+    @property
+    def _extra_query_params(self) -> dict:
+        return {"client_secret": self.client_secret}
+
     async def get_discovery_document(self) -> DiscoveryDocument:
         """Get document containing handy urls."""
         return {

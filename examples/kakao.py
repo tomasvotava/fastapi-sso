@@ -29,7 +29,7 @@ async def auth_init():
 async def auth_callback(request: Request):
     """Verify login"""
     async with sso:
-        return await sso.verify_and_process(request, params={"client_secret": CLIENT_SECRET})
+        return await sso.verify_and_process(request)
 
 
 if __name__ == "__main__":

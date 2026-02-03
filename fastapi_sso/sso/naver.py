@@ -15,6 +15,10 @@ class NaverSSO(SSOBase):
     scope: ClassVar[list[str]] = []
     additional_headers: ClassVar = {"accept": "application/json"}
 
+    @property
+    def _extra_query_params(self) -> dict:
+        return {"client_secret": self.client_secret}
+
     async def get_discovery_document(self) -> DiscoveryDocument:
         return {
             "authorization_endpoint": "https://nid.naver.com/oauth2.0/authorize",

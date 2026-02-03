@@ -18,6 +18,10 @@ class SeznamSSO(SSOBase):
     base_url = "https://login.szn.cz/api/v1"
     scope: ClassVar = ["identity", "avatar"]  # + ["contact-phone", "adulthood", "birthday", "gender"]
 
+    @property
+    def _extra_query_params(self) -> dict:
+        return {"client_secret": self.client_secret}
+
     async def get_discovery_document(self) -> DiscoveryDocument:
         """Get document containing handy urls."""
         return {
