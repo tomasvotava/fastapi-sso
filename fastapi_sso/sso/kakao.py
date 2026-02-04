@@ -15,6 +15,10 @@ class KakaoSSO(SSOBase):
     scop: ClassVar = ["openid"]
     version = "v2"
 
+    @property
+    def _extra_query_params(self) -> dict:
+        return {"client_secret": self.client_secret}
+
     async def get_discovery_document(self) -> DiscoveryDocument:
         return {
             "authorization_endpoint": "https://kauth.kakao.com/oauth/authorize",

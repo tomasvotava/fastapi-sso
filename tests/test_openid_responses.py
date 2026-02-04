@@ -13,6 +13,7 @@ from fastapi_sso.sso.line import LineSSO
 from fastapi_sso.sso.linkedin import LinkedInSSO
 from fastapi_sso.sso.microsoft import MicrosoftSSO
 from fastapi_sso.sso.naver import NaverSSO
+from fastapi_sso.sso.soundcloud import SoundcloudSSO
 from fastapi_sso.sso.spotify import SpotifySSO
 from fastapi_sso.sso.twitter import TwitterSSO
 from fastapi_sso.sso.yandex import YandexSSO
@@ -28,6 +29,24 @@ sso_test_cases: tuple[tuple[type[SSOBase], dict[str, Any], OpenID], ...] = (
         {"email": "test@example.com", "display_name": "testuser", "id": "test", "images": [{"url": "https://myimage"}]},
         OpenID(
             id="test", provider="spotify", display_name="testuser", email="test@example.com", picture="https://myimage"
+        ),
+    ),
+    (
+        SoundcloudSSO,
+        {
+            "id": 123456,
+            "first_name": "Test",
+            "last_name": "User",
+            "username": "testuser",
+            "avatar_url": "https://myimage",
+        },
+        OpenID(
+            id="123456",
+            first_name="Test",
+            last_name="User",
+            display_name="testuser",
+            picture="https://myimage",
+            provider="soundcloud",
         ),
     ),
     (

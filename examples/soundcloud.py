@@ -1,16 +1,16 @@
-"""Kakao Login Example"""
+"""Soundcloud Login Example"""
 
 import os
 import uvicorn
 from fastapi import FastAPI, Request
-from fastapi_sso.sso.kakao import KakaoSSO
+from fastapi_sso.sso.soundcloud import SoundcloudSSO
 
 CLIENT_ID = os.environ["CLIENT_ID"]
 CLIENT_SECRET = os.environ["CLIENT_SECRET"]
 
 app = FastAPI()
 
-sso = KakaoSSO(
+sso = SoundcloudSSO(
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
     redirect_uri="http://localhost:5000/auth/callback",
@@ -29,8 +29,9 @@ async def auth_init():
 async def auth_callback(request: Request):
     """Verify login"""
     async with sso:
-        return await sso.verify_and_process(request)
+        user = await sso.verify_and_process(request)
+        return user
 
 
 if __name__ == "__main__":
-    uvicorn.run(app="examples.kakao:app", host="127.0.0.1", port=5000, reload=True)
+    uvicorn.run(app="examples.soundcloud:app", host="127.0.0.1", port=5000)
