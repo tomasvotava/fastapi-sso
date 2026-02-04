@@ -23,7 +23,7 @@ class GithubSSO(SSOBase):
             "userinfo_endpoint": "https://api.github.com/user",
         }
 
-    async def _get_primary_email(self, session: Optional["httpx.AsyncClient"] = None) -> Optional[str]:
+    async def _get_primary_email(self, session: Optional["httpx.AsyncClient"] = None) -> str | None:
         """Attempt to get primary email from Github for a current user.
         The session received must be authenticated.
         """
