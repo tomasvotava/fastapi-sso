@@ -1,6 +1,6 @@
 """BitBucket SSO Oauth Helper class"""
 
-from typing import TYPE_CHECKING, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 import pydantic
 
@@ -21,9 +21,9 @@ class BitbucketSSO(SSOBase):
         self,
         client_id: str,
         client_secret: str,
-        redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = None,
+        redirect_uri: pydantic.AnyHttpUrl | str | None = None,
         allow_insecure_http: bool = False,
-        scope: Optional[list[str]] = None,
+        scope: list[str] | None = None,
     ):
         super().__init__(
             client_id=client_id,

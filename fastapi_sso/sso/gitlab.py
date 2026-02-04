@@ -1,6 +1,6 @@
 """Gitlab SSO Oauth Helper class."""
 
-from typing import TYPE_CHECKING, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Optional
 from urllib.parse import urljoin
 
 import pydantic
@@ -23,11 +23,11 @@ class GitlabSSO(SSOBase):
         self,
         client_id: str,
         client_secret: str,
-        redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = None,
+        redirect_uri: pydantic.AnyHttpUrl | str | None = None,
         allow_insecure_http: bool = False,
         use_state: bool = False,  # TODO: Remove use_state argument
-        scope: Optional[list[str]] = None,
-        base_endpoint_url: Optional[str] = None,
+        scope: list[str] | None = None,
+        base_endpoint_url: str | None = None,
     ) -> None:
         super().__init__(
             client_id,
@@ -47,7 +47,7 @@ class GitlabSSO(SSOBase):
             "userinfo_endpoint": urljoin(self.base_endpoint_url, "/api/v4/user"),
         }
 
-    def _parse_name(self, full_name: Optional[str]) -> tuple[Union[str, None], Union[str, None]]:
+    def _parse_name(self, full_name: str | None) -> tuple[str | None, str | None]:
         """Parses the full name from Gitlab into the first and last name."""
         if not full_name or not isinstance(full_name, str):
             return None, None

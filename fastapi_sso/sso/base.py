@@ -4,10 +4,10 @@ import asyncio
 import json
 import logging
 import os
-import sys
 import warnings
+from collections.abc import Callable
 from types import TracebackType
-from typing import Any, ClassVar, Literal, Optional, TypedDict, TypeVar, Union, overload
+from typing import Any, ClassVar, Literal, ParamSpec, TypedDict, TypeVar, overload
 
 import httpx
 import jwt
@@ -19,14 +19,6 @@ from starlette.responses import RedirectResponse
 
 from fastapi_sso.pkce import get_pkce_challenge_pair
 from fastapi_sso.state import generate_random_state
-
-if sys.version_info < (3, 10):
-    from typing import Callable  # pragma: no cover
-
-    from typing_extensions import ParamSpec  # pragma: no cover
-else:
-    from collections.abc import Callable
-    from typing import ParamSpec
 
 logger = logging.getLogger(__name__)
 
@@ -64,13 +56,13 @@ class SSOLoginError(HTTPException):
 class OpenID(pydantic.BaseModel):
     """Class (schema) to represent information got from sso provider in a common form."""
 
-    id: Optional[str] = None
-    email: Optional[pydantic.EmailStr] = None
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    display_name: Optional[str] = None
-    picture: Optional[str] = None
-    provider: Optional[str] = None
+    id: str | None = None
+    email: pydantic.EmailStr | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    display_name: str | None = None
+    picture: str | None = None
+    provider: str | None = None
 
 
 class SecurityWarning(UserWarning):
@@ -99,9 +91,9 @@ class SSOBase:
     provider: str = NotImplemented
     client_id: str = NotImplemented
     client_secret: str = NotImplemented
-    redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = NotImplemented
+    redirect_uri: pydantic.AnyHttpUrl | str | None = NotImplemented
     scope: ClassVar[list[str]] = []
-    additional_headers: ClassVar[Optional[dict[str, Any]]] = None
+    additional_headers: ClassVar[dict[str, Any] | None] = None
     uses_pkce: bool = False
     requires_state: bool = False
     use_id_token_for_user_info: ClassVar[bool] = False
@@ -112,20 +104,20 @@ class SSOBase:
         self,
         client_id: str,
         client_secret: str,
-        redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = None,
+        redirect_uri: pydantic.AnyHttpUrl | str | None = None,
         allow_insecure_http: bool = False,
         use_state: bool = False,
-        scope: Optional[list[str]] = None,
+        scope: list[str] | None = None,
     ):
         """Base class (mixin) for all SSO providers."""
         self.client_id: str = client_id
         self.client_secret: str = client_secret
-        self.redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = redirect_uri
+        self.redirect_uri: pydantic.AnyHttpUrl | str | None = redirect_uri
         self.allow_insecure_http: bool = allow_insecure_http
         self._login_lock = asyncio.Lock()
         self._in_stack = False
-        self._oauth_client: Optional[WebApplicationClient] = None
-        self._generated_state: Optional[str] = None
+        self._oauth_client: WebApplicationClient | None = None
+        self._generated_state: str | None = None
 
         if self.allow_insecure_http:
             logger.debug("Initializing %s with allow_insecure_http=True", self.__class__.__name__)
@@ -141,15 +133,15 @@ class SSOBase:
                 DeprecationWarning,
             )
         self._scope = scope or self.scope
-        self._refresh_token: Optional[str] = None
-        self._id_token: Optional[str] = None
-        self._state: Optional[str] = None
-        self._pkce_code_challenge: Optional[str] = None
-        self._pkce_code_verifier: Optional[str] = None
+        self._refresh_token: str | None = None
+        self._id_token: str | None = None
+        self._state: str | None = None
+        self._pkce_code_challenge: str | None = None
+        self._pkce_code_verifier: str | None = None
         self._pkce_challenge_method = "S256"
 
     @property
-    def state(self) -> Optional[str]:
+    def state(self) -> str | None:
         """Retrieves the state as it was returned from the server.
 
         Warning:
@@ -187,7 +179,7 @@ class SSOBase:
 
     @property
     @requires_async_context
-    def access_token(self) -> Optional[str]:
+    def access_token(self) -> str | None:
         """Retrieves the access token from token endpoint.
 
         Returns:
@@ -197,7 +189,7 @@ class SSOBase:
 
     @property
     @requires_async_context
-    def refresh_token(self) -> Optional[str]:
+    def refresh_token(self) -> str | None:
         """Retrieves the refresh token if returned from provider.
 
         Returns:
@@ -207,7 +199,7 @@ class SSOBase:
 
     @property
     @requires_async_context
-    def id_token(self) -> Optional[str]:
+    def id_token(self) -> str | None:
         """Retrieves the id token if returned from provider.
 
         Returns:
@@ -215,7 +207,7 @@ class SSOBase:
         """
         return self._id_token
 
-    async def openid_from_response(self, response: dict, session: Optional[httpx.AsyncClient] = None) -> OpenID:
+    async def openid_from_response(self, response: dict, session: httpx.AsyncClient | None = None) -> OpenID:
         """Converts a response from the provider's user info endpoint to an OpenID object.
 
         Args:
@@ -230,7 +222,7 @@ class SSOBase:
         """
         raise NotImplementedError(f"Provider {self.provider} not supported")
 
-    async def openid_from_token(self, id_token: dict, session: Optional[httpx.AsyncClient] = None) -> OpenID:
+    async def openid_from_token(self, id_token: dict, session: httpx.AsyncClient | None = None) -> OpenID:
         """Converts an ID token from the provider's token endpoint to an OpenID object.
 
         Args:
@@ -254,19 +246,19 @@ class SSOBase:
         raise NotImplementedError(f"Provider {self.provider} not supported")
 
     @property
-    async def authorization_endpoint(self) -> Optional[str]:
+    async def authorization_endpoint(self) -> str | None:
         """Return `authorization_endpoint` from discovery document."""
         discovery = await self.get_discovery_document()
         return discovery.get("authorization_endpoint")
 
     @property
-    async def token_endpoint(self) -> Optional[str]:
+    async def token_endpoint(self) -> str | None:
         """Return `token_endpoint` from discovery document."""
         discovery = await self.get_discovery_document()
         return discovery.get("token_endpoint")
 
     @property
-    async def userinfo_endpoint(self) -> Optional[str]:
+    async def userinfo_endpoint(self) -> str | None:
         """Return `userinfo_endpoint` from discovery document."""
         discovery = await self.get_discovery_document()
         return discovery.get("userinfo_endpoint")
@@ -274,9 +266,9 @@ class SSOBase:
     async def get_login_url(
         self,
         *,
-        redirect_uri: Optional[Union[pydantic.AnyHttpUrl, str]] = None,
-        params: Optional[dict[str, Any]] = None,
-        state: Optional[str] = None,
+        redirect_uri: pydantic.AnyHttpUrl | str | None = None,
+        params: dict[str, Any] | None = None,
+        state: str | None = None,
     ) -> str:
         """Generates and returns the prepared login URL.
 
@@ -321,9 +313,9 @@ class SSOBase:
     async def get_login_redirect(
         self,
         *,
-        redirect_uri: Optional[str] = None,
-        params: Optional[dict[str, Any]] = None,
-        state: Optional[str] = None,
+        redirect_uri: str | None = None,
+        params: dict[str, Any] | None = None,
+        state: str | None = None,
     ) -> RedirectResponse:
         """Constructs and returns a redirect response to the login page of OAuth SSO provider.
 
@@ -350,33 +342,33 @@ class SSOBase:
         self,
         request: Request,
         *,
-        params: Optional[dict[str, Any]] = None,
-        headers: Optional[dict[str, Any]] = None,
-        redirect_uri: Optional[str] = None,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, Any] | None = None,
+        redirect_uri: str | None = None,
         convert_response: Literal[True] = True,
-    ) -> Optional[OpenID]: ...
+    ) -> OpenID | None: ...
 
     @overload
     async def verify_and_process(
         self,
         request: Request,
         *,
-        params: Optional[dict[str, Any]] = None,
-        headers: Optional[dict[str, Any]] = None,
-        redirect_uri: Optional[str] = None,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, Any] | None = None,
+        redirect_uri: str | None = None,
         convert_response: Literal[False],
-    ) -> Optional[dict[str, Any]]: ...
+    ) -> dict[str, Any] | None: ...
 
     @requires_async_context
     async def verify_and_process(
         self,
         request: Request,
         *,
-        params: Optional[dict[str, Any]] = None,
-        headers: Optional[dict[str, Any]] = None,
-        redirect_uri: Optional[str] = None,
-        convert_response: Union[Literal[True], Literal[False]] = True,
-    ) -> Union[Optional[OpenID], Optional[dict[str, Any]]]:
+        params: dict[str, Any] | None = None,
+        headers: dict[str, Any] | None = None,
+        redirect_uri: str | None = None,
+        convert_response: Literal[True] | Literal[False] = True,
+    ) -> OpenID | None | dict[str, Any] | None:
         """Processes the login given a FastAPI (Starlette) Request object. This should be used for the /callback path.
 
         Args:
@@ -412,7 +404,7 @@ class SSOBase:
                 raise SSOLoginError(401, "State cookie not found")
             if sso_state is not None and sso_state != self._state:
                 raise SSOLoginError(401, "Invalid state")
-        pkce_code_verifier: Optional[str] = None
+        pkce_code_verifier: str | None = None
         if self.uses_pkce:
             pkce_code_verifier = request.cookies.get("pkce_code_verifier")
             if pkce_code_verifier is None:
@@ -461,18 +453,18 @@ class SSOBase:
 
     async def __aexit__(
         self,
-        _exc_type: Optional[type[BaseException]],
-        _exc_val: Optional[BaseException],
-        _exc_tb: Optional[TracebackType],
+        _exc_type: type[BaseException] | None,
+        _exc_val: BaseException | None,
+        _exc_tb: TracebackType | None,
     ) -> None:
         self._in_stack = False
         self._login_lock.release()
 
     def __exit__(
         self,
-        _exc_type: Optional[type[BaseException]],
-        _exc_val: Optional[BaseException],
-        _exc_tb: Optional[TracebackType],
+        _exc_type: type[BaseException] | None,
+        _exc_val: BaseException | None,
+        _exc_tb: TracebackType | None,
     ) -> None:
         return None
 
@@ -486,12 +478,12 @@ class SSOBase:
         code: str,
         request: Request,
         *,
-        params: Optional[dict[str, Any]] = None,
-        additional_headers: Optional[dict[str, Any]] = None,
-        redirect_uri: Optional[str] = None,
-        pkce_code_verifier: Optional[str] = None,
+        params: dict[str, Any] | None = None,
+        additional_headers: dict[str, Any] | None = None,
+        redirect_uri: str | None = None,
+        pkce_code_verifier: str | None = None,
         convert_response: Literal[True] = True,
-    ) -> Optional[OpenID]: ...
+    ) -> OpenID | None: ...
 
     @overload
     async def process_login(
@@ -499,12 +491,12 @@ class SSOBase:
         code: str,
         request: Request,
         *,
-        params: Optional[dict[str, Any]] = None,
-        additional_headers: Optional[dict[str, Any]] = None,
-        redirect_uri: Optional[str] = None,
-        pkce_code_verifier: Optional[str] = None,
+        params: dict[str, Any] | None = None,
+        additional_headers: dict[str, Any] | None = None,
+        redirect_uri: str | None = None,
+        pkce_code_verifier: str | None = None,
         convert_response: Literal[False],
-    ) -> Optional[dict[str, Any]]: ...
+    ) -> dict[str, Any] | None: ...
 
     @requires_async_context
     async def process_login(
@@ -512,12 +504,12 @@ class SSOBase:
         code: str,
         request: Request,
         *,
-        params: Optional[dict[str, Any]] = None,
-        additional_headers: Optional[dict[str, Any]] = None,
-        redirect_uri: Optional[str] = None,
-        pkce_code_verifier: Optional[str] = None,
-        convert_response: Union[Literal[True], Literal[False]] = True,
-    ) -> Union[Optional[OpenID], Optional[dict[str, Any]]]:
+        params: dict[str, Any] | None = None,
+        additional_headers: dict[str, Any] | None = None,
+        redirect_uri: str | None = None,
+        pkce_code_verifier: str | None = None,
+        convert_response: Literal[True] | Literal[False] = True,
+    ) -> OpenID | None | dict[str, Any] | None:
         """Processes login from the callback endpoint to verify the user and request user info endpoint.
         It's a lower-level method, typically, you should use `verify_and_process` instead.
 
