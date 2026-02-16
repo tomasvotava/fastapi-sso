@@ -99,7 +99,7 @@ mkdocstrings = { extras = ["python"], version = ">=0.23,<1.1" }
 mypy = "^1"
 poethepoet = ">=0.21.1,<0.42.0"
 pre-commit = ">=3,<5"
-pytest = ">=7,<9"
+pytest = ">=7,<10"
 pytest-asyncio = ">=0.24,<1.4"
 pytest-cov = ">=4,<8"
 uvicorn = ">=0.23.1"
