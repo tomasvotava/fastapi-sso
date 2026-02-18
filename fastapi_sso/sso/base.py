@@ -97,6 +97,7 @@ class SSOBase:
     uses_pkce: bool = False
     requires_state: bool = False
     use_id_token_for_user_info: ClassVar[bool] = False
+    use_basic_auth: ClassVar[bool] = True
 
     _pkce_challenge_length: int = 96
 
@@ -570,10 +571,15 @@ class SSOBase:
 
         headers.update(additional_headers)
 
-        auth = httpx.BasicAuth(self.client_id, self.client_secret)
+        auth: httpx.BasicAuth | None = None
+        if self.use_basic_auth:
+            auth = httpx.BasicAuth(self.client_id, self.client_secret)
 
         async with httpx.AsyncClient() as session:
-            response = await session.post(token_url, headers=headers, content=body, auth=auth)
+            if auth is None:
+                response = await session.post(token_url, headers=headers, content=body)
+            else:
+                response = await session.post(token_url, headers=headers, content=body, auth=auth)
             content = response.json()
             self._refresh_token = content.get("refresh_token")
             self._id_token = content.get("id_token")

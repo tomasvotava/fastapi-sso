@@ -3,6 +3,7 @@
 (such as Facebook login, Google login and login via Microsoft Office 365 account)
 """
 
+from .sso.apple import AppleSSO
 from .sso.base import OpenID, SSOBase, SSOLoginError
 from .sso.bitbucket import BitbucketSSO
 from .sso.discord import DiscordSSO
@@ -20,9 +21,11 @@ from .sso.naver import NaverSSO
 from .sso.notion import NotionSSO
 from .sso.soundcloud import SoundcloudSSO
 from .sso.spotify import SpotifySSO
+from .sso.tidal import TidalSSO
 from .sso.twitter import TwitterSSO
 
 __all__ = [
+    "AppleSSO",
     "BitbucketSSO",
     "DiscordSSO",
     "FacebookSSO",
@@ -41,6 +44,7 @@ __all__ = [
     "SSOLoginError",
     "SoundcloudSSO",
     "SpotifySSO",
+    "TidalSSO",
     "TwitterSSO",
     "create_provider",
 ]
