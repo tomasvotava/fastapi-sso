@@ -59,16 +59,16 @@ sso_test_cases: tuple[tuple[type[SSOBase], dict[str, Any], OpenID], ...] = (
     (
         TidalSSO,
         {
-            "id": "123456",
-            "firstName": "Test",
-            "lastName": "User",
-            "username": "testuser",
-            "email": "test@example.com",
+            "data": {
+                "id": "123456",
+                "attributes": {
+                    "username": "testuser",
+                    "email": "test@example.com",
+                },
+            }
         },
         OpenID(
             id="123456",
-            first_name="Test",
-            last_name="User",
             display_name="testuser",
             email="test@example.com",
             provider="tidal",

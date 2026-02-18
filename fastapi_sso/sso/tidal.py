@@ -12,7 +12,7 @@ class TidalSSO(SSOBase):
     """Class providing login via Tidal OAuth."""
 
     provider = "tidal"
-    scope: ClassVar = ["openid"]
+    scope: ClassVar = ["user.read"]
     uses_pkce = True
 
     async def get_discovery_document(self) -> DiscoveryDocument:
@@ -25,11 +25,10 @@ class TidalSSO(SSOBase):
 
     async def openid_from_response(self, response: dict, session: Optional["httpx.AsyncClient"] = None) -> OpenID:
         """Return OpenID from user information provided by Tidal."""
+        response = response["data"]
         return OpenID(
             id=response.get("id"),
-            first_name=response.get("firstName"),
-            last_name=response.get("lastName"),
-            display_name=response.get("username"),
-            email=response.get("email"),
+            display_name=response["attributes"].get("username"),
+            email=response["attributes"].get("email"),
             provider=self.provider,
         )
