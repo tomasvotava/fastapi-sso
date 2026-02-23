@@ -92,14 +92,14 @@ docs = "mkdocs build --clean"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=23.7.0"
-isort = ">=5,<8"
+isort = ">=5,<9"
 markdown-include = "^0.8.1"
 mkdocs-material = { extras = ["imaging"], version = "^9.3.2" }
 mkdocstrings = { extras = ["python"], version = ">=0.23,<1.1" }
 mypy = "^1"
-poethepoet = ">=0.21.1,<0.42.0"
+poethepoet = ">=0.21.1,<0.43.0"
 pre-commit = ">=3,<5"
-pytest = ">=7,<9"
+pytest = ">=7,<10"
 pytest-asyncio = ">=0.24,<1.4"
 pytest-cov = ">=4,<8"
 uvicorn = ">=0.23.1"
