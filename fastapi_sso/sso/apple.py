@@ -2,6 +2,8 @@
 
 from typing import TYPE_CHECKING, Any, ClassVar, Optional
 
+import pydantic
+
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
 if TYPE_CHECKING:
@@ -19,7 +21,7 @@ class AppleSSO(SSOBase):
     async def get_login_url(
         self,
         *,
-        redirect_uri: str | None = None,
+        redirect_uri: pydantic.AnyHttpUrl | str | None = None,
         params: dict[str, Any] | None = None,
         state: str | None = None,
     ) -> str:
