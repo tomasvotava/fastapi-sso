@@ -1,6 +1,6 @@
 """Apple SSO Login helper."""
 
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Optional
 
 from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase
 
@@ -15,6 +15,22 @@ class AppleSSO(SSOBase):
     scope: ClassVar = ["openid", "email"]
     use_id_token_for_user_info: ClassVar = True
     use_basic_auth: ClassVar = False
+
+    async def get_login_url(
+        self,
+        *,
+        redirect_uri: str | None = None,
+        params: dict[str, Any] | None = None,
+        state: str | None = None,
+    ) -> str:
+        """Generate Apple login URL with `form_post` callback mode.
+
+        Apple requires `response_mode=form_post` when requesting `name` or `email`.
+        """
+        auth_params = {"response_mode": "form_post"}
+        if params:
+            auth_params.update(params)
+        return await super().get_login_url(redirect_uri=redirect_uri, params=auth_params, state=state)
 
     @property
     def _extra_query_params(self) -> dict:

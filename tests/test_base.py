@@ -69,6 +69,30 @@ class TestSSOBase:
         ):
             await sso.verify_and_process(Request())
 
+    async def test_verify_and_process_post_form_callback(self, monkeypatch: pytest.MonkeyPatch):
+        sso = SSOBase("client_id", "client_secret")
+
+        class PostRequest:
+            method = "POST"
+            query_params = {}
+            headers = {}
+            cookies = {}
+            url = "http://localhost/auth/callback"
+
+            @staticmethod
+            async def form():
+                return {"code": "code-from-form", "state": "state-from-form"}
+
+        async def fake_process_login(self, code, request, **kwargs):
+            return {"code": code, "state": self._state}
+
+        monkeypatch.setattr(SSOBase, "process_login", fake_process_login)
+
+        with pytest.warns(SecurityWarning, match="Please make sure you are using SSO provider in an async context"):
+            result = await sso.verify_and_process(PostRequest())
+
+        assert result == {"code": "code-from-form", "state": "state-from-form"}
+
     def test_autoset_insecure_transport_env_var(self):
         assert not os.getenv(
             "OAUTHLIB_INSECURE_TRANSPORT"
