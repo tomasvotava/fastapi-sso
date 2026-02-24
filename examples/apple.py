@@ -8,12 +8,6 @@ Setup:
 Notes:
 - Apple web callbacks must be public HTTPS. For local testing, use a tunnel (for example ngrok).
 - Register the tunnel domain in "Domains and Subdomains" and the exact callback in "Return URLs".
-
-Run:
-    $CLIENT_ID = "<services-id>"
-    $CLIENT_SECRET = "<apple-client-secret-jwt>"
-    $REDIRECT_URI = "https://<public-host>/auth/callback"
-    python examples/apple.py
 """
 
 import os
