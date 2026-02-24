@@ -396,11 +396,12 @@ class SSOBase:
 
         code = callback_params.get("code")
         if code is None:
+            param_count = len(callback_params)
+            has_state_param = "state" in callback_params
             logger.debug(
-                "Callback request:\n\tURI: %s\n\tHeaders: %s\n\tQuery params: %s",
-                request.url,
-                request.headers,
-                callback_params,
+                "Callback request missing code parameter (param_count=%d, has_state_param=%s).",
+                param_count,
+                has_state_param,
             )
             raise SSOLoginError(400, "'code' parameter was not found in callback request")
         self._state = callback_params.get("state")
