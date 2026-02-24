@@ -8,6 +8,7 @@ from fastapi.responses import RedirectResponse
 from utils import AnythingDict, Request, Response, make_fake_async_client
 
 from fastapi_sso.sso.base import OpenID, SecurityWarning, SSOBase, SSOLoginError
+from fastapi_sso.sso.apple import AppleSSO
 from fastapi_sso.sso.bitbucket import BitbucketSSO
 from fastapi_sso.sso.discord import DiscordSSO
 from fastapi_sso.sso.facebook import FacebookSSO
@@ -25,6 +26,7 @@ from fastapi_sso.sso.notion import NotionSSO
 from fastapi_sso.sso.seznam import SeznamSSO
 from fastapi_sso.sso.soundcloud import SoundcloudSSO
 from fastapi_sso.sso.spotify import SpotifySSO
+from fastapi_sso.sso.tidal import TidalSSO
 from fastapi_sso.sso.twitter import TwitterSSO
 from fastapi_sso.sso.yandex import YandexSSO
 
@@ -41,6 +43,7 @@ GenericProvider = create_provider(
 )
 
 tested_providers = (
+    AppleSSO,
     FacebookSSO,
     FitbitSSO,
     GithubSSO,
@@ -60,6 +63,7 @@ tested_providers = (
     SeznamSSO,
     BitbucketSSO,
     DiscordSSO,
+    TidalSSO,
 )
 
 # Run all tests for each of the listed providers

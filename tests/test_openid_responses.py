@@ -3,6 +3,7 @@ from typing import Any
 import pytest
 
 from fastapi_sso.sso.base import OpenID, SSOBase
+from fastapi_sso.sso.apple import AppleSSO
 from fastapi_sso.sso.discord import DiscordSSO
 from fastapi_sso.sso.facebook import FacebookSSO
 from fastapi_sso.sso.fitbit import FitbitSSO
@@ -15,10 +16,16 @@ from fastapi_sso.sso.microsoft import MicrosoftSSO
 from fastapi_sso.sso.naver import NaverSSO
 from fastapi_sso.sso.soundcloud import SoundcloudSSO
 from fastapi_sso.sso.spotify import SpotifySSO
+from fastapi_sso.sso.tidal import TidalSSO
 from fastapi_sso.sso.twitter import TwitterSSO
 from fastapi_sso.sso.yandex import YandexSSO
 
 sso_test_cases: tuple[tuple[type[SSOBase], dict[str, Any], OpenID], ...] = (
+    (
+        AppleSSO,
+        {"sub": "apple-user-id", "email": "test@example.com"},
+        OpenID(id="apple-user-id", email="test@example.com", provider="apple"),
+    ),
     (
         TwitterSSO,
         {"data": {"id": "test", "username": "TestUser1234", "name": "Test User"}},
@@ -47,6 +54,24 @@ sso_test_cases: tuple[tuple[type[SSOBase], dict[str, Any], OpenID], ...] = (
             display_name="testuser",
             picture="https://myimage",
             provider="soundcloud",
+        ),
+    ),
+    (
+        TidalSSO,
+        {
+            "data": {
+                "id": "123456",
+                "attributes": {
+                    "username": "testuser",
+                    "email": "test@example.com",
+                },
+            }
+        },
+        OpenID(
+            id="123456",
+            display_name="testuser",
+            email="test@example.com",
+            provider="tidal",
         ),
     ),
     (

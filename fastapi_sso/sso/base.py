@@ -8,6 +8,7 @@ import warnings
 from collections.abc import Callable
 from types import TracebackType
 from typing import Any, ClassVar, Literal, ParamSpec, TypedDict, TypeVar, overload
+from urllib.parse import parse_qs, urlsplit
 
 import httpx
 import jwt
@@ -97,6 +98,7 @@ class SSOBase:
     uses_pkce: bool = False
     requires_state: bool = False
     use_id_token_for_user_info: ClassVar[bool] = False
+    use_basic_auth: ClassVar[bool] = True
 
     _pkce_challenge_length: int = 96
 
@@ -386,16 +388,23 @@ class SSOBase:
             Optional[dict[str, Any]]: The original JSON response from the API.
         """
         headers = headers or {}
-        code = request.query_params.get("code")
+        callback_params: dict[str, Any] = dict(request.query_params)
+
+        request_method = str(getattr(request, "method", "GET")).upper()
+        if "code" not in callback_params and request_method == "POST" and hasattr(request, "form"):
+            callback_params = dict(await request.form())
+
+        code = callback_params.get("code")
         if code is None:
+            param_count = len(callback_params)
+            has_state_param = "state" in callback_params
             logger.debug(
-                "Callback request:\n\tURI: %s\n\tHeaders: %s\n\tQuery params: %s",
-                request.url,
-                request.headers,
-                request.query_params,
+                "Callback request missing code parameter (param_count=%d, has_state_param=%s).",
+                param_count,
+                has_state_param,
             )
             raise SSOLoginError(400, "'code' parameter was not found in callback request")
-        self._state = request.query_params.get("state")
+        self._state = callback_params.get("state")
         if self._state is None and self.requires_state:
             raise SSOLoginError(400, "'state' parameter was not found in callback request")
         if self._state is not None:
@@ -553,13 +562,16 @@ class SSOBase:
             current_url = str(url)
 
         current_path = f"{url.scheme}://{url.netloc}{url.path}"
+        parsed_current_url = urlsplit(current_url)
+        has_code_in_query = "code" in parse_qs(parsed_current_url.query)
+        authorization_response: str | None = current_url if has_code_in_query else None
 
         if pkce_code_verifier:
             params.update({"code_verifier": pkce_code_verifier})
 
         token_url, headers, body = self.oauth_client.prepare_token_request(
             await self.token_endpoint,
-            authorization_response=current_url,
+            authorization_response=authorization_response,
             redirect_url=redirect_uri or self.redirect_uri or current_path,
             code=code,
             **params,
@@ -570,10 +582,15 @@ class SSOBase:
 
         headers.update(additional_headers)
 
-        auth = httpx.BasicAuth(self.client_id, self.client_secret)
+        auth: httpx.BasicAuth | None = None
+        if self.use_basic_auth:
+            auth = httpx.BasicAuth(self.client_id, self.client_secret)
 
         async with httpx.AsyncClient() as session:
-            response = await session.post(token_url, headers=headers, content=body, auth=auth)
+            if auth is None:
+                response = await session.post(token_url, headers=headers, content=body)
+            else:
+                response = await session.post(token_url, headers=headers, content=body, auth=auth)
             content = response.json()
             self._refresh_token = content.get("refresh_token")
             self._id_token = content.get("id_token")
