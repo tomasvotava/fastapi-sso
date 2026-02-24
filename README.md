@@ -129,6 +129,8 @@ I tend to process Pull Requests faster when properly caffeinated 😉.
 - Discord (by Kaelian Baudelet) - [afi-dev](https://github.com/afi-dev)
 - Bitbucket (by Kaelian Baudelet) - [afi-dev](https://github.com/afi-dev)
 - Soundcloud (by John) - [john-9474](https://github.com/john-9474)
+- Apple (by John) - [john-9474](https://github.com/john-9474)
+- Tidal (by John) - [john-9474](https://github.com/john-9474)
 
 See [Contributing](#contributing) for a guide on how to contribute your own login provider.
 
