@@ -1,33 +1,63 @@
 # Security Policy
 
 ## Overview
-Security is of paramount importance to this project, especially since it deals with login functionalities.
-That being said, an oopsie may happen and it is crucial for me to be informed promptly. This document provides an overview of the supported
-versions and instructions on reporting any security-related issues or vulnerabilities you might discover.
+
+`fastapi-sso` handles logins, so a bug here can become someone else's account takeover. Security reports are the most
+useful thing you can send me, and they get priority over everything else in the tracker.
 
 ## Supported Versions
-`fastapi-sso` is still in its developmental phases, and we haven't rolled out a 1.0.0 release yet. Currently, I am offering support for all releases `0.7.0` and newer.
 
-| Version    | Supported          |
-| -----------| ------------------ |
-| >= 0.7.0   | :white_check_mark: |
+Fixes ship in a new release built from `master`. There are no maintenance branches and no backports, so only the
+latest release receives security fixes.
+
+| Version        | Supported          |
+| -------------- | ------------------ |
+| Latest release | :white_check_mark: |
+| Anything older | :x:                |
+
+Upgrade to the latest release before reporting, so we don't spend time on something already fixed.
 
 ## Reporting a Vulnerability
-Addressing security issues can be time-consuming, but rest assured, I take them very seriously and endeavor to resolve them as swiftly as possible. If you identify a security vulnerability in `fastapi-sso`, I urge you to notify me.
 
-### Steps to Report a Vulnerability:
-1. Create a new issue in our [Issue Tracker](https://github.com/tomasvotava/fastapi-sso/issues).
-2. Assign the `security` label to the issue.
-3. Furnish a detailed description of the issue, specifying where the vulnerability occurs, the steps to reproduce it, and its potential impacts.
+**Report privately, not in the public issue tracker.**
 
-### What to Expect
-I will acknowledge the receipt of your vulnerability report and keep you posted on the progress regularly.
+Use GitHub's private vulnerability reporting, which is enabled on this repository:
 
-### Disclosure Policy
-In the realm of coding etiquette, it is generally frowned upon to publicly disclose issues without prior communication with me.
-Therefore, I ask you to discuss any grievances or concerns about `fastapi-sso` with me before publicizing them.
+1. Open [Report a vulnerability](https://github.com/tomasvotava/fastapi-sso/security/advisories/new).
+2. Describe the issue, the version you tested against, and the impact you think it has.
+3. Include steps to reproduce, ideally a short runnable snippet.
+4. Suggest a severity if you have one in mind. I may end up disagreeing, and that is a normal part of triage.
 
-In other words, if there's something concerning `fastapi-sso` you'd like to bitch about, let me know and we'll bitch about it together.
+Only you and the maintainers can see the report. It stays private until an advisory is published.
+
+If you have already opened a public issue before reading this, don't worry about it. Say so in the private report and
+I will handle the cleanup.
+
+## What to Expect
+
+- An acknowledgement that I received the report.
+- Triage, where I confirm or dispute the finding and we agree on severity.
+- A fix, released as a new version.
+- A published GitHub Security Advisory naming you as the reporter, unless you would rather stay anonymous.
+- A CVE, requested through GitHub, for anything that affects users on the default configuration.
+
+This is a side project maintained by one person, so response times depend on what else my week looks like. I would
+rather tell you that up front than promise a turnaround I cannot keep.
+
+## Disclosure Policy
+
+Disclosure is coordinated. The advisory goes public once the fixed version is on PyPI, so that everyone reading it has
+somewhere to upgrade to. Please hold off on publishing details until then.
+
+If a fix is taking unreasonably long, tell me. Agreeing on a disclosure date is fair, going around me without saying
+anything is not.
+
+## Non-Security Issues
+
+Everything that is not a vulnerability belongs in the [issue tracker](https://github.com/tomasvotava/fastapi-sso/issues),
+including things you are annoyed about. If there is something concerning `fastapi-sso` you would like to bitch about,
+let me know and we'll bitch about it together.
 
 ## Thank You
-Raising an issue is a significant contribution, and I always appreciate discovering that people are using `fastapi-sso`. I am thankful for any insights or feedback provided.
+
+Reporting takes real effort and I appreciate every report I get, including the ones that turn out to be false alarms.
