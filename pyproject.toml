@@ -92,7 +92,7 @@ docs = "mkdocs build --clean"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=23.7.0"
-isort = ">=5,<9"
+isort = ">=5,<10"
 markdown-include = "^0.8.1"
 mkdocs-material = { extras = ["imaging"], version = "^9.3.2" }
 mkdocstrings = { extras = ["python"], version = ">=0.23,<1.1" }
