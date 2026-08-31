@@ -14,7 +14,6 @@ class TwitterSSO(SSOBase):
     provider = "twitter"
     scope: ClassVar = ["users.read", "tweet.read"]
     uses_pkce = True
-    requires_state = True
 
     async def get_discovery_document(self) -> DiscoveryDocument:
         return {

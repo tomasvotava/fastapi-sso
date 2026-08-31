@@ -82,7 +82,7 @@ async def test_apple_verify_and_process_form_post_callback(monkeypatch: pytest.M
         method = "POST"
         query_params = {}
         headers = {}
-        cookies = {}
+        cookies = {"sso_state": "state"}
         url = URL("https://localhost/auth/callback")
 
         @staticmethod

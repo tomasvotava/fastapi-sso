@@ -9,8 +9,10 @@
     cryptographically random, stored server-side, and verified when the provider
     redirects the user back.
 
-    If you do **not** pass a `state` explicitly, `fastapi-sso` will generate, store,
-    and validate a secure random state for you.
+    If you do **not** pass a `state` explicitly, `fastapi-sso` generates a secure random
+    state for you, sets it as the `sso_state` cookie on the login redirect, and matches the
+    two when the provider calls back. This requires the SSO instance to be used as a context
+    manager (`async with sso:`) and the cookie to reach your callback endpoint.
 
     Using `state` to carry arbitrary user-controlled data (such as return URLs)
     **without validation** is unsafe and can lead to critical vulnerabilities

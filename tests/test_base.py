@@ -48,8 +48,9 @@ class TestSSOBase:
         with pytest.raises(NotImplementedError):
             await sso.openid_from_token({})
 
-        request = Request()
+        request = Request(cookies={"sso_state": "state"})
         request.query_params["code"] = "code"
+        request.query_params["state"] = "state"
         with pytest.raises(NotImplementedError), pytest.warns(
             SecurityWarning, match="Please make sure you are using SSO provider in an async context"
         ):
@@ -76,7 +77,7 @@ class TestSSOBase:
             method = "POST"
             query_params = {}
             headers = {}
-            cookies = {}
+            cookies = {"sso_state": "state-from-form"}
             url = "http://localhost/auth/callback"
 
             @staticmethod

@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import os
+import secrets
 import warnings
 from collections.abc import Callable
 from types import TracebackType
@@ -96,7 +97,7 @@ class SSOBase:
     scope: ClassVar[list[str]] = []
     additional_headers: ClassVar[dict[str, Any] | None] = None
     uses_pkce: bool = False
-    requires_state: bool = False
+    requires_state: bool = True
     use_id_token_for_user_info: ClassVar[bool] = False
     use_basic_auth: ClassVar[bool] = True
 
@@ -336,7 +337,13 @@ class SSOBase:
         if self.uses_pkce:
             response.set_cookie("pkce_code_verifier", str(self._pkce_code_verifier))
         if state is not None:
-            response.set_cookie("sso_state", state)
+            response.set_cookie(
+                "sso_state",
+                state,
+                httponly=True,
+                samesite="lax",
+                secure=not self.allow_insecure_http,
+            )
         return response
 
     @overload
@@ -409,9 +416,9 @@ class SSOBase:
             raise SSOLoginError(400, "'state' parameter was not found in callback request")
         if self._state is not None:
             sso_state = request.cookies.get("sso_state")
-            if sso_state is None and self.requires_state:
+            if sso_state is None:
                 raise SSOLoginError(401, "State cookie not found")
-            if sso_state is not None and sso_state != self._state:
+            if not secrets.compare_digest(sso_state.encode(), self._state.encode()):
                 raise SSOLoginError(401, "Invalid state")
         pkce_code_verifier: str | None = None
         if self.uses_pkce:

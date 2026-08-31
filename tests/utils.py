@@ -2,10 +2,11 @@ from starlette.datastructures import URL
 
 
 class Request:
-    def __init__(self, url="http://localhost", query_params=None):
+    def __init__(self, url="http://localhost", query_params=None, cookies=None):
         self.url = URL(url)
         self.query_params = query_params or {}
         self.headers = {}
+        self.cookies = cookies or {}
 
 
 class Response:
