@@ -94,7 +94,8 @@ class TestProviders:
     async def test_login_url_request_time(self, Provider: type[SSOBase]):
         sso = Provider("client_id", "client_secret")
         async with sso:
-            url = await sso.get_login_url(redirect_uri="http://localhost")
+            with pytest.warns(SecurityWarning, match="not bound to the 'sso_state' cookie"):
+                url = await sso.get_login_url(redirect_uri="http://localhost")
             assert url.startswith(
                 await sso.authorization_endpoint
             ), f"Login URL must start with {await sso.authorization_endpoint}"
@@ -107,7 +108,8 @@ class TestProviders:
         sso = Provider("client_id", "client_secret", redirect_uri="http://localhost")
 
         async with sso:
-            url = await sso.get_login_url()
+            with pytest.warns(SecurityWarning, match="not bound to the 'sso_state' cookie"):
+                url = await sso.get_login_url()
             assert url.startswith(
                 await sso.authorization_endpoint
             ), f"Login URL must start with {await sso.authorization_endpoint}"
@@ -115,7 +117,8 @@ class TestProviders:
 
     async def assert_get_login_url_and_redirect(self, sso: SSOBase, **kwargs):
         async with sso:
-            url = await sso.get_login_url(**kwargs)
+            with pytest.warns(SecurityWarning, match="not bound to the 'sso_state' cookie"):
+                url = await sso.get_login_url(**kwargs)
             redirect = await sso.get_login_redirect(**kwargs)
             assert isinstance(url, str), "Login URL must be a string"
             assert isinstance(redirect, RedirectResponse), "Login redirect must be a RedirectResponse"

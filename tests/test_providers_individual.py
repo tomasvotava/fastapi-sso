@@ -8,6 +8,7 @@ from starlette.requests import Request
 from utils import Response, make_fake_async_client
 
 from fastapi_sso import AppleSSO, BitbucketSSO, NotionSSO, OpenID, SSOLoginError
+from fastapi_sso.sso.base import SecurityWarning
 
 
 async def test_notion_openid_response():
@@ -65,7 +66,8 @@ async def test_bitbucket_openid_response():
 async def test_apple_login_url_uses_form_post():
     sso = AppleSSO("client_id", "client_secret", redirect_uri="https://localhost/auth/callback")
     async with sso:
-        url = await sso.get_login_url()
+        with pytest.warns(SecurityWarning, match="not bound to the 'sso_state' cookie"):
+            url = await sso.get_login_url()
     assert "response_mode=form_post" in url
 
 
@@ -82,7 +84,7 @@ async def test_apple_verify_and_process_form_post_callback(monkeypatch: pytest.M
         method = "POST"
         query_params = {}
         headers = {}
-        cookies = {}
+        cookies = {"sso_state": "state"}
         url = URL("https://localhost/auth/callback")
 
         @staticmethod

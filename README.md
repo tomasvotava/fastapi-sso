@@ -38,6 +38,34 @@ Quick links for the eager ones:
 
 ## Security Notice
 
+### Version `0.22.0` Update: OAuth `state` Validation Is Now Enabled By Default
+
+The `state` validation added in `0.19.0` was gated behind `SSOBase.requires_state`, which defaulted to `False`.
+Applications that did not opt in performed no CSRF validation on the OAuth callback and remained vulnerable to
+login CSRF. This was reported by [@mohammedix88](https://github.com/mohammedix88) (cystack.ps redteam)
+in [GHSA-wgrh-7h2j-rg46](https://github.com/tomasvotava/fastapi-sso/security/advisories/GHSA-wgrh-7h2j-rg46).
+
+Since `0.22.0`, `requires_state` defaults to `True` and a `state` received in the callback is always matched against
+the `sso_state` cookie set at login time.
+
+**This is a breaking change.** A login flow that does not carry the `sso_state` cookie back to the callback now fails
+with `401 State cookie not found`. Two cases are affected:
+
+- The SSO instance is not used as a context manager (`async with sso:`), so no state is generated. This usage already
+  emitted a `SecurityWarning` and is now rejected at the callback.
+- The login and callback endpoints are served from different hosts, so the browser does not return the cookie.
+- The redirect response is built by hand from `get_login_url`, which returns a URL and sets no cookie. This case now
+  emits a `SecurityWarning` at login time naming the callback error it will cause. Either switch to
+  `get_login_redirect`, or set the `sso_state` cookie on your own response.
+
+If you cannot carry the cookie across your deployment, you can opt out per instance, at the cost of losing CSRF
+protection:
+
+```python
+sso = GoogleSSO(client_id, client_secret, redirect_uri)
+sso.requires_state = False
+```
+
 ### Version `0.19.0` Update: OAuth `state` Validation Fix
 
 A critical OAuth login CSRF vulnerability caused by missing `state` validation was
