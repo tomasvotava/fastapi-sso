@@ -121,6 +121,7 @@ class SSOBase:
         self._in_stack = False
         self._oauth_client: WebApplicationClient | None = None
         self._generated_state: str | None = None
+        self._binds_state_cookie = False
 
         if self.allow_insecure_http:
             logger.debug("Initializing %s with allow_insecure_http=True", self.__class__.__name__)
@@ -302,6 +303,14 @@ class SSOBase:
                     "generated automatically. Use SSO as a context manager. The login process will most probably fail."
                 )
             state = self._generated_state
+        if state is not None and not self._binds_state_cookie:
+            warnings.warn(
+                "'get_login_url' returns a URL only, so the 'state' it carries is not bound to the 'sso_state' "
+                "cookie and 'verify_and_process' will reject the callback with 'State cookie not found'. Use "
+                "'get_login_redirect', which sets the cookie, or set 'sso_state' on the response yourself.",
+                category=SecurityWarning,
+                stacklevel=2,
+            )
         request_uri = self.oauth_client.prepare_request_uri(
             await self.authorization_endpoint,
             redirect_uri=redirect_uri,
@@ -332,7 +341,11 @@ class SSOBase:
         """
         if self.requires_state and not state:
             state = self._generated_state
-        login_uri = await self.get_login_url(redirect_uri=redirect_uri, params=params, state=state)
+        self._binds_state_cookie = True
+        try:
+            login_uri = await self.get_login_url(redirect_uri=redirect_uri, params=params, state=state)
+        finally:
+            self._binds_state_cookie = False
         response = RedirectResponse(login_uri, 303)
         if self.uses_pkce:
             response.set_cookie("pkce_code_verifier", str(self._pkce_code_verifier))

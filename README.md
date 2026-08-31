@@ -54,6 +54,9 @@ with `401 State cookie not found`. Two cases are affected:
 - The SSO instance is not used as a context manager (`async with sso:`), so no state is generated. This usage already
   emitted a `SecurityWarning` and is now rejected at the callback.
 - The login and callback endpoints are served from different hosts, so the browser does not return the cookie.
+- The redirect response is built by hand from `get_login_url`, which returns a URL and sets no cookie. This case now
+  emits a `SecurityWarning` at login time naming the callback error it will cause. Either switch to
+  `get_login_redirect`, or set the `sso_state` cookie on your own response.
 
 If you cannot carry the cookie across your deployment, you can opt out per instance, at the cost of losing CSRF
 protection:

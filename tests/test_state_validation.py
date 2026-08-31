@@ -1,9 +1,11 @@
 # type: ignore
 
+import warnings
+
 import pytest
 from utils import Request
 
-from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SSOBase, SSOLoginError
+from fastapi_sso.sso.base import DiscoveryDocument, OpenID, SecurityWarning, SSOBase, SSOLoginError
 from fastapi_sso.sso.google import GoogleSSO
 
 
@@ -94,3 +96,16 @@ async def test_state_cookie_is_not_secure_over_insecure_http(monkeypatch: pytest
     async with sso:
         response = await sso.get_login_redirect()
     assert "Secure" not in response.headers["set-cookie"]
+
+
+async def test_login_url_warns_that_state_is_not_bound(sso: FakeSSO):
+    async with sso:
+        with pytest.warns(SecurityWarning, match="not bound to the 'sso_state' cookie"):
+            await sso.get_login_url()
+
+
+async def test_login_redirect_does_not_warn_about_binding(sso: FakeSSO):
+    async with sso:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", SecurityWarning)
+            await sso.get_login_redirect()
