@@ -293,8 +293,12 @@ class SSOBase:
         discovery = await self.get_discovery_document()
         return discovery.get("jwks_uri")
 
-    async def _signing_key(self, token: str, session: httpx.AsyncClient) -> jwt.PyJWK:
-        """Return the provider key matching the `kid` of a signed userinfo response."""
+    async def _signing_keys(self, token: str, session: httpx.AsyncClient) -> list[jwt.PyJWK]:
+        """Return the provider keys that may have signed a signed userinfo response.
+
+        The `kid` header is optional, so when it is absent every key of the JWKS is a
+        candidate and the caller tries them until one verifies the signature.
+        """
         uri = await self.jwks_uri
         if uri is None:
             raise SSOLoginError(
@@ -309,11 +313,15 @@ class SSOBase:
                 f"Invalid JWKS document for provider {self.provider!r}: {exc}. "
                 "Verifying a signed userinfo response requires the 'crypto' extra of this package.",
             ) from exc
+        if not keys:
+            raise SSOLoginError(401, f"The JWKS of provider {self.provider!r} holds no key.")
         kid = jwt.get_unverified_header(token).get("kid")
-        for key in keys:
-            if kid is None or key.key_id == kid:
-                return key
-        raise SSOLoginError(401, f"No key matching kid={kid!r} in the JWKS of provider {self.provider!r}.")
+        if kid is None:
+            return keys
+        matching = [key for key in keys if key.key_id == kid]
+        if not matching:
+            raise SSOLoginError(401, f"No key matching kid={kid!r} in the JWKS of provider {self.provider!r}.")
+        return matching
 
     async def parse_userinfo_response(self, response: httpx.Response, session: httpx.AsyncClient) -> dict[str, Any]:
         """Return the claims carried by a UserInfo endpoint response.
@@ -338,18 +346,21 @@ class SSOBase:
         if content_type != "application/jwt" and body.startswith("{"):
             return response.json()
 
-        signing_key = await self._signing_key(body, session)
-        try:
-            return jwt.decode(
-                body,
-                signing_key.key,
-                algorithms=self.userinfo_signing_algorithms,
-                audience=self.client_id,
-            )
-        except jwt.PyJWTError as exc:
-            raise SSOLoginError(
-                401, f"Invalid signed userinfo response from provider {self.provider!r}: {exc}"
-            ) from exc
+        keys = await self._signing_keys(body, session)
+        failure: jwt.PyJWTError | None = None
+        for key in keys:
+            try:
+                return jwt.decode(
+                    body,
+                    key.key,
+                    algorithms=self.userinfo_signing_algorithms,
+                    audience=self.client_id,
+                )
+            except jwt.PyJWTError as exc:
+                failure = exc
+        raise SSOLoginError(
+            401, f"Invalid signed userinfo response from provider {self.provider!r}: {failure}"
+        ) from failure
 
     async def get_login_url(
         self,

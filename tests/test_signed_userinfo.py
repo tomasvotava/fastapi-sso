@@ -62,8 +62,8 @@ def signed(userinfo: str) -> Response:
     return Response(text=userinfo, headers={"content-type": "application/jwt"})
 
 
-def make_client(userinfo: Response, jwks: Response | None = None):
-    jwks = jwks or Response(json_content={"keys": [public_jwk()]})
+def make_client(userinfo: Response, keys: list[dict] | None = None):
+    jwks = Response(json_content={"keys": [public_jwk()] if keys is None else keys})
 
     class FakeAsyncClient:
         headers = {}
@@ -84,9 +84,9 @@ def make_client(userinfo: Response, jwks: Response | None = None):
     return FakeAsyncClient
 
 
-async def login(sso: SSOBase, monkeypatch, userinfo: Response, convert: bool = False):
+async def login(sso: SSOBase, monkeypatch, userinfo: Response, keys: list[dict] | None = None, convert: bool = False):
     async with sso:
-        monkeypatch.setattr("httpx.AsyncClient", make_client(userinfo))
+        monkeypatch.setattr("httpx.AsyncClient", make_client(userinfo, keys))
         return await sso.process_login(
             "code",
             Request(url="https://fake.com/callback?code=code&state=unique"),
@@ -117,6 +117,23 @@ async def test_signed_response_is_detected_without_content_type(sso: FakeSSO, mo
 async def test_signed_response_without_kid_is_accepted(sso: FakeSSO, monkeypatch: pytest.MonkeyPatch):
     content = await login(sso, monkeypatch, signed(token(kid=None)))
     assert content["sub"] == "user-id"
+
+
+async def test_signed_response_without_kid_tries_every_key(sso: FakeSSO, monkeypatch: pytest.MonkeyPatch):
+    keys = [public_jwk(), public_jwk(other_private_key, kid="rotated-key")]
+    content = await login(sso, monkeypatch, signed(token(key=other_private_key, kid=None)), keys=keys)
+    assert content["sub"] == "user-id"
+
+
+async def test_signed_response_with_kid_uses_the_matching_key(sso: FakeSSO, monkeypatch: pytest.MonkeyPatch):
+    keys = [public_jwk(), public_jwk(other_private_key, kid="rotated-key")]
+    content = await login(sso, monkeypatch, signed(token(key=other_private_key, kid="rotated-key")), keys=keys)
+    assert content["sub"] == "user-id"
+
+
+async def test_signed_response_signed_by_an_unknown_key_is_rejected(sso: FakeSSO, monkeypatch: pytest.MonkeyPatch):
+    with pytest.raises(SSOLoginError, match="Invalid signed userinfo response"):
+        await login(sso, monkeypatch, signed(token(key=other_private_key, kid=None)))
 
 
 async def test_signed_response_can_be_converted_to_openid(sso: FakeSSO, monkeypatch: pytest.MonkeyPatch):
