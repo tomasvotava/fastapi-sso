@@ -32,12 +32,19 @@ def _decode_id_token(id_token: str, verify: bool = False) -> dict:
     return jwt.decode(id_token, options={"verify_signature": verify})
 
 
-class DiscoveryDocument(TypedDict):
-    """Discovery document."""
-
+# `total=False` on the subclass makes `jwks_uri` optional while the keys inherited
+# from the base stay required. This is the usual way of mixing both before Python
+# 3.11, where `typing.NotRequired` is not available yet.
+class _DiscoveryDocumentBase(TypedDict):
     authorization_endpoint: str
     token_endpoint: str
     userinfo_endpoint: str
+
+
+class DiscoveryDocument(_DiscoveryDocumentBase, total=False):
+    """Discovery document."""
+
+    jwks_uri: str
 
 
 class UnsetStateWarning(UserWarning):
@@ -100,6 +107,19 @@ class SSOBase:
     requires_state: bool = True
     use_id_token_for_user_info: ClassVar[bool] = False
     use_basic_auth: ClassVar[bool] = True
+    # Only asymmetric algorithms: the response is verified with a public key from the
+    # provider JWKS, so a token signed with a shared secret can never be accepted.
+    userinfo_signing_algorithms: ClassVar[list[str]] = [
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512",
+    ]
 
     _pkce_challenge_length: int = 96
 
@@ -266,6 +286,70 @@ class SSOBase:
         """Return `userinfo_endpoint` from discovery document."""
         discovery = await self.get_discovery_document()
         return discovery.get("userinfo_endpoint")
+
+    @property
+    async def jwks_uri(self) -> str | None:
+        """Return `jwks_uri` from discovery document."""
+        discovery = await self.get_discovery_document()
+        return discovery.get("jwks_uri")
+
+    async def _signing_key(self, token: str, session: httpx.AsyncClient) -> jwt.PyJWK:
+        """Return the provider key matching the `kid` of a signed userinfo response."""
+        uri = await self.jwks_uri
+        if uri is None:
+            raise SSOLoginError(
+                401, f"Provider {self.provider!r} exposes no jwks_uri to verify its signed userinfo response."
+            )
+        jwks = (await session.get(uri)).json()
+        try:
+            keys = [jwt.PyJWK(key) for key in jwks.get("keys", [])]
+        except jwt.PyJWKError as exc:
+            raise SSOLoginError(
+                401,
+                f"Invalid JWKS document for provider {self.provider!r}: {exc}. "
+                "Verifying a signed userinfo response requires the 'crypto' extra of this package.",
+            ) from exc
+        kid = jwt.get_unverified_header(token).get("kid")
+        for key in keys:
+            if kid is None or key.key_id == kid:
+                return key
+        raise SSOLoginError(401, f"No key matching kid={kid!r} in the JWKS of provider {self.provider!r}.")
+
+    async def parse_userinfo_response(self, response: httpx.Response, session: httpx.AsyncClient) -> dict[str, Any]:
+        """Return the claims carried by a UserInfo endpoint response.
+
+        OpenID Connect Core 1.0 (section 5.3.2) allows the provider to sign its
+        UserInfo response: the claims are then returned as a JWT with an
+        ``application/jwt`` content type, and the signature must be verified
+        against the provider JWKS before the claims are trusted.
+
+        Args:
+            response (httpx.Response): The response of the UserInfo endpoint.
+            session (httpx.AsyncClient): Client used to fetch the provider JWKS.
+
+        Returns:
+            dict[str, Any]: The claims carried by the response.
+
+        Raises:
+            SSOLoginError: If a signed response cannot be verified.
+        """
+        body = response.text.strip()
+        content_type = response.headers.get("content-type", "").split(";")[0].strip().lower()
+        if content_type != "application/jwt" and body.startswith("{"):
+            return response.json()
+
+        signing_key = await self._signing_key(body, session)
+        try:
+            return jwt.decode(
+                body,
+                signing_key.key,
+                algorithms=self.userinfo_signing_algorithms,
+                audience=self.client_id,
+            )
+        except jwt.PyJWTError as exc:
+            raise SSOLoginError(
+                401, f"Invalid signed userinfo response from provider {self.provider!r}: {exc}"
+            ) from exc
 
     async def get_login_url(
         self,
@@ -620,7 +704,7 @@ class SSOBase:
             headers.update(additional_headers)
             session.headers.update(headers)
             response = await session.get(uri)
-            content = response.json()
+            content = await self.parse_userinfo_response(response, session)
             if convert_response:
                 if self.use_id_token_for_user_info:
                     if not self._id_token:

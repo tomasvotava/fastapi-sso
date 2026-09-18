@@ -23,6 +23,8 @@ async def test__race_condition():
     class Response:
         def __init__(self, token: str):
             self.token = token
+            self.headers: dict = {}
+            self.text = "{}"
 
         def json(self):
             return {
