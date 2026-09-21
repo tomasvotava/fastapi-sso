@@ -16,6 +16,7 @@ CLIENT_ID = "client_id"
 
 private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 other_private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+third_private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
 
 class FakeSSO(SSOBase):
@@ -114,6 +115,24 @@ async def test_signed_response_is_detected_without_content_type(sso: FakeSSO, mo
     assert content["sub"] == "user-id"
 
 
+async def test_json_response_with_charset_is_supported(sso: FakeSSO, monkeypatch: pytest.MonkeyPatch):
+    userinfo = Response(
+        json_content={"sub": "user-id"},
+        text='{"sub": "user-id"}',
+        headers={"content-type": "application/json; charset=utf-8"},
+    )
+    assert await login(sso, monkeypatch, userinfo) == {"sub": "user-id"}
+
+
+async def test_json_body_with_an_unknown_content_type_is_supported(sso: FakeSSO, monkeypatch: pytest.MonkeyPatch):
+    userinfo = Response(
+        json_content={"sub": "user-id"},
+        text='{"sub": "user-id"}',
+        headers={"content-type": "text/plain"},
+    )
+    assert await login(sso, monkeypatch, userinfo) == {"sub": "user-id"}
+
+
 async def test_signed_response_without_kid_is_accepted(sso: FakeSSO, monkeypatch: pytest.MonkeyPatch):
     content = await login(sso, monkeypatch, signed(token(kid=None)))
     assert content["sub"] == "user-id"
@@ -150,6 +169,12 @@ async def test_unknown_kid_is_rejected(sso: FakeSSO, monkeypatch: pytest.MonkeyP
 async def test_invalid_signature_is_rejected(sso: FakeSSO, monkeypatch: pytest.MonkeyPatch):
     with pytest.raises(SSOLoginError, match="Invalid signed userinfo response"):
         await login(sso, monkeypatch, signed(token(key=other_private_key)))
+
+
+async def test_all_key_failures_are_reported(sso: FakeSSO, monkeypatch: pytest.MonkeyPatch):
+    keys = [public_jwk(), public_jwk(other_private_key, kid="rotated-key")]
+    with pytest.raises(SSOLoginError, match=r"test-key.*rotated-key"):
+        await login(sso, monkeypatch, signed(token(key=third_private_key, kid=None)), keys=keys)
 
 
 async def test_wrong_audience_is_rejected(sso: FakeSSO, monkeypatch: pytest.MonkeyPatch):

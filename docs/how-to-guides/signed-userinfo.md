@@ -8,10 +8,12 @@ allows a provider to sign its UserInfo response. In that case the claims are ret
 JWT with an `application/jwt` content type instead of a plain JSON body, and the client
 **must** verify the signature before trusting the claims.
 
-`fastapi-sso` handles that case automatically: when the UserInfo endpoint answers with
-`application/jwt` — or with a body that is not a JSON object — the response is verified
-against the provider's JWKS and decoded. Plain JSON responses keep working exactly as
-before, so no configuration is needed.
+`fastapi-sso` handles that case automatically: the content type of the response selects
+the parsing path — `application/json` is read as plain JSON, `application/jwt` is verified
+against the provider's JWKS and decoded. Providers do not always set an accurate content
+type, so when it is missing or unknown the body is inspected: a JWT is verified, anything
+else is parsed as JSON. Plain JSON responses keep working exactly as before, so no
+configuration is needed.
 
 ```python
 # Nothing to change: the same code handles both cases.
