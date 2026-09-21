@@ -10,9 +10,11 @@ class Request:
 
 
 class Response:
-    def __init__(self, url="http://localhost", json_content=None):
+    def __init__(self, url="http://localhost", json_content=None, text=None, headers=None):
         self.url = URL(url)
         self.json_content = json_content or {}
+        self.text = "{}" if text is None else text
+        self.headers = headers or {}
 
     def json(self):
         return self.json_content
