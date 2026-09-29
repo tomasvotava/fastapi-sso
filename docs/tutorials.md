@@ -36,7 +36,7 @@ async def google_callback(request: Request):
     return user
 ```
 
-Save the file as `example.py` and run it using `uvicorn example:app`.
+Save the file as `example.py` and run it using `uvicorn example:app --port 3000`.
 
 Now, visit [http://localhost:3000/google/login](http://localhost:3000/google/login).
 
@@ -48,7 +48,8 @@ Now, visit [http://localhost:3000/google/login](http://localhost:3000/google/log
 
 You may use SSO as a dependency in your FastAPI application.
 This is useful if you want to use the same SSO instance in multiple endpoints and make sure the state is cleared after
-the request is processed. You may even omit the `with` statement in this case.
+the request is processed. The SSO instance still has to be used as an async context manager, otherwise no `state`
+is generated and the callback fails with `400 'state' parameter was not found in callback request`.
 
 ```python
 from fastapi import Depends, FastAPI, Request
@@ -64,10 +65,12 @@ def get_google_sso() -> GoogleSSO:
 
 @app.get("/google/login")
 async def google_login(google_sso: GoogleSSO = Depends(get_google_sso)):
-    return await google_sso.get_login_redirect()
+    async with google_sso:
+        return await google_sso.get_login_redirect()
 
 @app.get("/google/callback")
 async def google_callback(request: Request, google_sso: GoogleSSO = Depends(get_google_sso)):
-    user = await google_sso.verify_and_process(request)
+    async with google_sso:
+        user = await google_sso.verify_and_process(request)
     return user
 ```
