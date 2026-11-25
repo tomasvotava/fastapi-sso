@@ -109,3 +109,91 @@ async def test_login_redirect_does_not_warn_about_binding(sso: FakeSSO):
         with warnings.catch_warnings():
             warnings.simplefilter("error", SecurityWarning)
             await sso.get_login_redirect()
+
+
+async def test_login_redirect_sets_redirect_uri_cookie(sso: FakeSSO):
+    async with sso:
+        response = await sso.get_login_redirect(redirect_uri="https://example.com/custom/callback")
+    cookies = [v.decode("latin1") for k, v in response.raw_headers if k.lower() == b"set-cookie"]
+    redirect_cookie = next((c for c in cookies if "sso_redirect_uri=" in c), None)
+    assert redirect_cookie is not None
+    assert "sso_redirect_uri=" in redirect_cookie
+    expected_encoded = "https%3A%2F%2Fexample.com%2Fcustom%2Fcallback"
+    assert expected_encoded in redirect_cookie or "https://example.com/custom/callback" in redirect_cookie
+    assert "HttpOnly" in redirect_cookie
+    assert "Secure" in redirect_cookie
+    assert "SameSite=lax" in redirect_cookie
+
+
+async def test_verify_and_process_uses_cookie_redirect_uri(monkeypatch: pytest.MonkeyPatch):
+    captured = {}
+
+    async def fake_process_login(self, code, request, **kwargs):
+        captured.update(kwargs)
+        return "logged-in"
+
+    monkeypatch.setattr(SSOBase, "process_login", fake_process_login)
+    sso = FakeSSO("client_id", "client_secret")
+    request = Request(cookies={"sso_state": "state", "sso_redirect_uri": "https://example.com/from-cookie"})
+    request.query_params["code"] = "code"
+    request.query_params["state"] = "state"
+
+    async with sso:
+        result = await sso.verify_and_process(request)
+
+    assert result == "logged-in"
+    assert captured.get("redirect_uri") == "https://example.com/from-cookie"
+
+
+async def test_process_login_uses_https_current_path_behind_reverse_proxy(monkeypatch: pytest.MonkeyPatch):
+    captured_redirect_url = {}
+
+    sso = FakeSSO("client_id", "client_secret", allow_insecure_http=False)
+
+    def fake_prepare_token_request(*args, **kwargs):
+        captured_redirect_url["url"] = kwargs.get("redirect_url")
+        return "https://fake.com/token", {}, "{}"
+
+    class DummyURL:
+        scheme = "http"
+        netloc = "my-service.com"
+        path = "/auth/callback"
+        def __str__(self):
+            return "http://my-service.com/auth/callback"
+
+    class DummyRequest:
+        def __init__(self):
+            self.url = DummyURL()
+            self.cookies = {}
+
+    async with sso:
+        from oauthlib.oauth2 import WebApplicationClient
+
+        monkeypatch.setattr(WebApplicationClient, "prepare_token_request", fake_prepare_token_request)
+        import httpx
+
+        async def fake_post(*args, **kwargs):
+            class FakeResponse:
+                def json(self):
+                    return {
+                        "access_token": "fake-access-token",
+                        "token_type": "bearer",
+                        "refresh_token": None,
+                        "id_token": None,
+                    }
+
+            return FakeResponse()
+
+        monkeypatch.setattr(httpx.AsyncClient, "post", fake_post)
+        monkeypatch.setattr(sso.oauth_client, "parse_request_body_response", lambda *a: None)
+        monkeypatch.setattr(sso.oauth_client, "add_token", lambda *a: ("https://fake.com/userinfo", {}, None))
+        async def fake_parse(*args):
+            return {}
+        monkeypatch.setattr(sso, "parse_userinfo_response", fake_parse)
+        async def fake_openid(*args):
+            return "done"
+        monkeypatch.setattr(sso, "openid_from_response", fake_openid)
+
+        await sso.process_login("code", DummyRequest())
+
+    assert captured_redirect_url.get("url") == "https://my-service.com/auth/callback"

@@ -499,6 +499,15 @@ class SSOBase:
                 samesite="lax",
                 secure=not self.allow_insecure_http,
             )
+        effective_redirect_uri = redirect_uri or self.redirect_uri
+        if effective_redirect_uri is not None:
+            response.set_cookie(
+                "sso_redirect_uri",
+                str(effective_redirect_uri),
+                httponly=True,
+                samesite="lax",
+                secure=not self.allow_insecure_http,
+            )
         return response
 
     @overload
@@ -575,6 +584,8 @@ class SSOBase:
                 raise SSOLoginError(401, "State cookie not found")
             if not secrets.compare_digest(sso_state.encode(), self._state.encode()):
                 raise SSOLoginError(401, "Invalid state")
+        if redirect_uri is None:
+            redirect_uri = request.cookies.get("sso_redirect_uri")
         pkce_code_verifier: str | None = None
         if self.uses_pkce:
             pkce_code_verifier = request.cookies.get("pkce_code_verifier")
@@ -716,14 +727,19 @@ class SSOBase:
         additional_headers = additional_headers or {}
         additional_headers.update(self.additional_headers or {})
 
+        if redirect_uri is None:
+            redirect_uri = request.cookies.get("sso_redirect_uri")
+
         url = request.url
 
         if not self.allow_insecure_http and url.scheme != "https":
             current_url = str(url).replace("http://", "https://")
+            scheme = "https"
         else:
             current_url = str(url)
+            scheme = url.scheme
 
-        current_path = f"{url.scheme}://{url.netloc}{url.path}"
+        current_path = f"{scheme}://{url.netloc}{url.path}"
         parsed_current_url = urlsplit(current_url)
         has_code_in_query = "code" in parse_qs(parsed_current_url.query)
         authorization_response: str | None = current_url if has_code_in_query else None
@@ -734,7 +750,7 @@ class SSOBase:
         token_url, headers, body = self.oauth_client.prepare_token_request(
             await self.token_endpoint,
             authorization_response=authorization_response,
-            redirect_url=redirect_uri or self.redirect_uri or current_path,
+            redirect_url=str(redirect_uri or self.redirect_uri or current_path),
             code=code,
             **params,
         )  # type: ignore
